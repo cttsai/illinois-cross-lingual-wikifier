@@ -75,8 +75,8 @@ public class WikiCandidateGenerator {
         this.lang = lang;
         if(db_pool.containsKey(lang)) db = db_pool.get(lang);
         else {
-//            String dbfile = Constants.dbpath1+"/candidates/"+lang+"_candidates";
-            String dbfile = "/shared/preprocessed/ctsai12/multilingual/mapdb/candidates/"+lang+"_candidates";
+            String dbfile = Constants.dbpath1+"/candidates/"+lang+"_candidates";
+//            String dbfile = "/shared/preprocessed/ctsai12/multilingual/mapdb/candidates/"+lang+"_candidates";
 			/*
             if(new File(dbfile).exists()){
                 logger.info("cand db exists "+dbfile);

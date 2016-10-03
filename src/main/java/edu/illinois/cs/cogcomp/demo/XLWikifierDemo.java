@@ -93,8 +93,9 @@ public class XLWikifierDemo {
 
     public static void main(String[] args) {
         String text = "Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu .";
-        text = "Paul Kantor teaches information science at Rutgers University";
-        XLWikifierDemo result = new XLWikifierDemo(text, "en", true);
+        String lang = "tr";
+//        text = "Paul Kantor teaches information science at Rutgers University";
+        XLWikifierDemo result = new XLWikifierDemo(text, lang, false);
         System.out.println(result.getOutput());
     }
 

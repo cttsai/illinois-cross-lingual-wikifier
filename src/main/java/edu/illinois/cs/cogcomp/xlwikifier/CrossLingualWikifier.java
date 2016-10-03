@@ -37,7 +37,7 @@ public class CrossLingualWikifier {
             lang = l;
             wcg = new WikiCandidateGenerator();
             if(ranker != null) ranker.closeDBs();
-            ranker = Ranker.loadPreTrainedRanker(lang, "ranker/default/"+lang);
+            ranker = Ranker.loadPreTrainedRanker(lang, "models/ranker/default/"+lang+"/ranker.model");
             ranker.fm.ner_mode = false;
             if(ll!=null) ll.closeDB();
             ll = new LangLinker();
