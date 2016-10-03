@@ -1,0 +1,14 @@
+.classpath
+*.idea
+*.iml
+*.jar
+target/
+ehcache-caching-curator/
+bin/
+.project
+.svn
+.settings
+data
+brown-clusters
+models
+stopwords

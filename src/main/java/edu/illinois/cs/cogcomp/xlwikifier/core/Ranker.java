@@ -43,9 +43,11 @@ public class Ranker {
         logger.info("Loading ranker model: "+filepath);
         if(!new File(filepath).exists()){
             logger.error("Model doesn't exist: "+filepath);
+            System.exit(-1);
         }
         if(!new File(filepath+".lm").exists()){
             logger.error("Lexical manager doesn't exist: "+filepath+".lm");
+            System.exit(-1);
         }
         Ranker ranker = new Ranker(lang);
         ranker.readModel(filepath);
