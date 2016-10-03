@@ -6,14 +6,12 @@ import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;
 import edu.illinois.cs.cogcomp.xlwikifier.core.WordEmbedding;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.MediaWikiSearch;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -21,7 +19,6 @@ import static java.util.stream.Collectors.toSet;
 public class NERFeatureManager implements Serializable {
     private static final long serialVersionUID = -1932878634118945538L;
     private LexManager lex;
-    private QueryMQL qm;
     private MediaWikiSearch mws;
     private LangLinker ll;
     public WordEmbedding we;
@@ -32,7 +29,6 @@ public class NERFeatureManager implements Serializable {
 
     public NERFeatureManager(String lang){
         lex = new LexManager();
-        qm = new QueryMQL();
         mws = new MediaWikiSearch();
         ll = new LangLinker();
 //        ll.factor = 0.95;

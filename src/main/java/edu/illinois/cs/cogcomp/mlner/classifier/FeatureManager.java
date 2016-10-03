@@ -3,7 +3,6 @@ package edu.illinois.cs.cogcomp.mlner.classifier;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.MediaWikiSearch;
 
 import java.io.IOException;
@@ -17,13 +16,11 @@ import static java.util.stream.Collectors.toSet;
 public class FeatureManager implements Serializable {
     private static final long serialVersionUID = -1932878634118945538L;
     private LexManager lex;
-    private QueryMQL qm;
     private MediaWikiSearch mws;
     private Map<String, List<String>> typecache = new HashMap<>();
 
     public FeatureManager(){
         lex = new LexManager();
-        qm = new QueryMQL();
         mws = new MediaWikiSearch();
 
     }
@@ -62,18 +59,6 @@ public class FeatureManager implements Serializable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public void addWikiTypes(String mid, Map<String, Double> f) {
-        List<String> wiki = qm.lookupWikiTitleFromMid(mid, "en");
-        if(wiki.size()>0) {
-            List<String> cats = mws.getCategories(mws.formatTitle(wiki.get(0)), "en");
-            Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
-                    .collect(toSet());
-            for(String t: tokenset)
-                addFeature("WIKICATTOKEN-"+t, 1.0, f);
-
         }
     }
 

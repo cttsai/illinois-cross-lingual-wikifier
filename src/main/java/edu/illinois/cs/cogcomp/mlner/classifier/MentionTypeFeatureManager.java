@@ -8,7 +8,6 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.MediaWikiSearch;
 
 import java.io.File;
@@ -23,7 +22,6 @@ import static java.util.stream.Collectors.toSet;
 public class MentionTypeFeatureManager implements Serializable {
     private static final long serialVersionUID = -1932878634118945538L;
     private LexManager lex;
-    private QueryMQL qm;
     private LangLinker ll;
     private MediaWikiSearch mws;
     private Tokenizer tokenizer;

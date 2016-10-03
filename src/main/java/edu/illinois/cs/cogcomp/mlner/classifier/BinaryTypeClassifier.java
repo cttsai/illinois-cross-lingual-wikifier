@@ -4,16 +4,11 @@ import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
-import org.apache.commons.io.FileUtils;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.*;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.MentionReader;
 import structure.MulticlassClassifier;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +24,6 @@ public class BinaryTypeClassifier {
     private List<String> label2type = new ArrayList<>();
     private MulticlassClassifier mc;
     Set<String> goodtypes = null;
-    QueryMQL qm = new QueryMQL();
 
     public BinaryTypeClassifier(){
         fm = new FeatureManager();
@@ -56,7 +50,7 @@ public class BinaryTypeClassifier {
 //                .filter(x -> !x.equals("NIL")).collect(toSet());
 //        golds = golds.stream().filter(x -> !spagolds.contains(x.getGoldMid())).collect(toList());
 //        Map<String, List<ELMention>> doc2golds = golds.stream().collect(groupingBy(x -> x.getDocID()));
-//        DocumentReader dr = new DocumentReader();
+//        WikiDocReader dr = new WikiDocReader();
 //        List<QueryDocument> docs = dr.readEnglishDocuments(true);
 //        QueryMQL qm = new QueryMQL();
 //
@@ -111,7 +105,7 @@ public class BinaryTypeClassifier {
 //    }
 
 //    private void cacheNegMidsSpa(){
-//        DocumentReader dr = new DocumentReader();
+//        WikiDocReader dr = new WikiDocReader();
 //        List<QueryDocument> docs = dr.readSpanishDocuments();
 //        EDLSolver solver = new EDLSolver();
 //        List<ELMention> mentions = null;

@@ -1,12 +1,11 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.core.io.LineIO;
 import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import edu.illinois.cs.cogcomp.xlwikifier.Constants;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentNavigableMap;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Created by ctsai12 on 10/10/15.
@@ -36,7 +34,7 @@ public class WordEmbedding {
     public Map<String, ConcurrentNavigableMap<String, Double[]>> multi_vecs_cache = new HashMap<>();
 
     public Map<String, Set<String>> stopwords = new HashMap<>();
-    private DocumentReader dr;
+    private WikiDocReader dr;
 
     public DB sgtitle_db;
     public DB mono_db;
@@ -276,7 +274,7 @@ public class WordEmbedding {
     public void populateWikiDocRep(String title, String lang){
 //        System.out.println("Calculating title representation: "+title+" "+lang);
         if(dr == null || !dr_lang.equals(lang)) {
-            dr = new DocumentReader(lang);
+            dr = new WikiDocReader(lang);
             dr_lang = lang;
         }
 

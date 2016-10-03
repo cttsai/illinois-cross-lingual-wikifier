@@ -6,7 +6,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.TAC2015Exp;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
-import edu.illinois.cs.cogcomp.mlner.experiments.tac.TACExp;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.TACReader;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import structure.MulticlassClassifier;
@@ -35,8 +34,7 @@ public class MentionTypeClassifier {
     }
 
     public void train(){
-        TACExp te = new TACExp();
-        List<QueryDocument> docs = te.loadTrainingDocsWithMentions();
+        List<QueryDocument> docs = TACReader.loadENDocsWithPlainMentions(true);
         List<Pair<FeatureVector, Integer>> train_data = new ArrayList<>();
         for(QueryDocument doc: docs){
             for(ELMention m: doc.mentions){

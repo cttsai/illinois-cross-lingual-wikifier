@@ -5,7 +5,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.*;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.MentionReader;
-import edu.illinois.cs.cogcomp.mlner.experiments.tac.TACExp;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.TACReader;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import structure.MulticlassClassifier;
 
@@ -98,8 +98,7 @@ public class FiveTypeClassifier {
         FiveTypeClassifier c = new FiveTypeClassifier();
         c.train(false);
 
-        TACExp te = new TACExp();
-        List<QueryDocument> docs = te.loadTestDocsWithMentions();
+        List<QueryDocument> docs = TACReader.loadESDocsWithPlainMentions(false);
         int correct = 0, total = 0;
         for(QueryDocument doc: docs){
             for(ELMention m: doc.mentions){

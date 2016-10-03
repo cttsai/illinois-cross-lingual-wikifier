@@ -10,7 +10,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
 import edu.illinois.cs.cogcomp.lbjava.nlp.Word;
 import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
 import edu.illinois.cs.cogcomp.mlner.core.NERClassifier;
-import edu.illinois.cs.cogcomp.mlner.core.Utils;
+import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
@@ -30,7 +30,7 @@ public class CrossLingualNER {
 
     private static String lang;
     public static Tokenizer tokenizer;
-    private static Utils utils;
+    private static NERUtils utils;
     private static WikiCandidateGenerator wcg;
     private static Ranker ranker;
     private static NERClassifier nc;
@@ -45,7 +45,7 @@ public class CrossLingualNER {
             lang = l;
             logger.info("Setting lang in xlner: " + lang);
             tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-            utils = new Utils();
+            utils = new NERUtils();
             utils.setLang(lang);
             wcg = new WikiCandidateGenerator(true);
             if(ranker != null) ranker.closeDBs();

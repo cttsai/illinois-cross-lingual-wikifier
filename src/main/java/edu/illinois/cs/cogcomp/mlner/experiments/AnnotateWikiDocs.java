@@ -8,7 +8,7 @@ import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
 import edu.illinois.cs.cogcomp.mlner.CrossLingualNER;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import org.apache.commons.io.FileUtils;
@@ -35,7 +35,7 @@ public class AnnotateWikiDocs {
         int start = 0, end = 2000000;
         String outpath = "/shared/corpora/ner/wikipedia/"+lang+"-camera";
         CrossLingualNER.setLang(lang, true);
-        DocumentReader dr = new DocumentReader();
+        WikiDocReader dr = new WikiDocReader();
         List<String> paths = null;
         dr.tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         try {

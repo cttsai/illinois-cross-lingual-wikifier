@@ -2,7 +2,6 @@ package edu.illinois.cs.cogcomp.xlwikifier.datastructures;
 
 import edu.illinois.cs.cogcomp.xlwikifier.core.RankerFeatureManager;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.SearchResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ public class ELMention {
     private int eng_start;
     private int eng_end;
     private boolean orig_per = false;
-    public List<SearchResult> top_results = null;
     public List<String> wiki_titles = new ArrayList<>();
 //    private transient Double[] mid_vec;
     private transient Float[] mid_vec;
@@ -65,7 +63,6 @@ public class ELMention {
 	public String pred_type;
     public List<String> trans;
     public String gold_lang;
-    public transient Map<Integer, Double> idx2valsum = new HashMap<>();
     public String en_gold_trans;
     public boolean is_ne;
     public boolean is_ne_gold;

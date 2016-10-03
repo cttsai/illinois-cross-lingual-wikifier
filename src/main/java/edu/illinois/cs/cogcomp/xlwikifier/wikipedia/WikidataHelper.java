@@ -10,9 +10,10 @@ import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
 import org.wikidata.wdtk.datamodel.interfaces.TermedDocument;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
 
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,24 @@ public class WikidataHelper {
 		wdf = WikibaseDataFetcher.getWikidataDataFetcher();
 	}
 
+	private String getMD5Checksum(String query){
+		MessageDigest complete = null;
+		try {
+			complete = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		complete.update(query.getBytes(), 0, query.getBytes().length);
+		byte[] b = complete.digest();
+		String result = "";
+		for (int i = 0; i < b.length; i++)
+			result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+		return result;
+	}
+
 	public List<String> translateTitle(String entitle, String lang1, String lang2){
 		List<String>ans=new ArrayList<String>();
-		String filename = QueryMQL.getMD5Checksum(entitle);
+		String filename = getMD5Checksum(entitle);
 
 		String cache_path = "/shared/bronte/tac2015/mediawiki_cache/translate/"+lang1+lang2+"/"+filename;
 		if (IOUtils.exists(cache_path)) {

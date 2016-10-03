@@ -1,27 +1,20 @@
 package edu.illinois.cs.cogcomp.xlwikifier.experiments;
 
+import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.core.WordEmbedding;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.TACReader;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDataReader;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.MentionReader;
-import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.mlner.classifier.MentionTypeClassifier;
 import edu.illinois.cs.cogcomp.mlner.classifier.FiveTypeClassifier;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreebaseSearch;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.SearchResult;
-import edu.illinois.cs.cogcomp.xlwikifier.Utils;
 
-import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,29 +22,32 @@ import java.util.regex.Pattern;
 import static java.util.stream.Collectors.*;
 
 /**
+ * Note: this uses gold mentions, and has been changed after cleaning.
+ * Need to check carefully if every step works well
+ *
+ * Better results can be obtained in the 2016 experiments (with predicted mentions)
+ *
  * Created by ctsai12 on 1/19/16.
  * This class re-produces the results on TAC data in our NAACL paper (Table 5)
  */
 public class TAC2015Exp {
     private Evaluator eval;
     private MentionReader mr;
-    private DocumentReader dr;
+    private WikiDocReader dr;
     private WordEmbedding we;
-    private FreebaseSearch fb = new FreebaseSearch();
-    private QueryMQL qm = new QueryMQL();
     private LangLinker ll = new LangLinker();
 
     public TAC2015Exp(){
         eval = new Evaluator();
         mr = new MentionReader();
-        dr = new DocumentReader();
+        dr = new WikiDocReader();
     }
 
     public Ranker trainRanker(String lang, int n_docs, double ratio){
         Ranker ranker = new Ranker(lang);
         ranker.fm.ner_mode = false;
 //        ranker.fm.use_foreign_title = false; // only for tac exps
-        String model = Utils.getTime()+"."+lang+".tac";
+        String model = lang+".tac";
         List<QueryDocument> docs = dr.readWikiDocsNew(lang, 0, n_docs);
 //        for(QueryDocument doc: docs) {
 //            doc.mentions = doc.mentions.stream().filter(x -> ranker.qualifiedMention(x, lang)).collect(toList());
@@ -120,38 +116,6 @@ public class TAC2015Exp {
         return ret;
     }
 
-    /**
-     * Set the Mids by the wikified titles
-     */
-    public void solveByWikiTitle(List<QueryDocument> docs, String lang){
-        boolean search = true;
-        System.out.println("Solving by wikipedia titles...");
-        for(QueryDocument doc: docs) {
-            for (ELMention m : doc.mentions) {
-
-                if (m.getWikiTitle().startsWith("NIL")){
-                    m.setMid("NIL");
-                }
-                else {
-                    String mid = getMidByWikiTitle(m.getWikiTitle(), fb, qm, ll, lang, search);
-                    if (mid != null)
-                        m.setMid(mid);
-                    else
-                        m.setMid("NIL");
-                }
-
-//                for(WikiCand c: m.getCandidates()){
-//                    String mid = getMidByWikiTitle(c.getTitle(), fb, qm, ll, lang, search);
-//                    c.orig_title = c.title;
-//                    if(mid!=null)
-//                        c.title = mid;
-//                    else
-//                        c.title = "NIL";
-//                }
-            }
-        }
-    }
-
     public String formatTitle(String title){
         String tmp = "";
         for(String token: title.split("_")){
@@ -162,103 +126,6 @@ public class TAC2015Exp {
             tmp+="_";
         }
         return tmp.substring(0, tmp.length()-1);
-    }
-
-    public String getMidByWikiTitle(String title, FreebaseSearch fb, QueryMQL qm, LangLinker ll, String lang, boolean search){
-        if(title.trim().isEmpty())
-            return null;
-        if(title.startsWith("NIL"))
-            return null;
-        String ent = ll.translateToEn(title, lang);
-        title = formatTitle(title);
-        if(lang.equals("zh")) lang = "zh-cn";
-        String mid = qm.lookupMidFromTitle(title, lang);
-        if (mid != null) {
-            mid = mid.substring(1).replaceAll("/", ".");
-            return mid;
-        }
-
-        if(ent!=null){
-            ent = formatTitle(ent);
-            mid = qm.lookupMidFromTitle(ent, "en");
-            if (mid != null) {
-                mid = mid.substring(1).replaceAll("/", ".");
-                return mid;
-            }
-        }
-
-        if(search && (!lang.equals("uz") && !lang.equals("ha") && !lang.equals("bn")
-            && !lang.equals("yo")&& !lang.equals("ta"))) {
-            List<SearchResult> answers = fb.lookup(title, lang, "");
-            if (answers.size() > 0) {
-                return answers.get(0).getMid().substring(1).replaceAll("/", ".");
-            }
-        }
-
-//        if(search) {
-//            List<SearchResult> answers = fb.lookup(title, "en", "");
-//            if (answers.size() > 0) {
-//                return answers.get(0).getMid().substring(1).replaceAll("/", ".");
-//            }
-//        }
-//
-//        if(ent!=null)
-//            if(search) {
-//                List<SearchResult> answers = fb.lookup(ent, "en", "");
-//                if (answers.size() > 0) {
-//                    return answers.get(0).getMid().substring(1).replaceAll("/", ".");
-//                }
-//            }
-
-        return null;
-    }
-
-
-    private List<QueryDocument> loadSpanishDocsWithMentions(boolean train){
-        List<QueryDocument> docs;
-        if(train)
-            docs = dr.readSpanishDocuments();
-        else
-            docs = dr.readSpanishTestDocuments();
-        for(QueryDocument doc: docs) {
-            List<ELMention> nm = new ArrayList<>();
-            List<ELMention> authors = new ArrayList<>();
-            Set<String> seen_off = new HashSet<>();
-            for(ELMention m: doc.mentions){
-                Pair<Integer, Integer> offsets = doc.getPlainOffsets(m);
-                if(offsets!=null) {
-//                    if(seen_off.contains(offsets.getFirst()+"_"+offsets.getSecond()))
-//                        continue;
-                    m.setStartOffset(offsets.getFirst());
-                    m.setEndOffset(offsets.getSecond());
-                    nm.add(m);
-                    seen_off.add(offsets.getFirst()+"_"+offsets.getSecond());
-                }
-                else{
-                    if(!m.getGoldMid().startsWith("NIL"))
-                        System.out.println("Failed to map mention: "+m.getMention()+" "+m.getType());
-                    else{
-                        authors.add(m);
-                    }
-                }
-            }
-
-            List<ELMention> nnm = new ArrayList<>();
-            List<ELMention> na = new ArrayList<>();
-            Set<String> anames = authors.stream().map(x -> x.getMention().toLowerCase()).collect(toSet());
-            for(ELMention m: nm){
-                if(anames.contains(m.getMention().toLowerCase()))
-                    na.add(m);
-                else
-                    nnm.add(m);
-            }
-
-            authors.addAll(na);
-
-            doc.mentions = nnm;
-            doc.authors = authors;
-        }
-        return docs;
     }
 
     public void runZH(){
@@ -272,7 +139,8 @@ public class TAC2015Exp {
         CrossLingualWikifier wikifier = new CrossLingualWikifier("zh", new WikiCandidateGenerator(true));
         wikifier.setRanker(ranker);
         wikifier.wikify(docs);
-        solveByWikiTitle(docs, "zh");
+        NERUtils utils = new NERUtils();
+        utils.setMidByWikiTitle(docs, "zh");
 
         FiveTypeClassifier fiveTypeClassifier = new FiveTypeClassifier();
         fiveTypeClassifier.train(false);
@@ -308,12 +176,8 @@ public class TAC2015Exp {
         eval.evaluateMid(docs);
     }
     public void runES(){
-//        we = new WordEmbedding();
-//        we.loadMultiDBNew("es");
         Ranker ranker = trainRanker("es", 1000, 3);
-//        Ranker ranker = trainRankerTACSPA();
 
-        List<ELMention> mentions = mr.readMentionCache("/shared/bronte/ctsai12/multilingual/2015data/gold.test.mentions.cands");
         List<ELMention> gold_mentions = mr.readTestMentionsSpa();
 
 //        Set<String> keyset = mentions.stream().map(x -> x.getStartOffset() + " " + x.getEndOffset() + " " + x.getDocID()).collect(toSet());
@@ -322,45 +186,23 @@ public class TAC2015Exp {
             m.setStartOffset(m.getStartOffset()+39);
             m.setEndOffset(m.getEndOffset()+39);
         }
-        List<QueryDocument> docs = dr.readSpanishTestDocuments();
+        List<QueryDocument> docs = TACReader.loadESDocsWithPlainMentions(false);
+
+
+        // need to check if it's correct
         List<ELMention> authors = getGoldAuthors(docs, gold_mentions);
-        for(QueryDocument doc: docs) {
-            doc.mentions = mentions.stream().filter(x -> x.getDocID().equals(doc.getDocID())).collect(toList());
-            List<ELMention> nm = new ArrayList<>();
-            for(ELMention m: doc.mentions){
-                m.setStartOffset(m.getStartOffset()+39);
-                m.setEndOffset(m.getEndOffset()+39);
-                Pair<Integer, Integer> offsets = doc.getPlainOffsets(m);
-                if(offsets!=null) {
-                    m.setStartOffset(offsets.getFirst());
-                    m.setEndOffset(offsets.getSecond());
-                    nm.add(m);
-                }
-            }
-            doc.mentions = nm;
-        }
-
-//        List<QueryDocument> docs = loadSpanishDocsWithMentions(false);
-
-//        ranker.setMidByModel(docs, "es");
 
         WikiCandidateGenerator wcg = new WikiCandidateGenerator(true);
         wcg.genCandidates(docs, "es");
-//        QueryMQL qm = new QueryMQL();
-//        for(QueryDocument doc: docs){
-//            for(ELMention m: doc.mentions){
-////                if(m.getCandidates().size()==0)
-//                    setCandsByFBSearch(m, "es", qm, we);
-//            }
-//        }
 
         ranker.setWikiTitleByModel(docs);
-        solveByWikiTitle(docs, "es");
+        NERUtils utils = new NERUtils();
+        utils.setMidByWikiTitle(docs, "es");
 
 		FiveTypeClassifier fiveTypeClassifier = new FiveTypeClassifier();
 		fiveTypeClassifier.train(false);
         MentionTypeClassifier mc = new MentionTypeClassifier("es");
-        mc.train();
+//        mc.train();
 		for(QueryDocument doc: docs){
 			for(ELMention mention: doc.mentions) {
 				if (!mention.getMid().startsWith("NIL")) {

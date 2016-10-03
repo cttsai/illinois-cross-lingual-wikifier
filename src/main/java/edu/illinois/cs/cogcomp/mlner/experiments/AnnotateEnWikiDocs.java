@@ -12,7 +12,7 @@ import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import org.apache.commons.io.FileUtils;
 
@@ -62,7 +62,7 @@ public class AnnotateEnWikiDocs {
         String target_lang = "es";
 
         int start = 100000, end = 1000000;
-        DocumentReader dr = new DocumentReader();
+        WikiDocReader dr = new WikiDocReader();
         List<String> paths = null;
         String dir = "/shared/dickens/ctsai12/multilingual/wikidump/" + lang + "/" + lang + "_wiki_view/";
         paths = LineIO.read(dir+"file.list.rand");

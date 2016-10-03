@@ -4,9 +4,8 @@ import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDataReader;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.xlel21.TransLookUp;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
@@ -59,7 +58,7 @@ public class WikiDataWithTransExp {
 
     public Ranker trainRanker(String lang){
         Ranker ranker = new Ranker(lang);
-//        String model = Utils.getTime()+"."+lang+"."+mono;
+//        String model = NERUtils.getTime()+"."+lang+"."+mono;
         String model = lang;
         List<QueryDocument> docs = wiki_reader.readTrainData(lang).subList(1, 2000);
         filterNonNE(docs);
@@ -160,7 +159,7 @@ public class WikiDataWithTransExp {
     public void generateWikiData(String lang, int n_docs, int test_start, int test_end){
         logger.info("Generating WikiData for "+lang);
         WikiCandidateGenerator wcg = new WikiCandidateGenerator();
-        DocumentReader dreader = new DocumentReader();
+        WikiDocReader dreader = new WikiDocReader();
         LangLinker ll = new LangLinker();
 
         List<QueryDocument> docs = dreader.readWikiDocsNew(lang, 0, n_docs);

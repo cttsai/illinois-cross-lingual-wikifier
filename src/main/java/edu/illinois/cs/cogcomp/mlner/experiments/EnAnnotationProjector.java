@@ -7,14 +7,14 @@ import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.curator.CuratorFactory;
-import edu.illinois.cs.cogcomp.mlner.core.Utils;
+import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.MediaWikiSearch;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikidataHelper;
@@ -42,7 +42,7 @@ public class EnAnnotationProjector {
         CrossLingualWikifier.setLang("en");
         String lang = "es";
         stopwords = StopWord.getStopWords("es");
-        Utils nerutils = new Utils();
+        NERUtils nerutils = new NERUtils();
         nerutils.setLang(lang);
         Gson gson = new Gson();
         LangLinker ll = new LangLinker();
@@ -93,7 +93,7 @@ public class EnAnnotationProjector {
         stopwords = StopWord.getStopWords("es");
 
         LangLinker ll = new LangLinker();
-        DocumentReader dr = new DocumentReader();
+        WikiDocReader dr = new WikiDocReader();
         String dir = "/shared/dickens/ctsai12/multilingual/wikidump/" + lang + "/" + lang + "_wiki_view/";
         ArrayList<String> paths = LineIO.read(dir + "file.list.rand");
         List<String> paths_lower = paths.stream().map(x -> x.toLowerCase()).collect(toList());
@@ -103,7 +103,7 @@ public class EnAnnotationProjector {
         String outpath = "/shared/corpora/ner/wikipedia/projection/"+lang+"2";
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
-        Utils nerutils = new Utils();
+        NERUtils nerutils = new NERUtils();
         nerutils.setLang(lang);
 
         String en_dir = "/shared/corpora/ner/wikipedia/en/";

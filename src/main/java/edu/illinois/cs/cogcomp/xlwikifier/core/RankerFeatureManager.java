@@ -453,10 +453,8 @@ public class RankerFeatureManager implements Serializable {
 
     public List<String> getDocWords(QueryDocument doc, String lang){
         String text = null;
-        if(lang.equals("es"))
-            text = doc.getAnnotatedDoc().getPlainText().toLowerCase();
-        else if(lang.equals("en"))
-            text = doc.getTranslatedText();
+
+        text = doc.plain_text.toLowerCase();
 
         text = text.toLowerCase().replaceAll(",","").replaceAll("\\.", "")
                 .replaceAll("'s", "").replaceAll("\n", " ");

@@ -22,8 +22,6 @@ public class QueryDocument {
     public String translated_text;
     public String xml_text;
     private transient TextAnnotation ta;
-    private transient  AnnotatedDocument adoc;
-    private transient List<Paragraph> paragraphs; // a copy for getXmlOffsets, it will be changed
     public List<String> ne_words_es;
     public List<ELMention> mentions = new ArrayList<>();
     public List<ELMention> golds;
@@ -39,28 +37,6 @@ public class QueryDocument {
         this.id = id;
     }
 
-    public QueryDocument(AnnotatedDocument adoc, String text){
-        this.adoc = adoc;
-        this.id = adoc.id;
-        this.translated_text = StringUtils.stripAccents(StringEscapeUtils.unescapeXml(text));
-//        translated_text = translated_text.replaceAll("ñ","n").replaceAll("Ñ","N").replaceAll("é","e");
-        this.paragraphs = new ArrayList<>();
-        for(Paragraph p: adoc.paragraphs){
-            Paragraph para = new Paragraph(p);
-            this.paragraphs.add(para);
-        }
-
-        for(Paragraph para: this.paragraphs){
-            for(Token token: para.tokens){
-                if(token.surface.length()>1 && token.surface.endsWith(",")) {
-                    token.surface = token.surface.substring(0, token.surface.length() - 1);
-                    token.end_char -= 1;
-                }
-            }
-        }
-//        loadTextAnnotation(curator);
-    }
-
     public String getDocID(){ return id; }
     public void setTextAnnotation(TextAnnotation ta){
         this.ta = ta;
@@ -70,7 +46,6 @@ public class QueryDocument {
 
     public String getTranslatedText(){ return translated_text; }
     public String getXmlText(){ return this.xml_text; }
-    public AnnotatedDocument getAnnotatedDoc(){ return adoc; }
 
     public void setXmlText(String text){
         this.xml_text = text;
@@ -295,47 +270,6 @@ public class QueryDocument {
         int t1_remain = tokens1.stream().collect(joining("")).length();
         int t2_remain = tokens2.stream().collect(joining("")).length();
         return score+t1_remain+t2_remain;
-    }
-
-    public String getMentionAnnotation(List<ELMention> mentions){
-
-        mentions = mentions.stream().sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset())).collect(toList());
-        assert mentions.get(0).getStartOffset() <= mentions.get(1).getStartOffset(): "sorting error";
-
-        int midx = 0;
-        String out = "";
-        for(Paragraph para: adoc.paragraphs){
-            for(Token token: para.tokens){
-                if(midx < mentions.size() && token.start_char == mentions.get(midx).getStartOffset()) {
-                    System.out.print(" [");
-                    out += " [";
-                }
-                System.out.print(" "+token.surface);
-                out += " "+token.surface;
-                if(midx < mentions.size() && token.end_char == mentions.get(midx).getEndOffset()){
-                    System.out.print(" ]");
-                    out += " ]";
-                    midx++;
-                }
-                while(midx < mentions.size() && token.start_char > mentions.get(midx).getStartOffset())
-                    midx++;
-//                if(midx >= mentions.size())
-//                    break;
-            }
-            System.out.println("\n");
-            out += "\n\n";
-            if(midx >= mentions.size())
-                break;
-
-        }
-        if(midx != mentions.size()){
-            System.out.println("Error: "+midx+" "+mentions.size());
-            System.out.println(mentions.get(midx).getMention()+" "+mentions.get(midx).getStartOffset());
-            System.out.println(adoc.paragraphs.stream().map(x -> x.surface).collect(joining("\n")));
-            System.out.println(adoc.paragraphs.get(0).tokens.get(0).start_char);
-            System.exit(-1);
-        }
-        return out;
     }
 
     public void prepareFeatures(RankerFeatureManager fm){

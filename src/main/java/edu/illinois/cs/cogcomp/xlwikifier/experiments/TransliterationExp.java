@@ -1,6 +1,5 @@
 package edu.illinois.cs.cogcomp.xlwikifier.experiments;
 
-import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
@@ -11,8 +10,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDataReader;
 import edu.illinois.cs.cogcomp.transliteration.Transliterator;
 import edu.illinois.cs.cogcomp.mlner.classifier.BinaryTypeClassifier;
 import edu.illinois.cs.cogcomp.mlner.classifier.FiveTypeClassifier;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
-import edu.illinois.cs.cogcomp.xlwikifier.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +24,6 @@ public class TransliterationExp {
     private Evaluator eval;
     private Transliterator tl;
     private LangLinker ll;
-    private QueryMQL qm;
     private FiveTypeClassifier typec;
     private BinaryTypeClassifier btc;
     public TransliterationExp(){
@@ -69,7 +65,7 @@ public class TransliterationExp {
 
     private Ranker trainRanker(String lang){
         Ranker ranker = new Ranker("en");
-        String model = Utils.getTime()+"."+lang+".trans";
+        String model = lang+".trans";
         List<QueryDocument> docs = wiki_reader.readTrainData(lang);
         transformDocs(docs, lang);
         WikiCandidateGenerator wcg = new WikiCandidateGenerator(true);
@@ -135,7 +131,7 @@ public class TransliterationExp {
 //        System.out.println("en title: "+en_title);
         if(en_title == null) return false;
 
-        String mid = qm.lookupMidFromTitle(formatTitle(en_title), "en");
+        String mid = FreeBaseQuery.getMidFromTitle(en_title, "en");
 //        System.out.println("mid: "+mid);
         if(mid == null) return false;
 

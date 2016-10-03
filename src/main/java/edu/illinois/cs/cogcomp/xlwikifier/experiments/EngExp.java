@@ -1,16 +1,16 @@
 package edu.illinois.cs.cogcomp.xlwikifier.experiments;
 
-import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDataReader;
-import edu.illinois.cs.cogcomp.xlwikifier.Utils;
 
 import java.util.List;
 
 /**
  * Created by ctsai12 on 1/20/16.
+ * This class tries to evaluate our English performance on the standard datasets.
+ * This is not done...
  */
 public class EngExp {
 
@@ -29,7 +29,7 @@ public class EngExp {
         String lang = "en";
         String test_lang = "es";
         Ranker ranker = new Ranker(lang);
-        String model = Utils.getTime()+"."+lang;
+        String model = lang+".enranker";
 
         List<QueryDocument> docs = wiki_reader.readTrainData(lang);
         WikiCandidateGenerator wcg = new WikiCandidateGenerator();

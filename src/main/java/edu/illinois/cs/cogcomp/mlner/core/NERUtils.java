@@ -16,9 +16,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import org.apache.commons.io.FileUtils;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreebaseSearch;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.SearchResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +23,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -34,7 +30,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Created by ctsai12 on 3/2/16.
  */
-public class Utils {
+public class NERUtils {
 
     public Tokenizer tokenizer;
     public Set<String> stops;
@@ -45,7 +41,7 @@ public class Utils {
     private LangLinker ll = new LangLinker();
     private WikiCandidateGenerator en_wcg = new WikiCandidateGenerator(true);
 
-    public Utils(){
+    public NERUtils(){
 //        tr = new Transliterator(lang);
 //        tlu = new TransLookUp(lang);
     }
@@ -408,82 +404,6 @@ public class Utils {
         }
     }
 
-    public void setMidByWikiTitleUZ(List<QueryDocument> docs){
-        System.out.println("Solving by wikipedia titles...");
-        boolean search = false;
-        FreebaseSearch fb = new FreebaseSearch();
-        QueryMQL qm = new QueryMQL();
-        LangLinker lluz = new LangLinker();
-        lluz.loadDB("uz");
-        for(QueryDocument doc: docs) {
-            for (ELMention m : doc.mentions) {
-                if(m.is_ne) continue;
-                if(m.ngram>1) search = false;
-                else search = true;
-
-                for(WikiCand c: m.getCandidates()){
-                    String en_title = ll.translateToEn(m.getWikiTitle(), c.lang);
-                    if(en_title == null) en_title = "NIL";
-
-                    String uz_title = "NIL";
-                    if(lang.equals("uz")) uz_title = m.getWikiTitle();
-                    else {
-                        if (!en_title.startsWith("NIL"))
-                            uz_title = lluz.translateFromEn(en_title, "uz");
-                        if (uz_title == null) uz_title = "NIL";
-                    }
-
-                    String mid = getMidByWikiTitleUZ(uz_title, en_title, fb, qm, search);
-
-                    c.orig_title = uz_title;
-                    if(mid!=null)
-                        c.title = mid;
-                    else
-                        c.title = "NIL";
-                    c.lang = "uz";
-                }
-
-                if(m.getCandidates().size()>0){
-                    m.setMid(m.getCandidates().get(0).title);
-                    m.setWikiTitle(m.getCandidates().get(0).orig_title);
-                }
-            }
-        }
-        lluz.closeDB();
-    }
-
-    public String getMidByWikiTitleUZ(String uz_title, String en_title, FreebaseSearch fb, QueryMQL qm, boolean search){
-        if(uz_title.trim().isEmpty())
-            return null;
-        if(uz_title.startsWith("NIL"))
-            return null;
-        uz_title = formatTitle(uz_title);
-        String mid = qm.lookupMidFromTitle(uz_title, "uz");
-        if (mid != null) {
-            mid = mid.substring(1).replaceAll("/", ".");
-            return mid;
-        }
-
-        if(en_title!=null){
-            en_title = formatTitle(en_title);
-            mid = qm.lookupMidFromTitle(en_title, "en");
-            if (mid != null) {
-                mid = mid.substring(1).replaceAll("/", ".");
-                return mid;
-            }
-        }
-
-        if(search) {
-//            System.out.println(title+" "+lang);
-            List<SearchResult> answers = fb.lookup(uz_title, "uz", "");
-            if (answers.size() > 0) {
-                return answers.get(0).getMid().substring(1).replaceAll("/", ".");
-            }
-        }
-
-        return null;
-    }
-
     public String getMidByWikiTitle(String title, LangLinker ll, String lang, boolean search){
         if(title.trim().isEmpty())
             return null;
@@ -537,7 +457,7 @@ public class Utils {
     }
 
 
-    public void setWikiTitleFromMid(QueryMQL qm, String lang, ELMention m){
+    public void setWikiTitleFromMid(String lang, ELMention m){
         String mid = m.getGoldMid();
         if(mid.startsWith("NIL"))
             m.gold_wiki_title = "NIL";

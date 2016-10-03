@@ -12,8 +12,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import org.apache.commons.io.FileUtils;
 import edu.illinois.cs.cogcomp.mlner.classifier.BinaryTypeClassifier;
 import edu.illinois.cs.cogcomp.mlner.classifier.FiveTypeClassifier;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
-import edu.illinois.cs.cogcomp.xlwikifier.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +28,6 @@ public class Main {
     private XLELReader reader;
     private TACKnowledgeBase kb;
     private WikiCandidateGenerator wcg;
-    private QueryMQL qm;
     private BinaryTypeClassifier btc;
     private FiveTypeClassifier fc;
     private Transliterator tr;
@@ -42,7 +39,6 @@ public class Main {
         reader = new XLELReader();
         kb = TACKnowledgeBase.defaultInstance();
         wcg = new WikiCandidateGenerator();
-        qm = new QueryMQL();
         fc = new FiveTypeClassifier();
         fc.train(false);
         btc = new BinaryTypeClassifier();
@@ -59,7 +55,7 @@ public class Main {
         candsToJson(docs, lang);
 //        setCandsFromCache(docs, lang);
         Ranker ranker = new Ranker(lang);
-        String model = Utils.getTime()+"."+lang+".xlel";
+        String model = lang+".xlel";
         ranker.train(docs, model);
 //        checkGoldVec(docs, ranker);
 //        Linker linker = new Linker(ranker);

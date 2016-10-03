@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import edu.illinois.cs.cogcomp.mlner.core.Utils;
+import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
 
 import static java.util.stream.Collectors.*;
 
@@ -417,7 +417,6 @@ public class Solver {
         if(!FreeBaseQuery.isloaded())
             FreeBaseQuery.loadDB(true);
 
-        TAC2015Exp te = new TAC2015Exp();
         WikiCandidateGenerator wcg = new WikiCandidateGenerator(true);
         wcg.genCandidates(docs, lang);
         WikiCandidateGenerator wcg_en = new WikiCandidateGenerator(true);
@@ -431,7 +430,7 @@ public class Solver {
 
         System.out.println("no cand "+docs.stream().flatMap(x -> x.mentions.stream()).filter(x -> x.getCandidates().size()==0).count());
 
-        Utils utils = new Utils();
+        NERUtils utils = new NERUtils();
         for(QueryDocument doc: docs) {
             utils.setMidByWikiTitle(doc);
         }

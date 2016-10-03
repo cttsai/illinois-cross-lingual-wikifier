@@ -2,7 +2,6 @@ package edu.illinois.cs.cogcomp.xlwikifier.experiments;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.QueryMQL;
 
 import java.util.List;
 import java.util.Set;
@@ -130,27 +129,4 @@ public class Evaluator {
 		}
     }
 
-    public void evaluateWikiTitles(List<QueryDocument> docs) {
-        int correct = 0, contain = 0;
-        int total = 0;
-        QueryMQL qm = new QueryMQL();
-        for(QueryDocument doc: docs) {
-            for (ELMention m : doc.mentions) {
-                total++;
-                Set<String> preds = m.wiki_titles.stream().map(x -> x.toLowerCase()).collect(toSet());
-                if (preds.contains(m.gold_wiki_title.toLowerCase())
-                        || (preds.size()==0 && m.gold_wiki_title.startsWith("NIL")))
-                    correct++;
-
-                Set<String> allcands = m.top_results.stream()
-                        .flatMap(x -> qm.lookupWikiTitleFromMid(x.getMid(), "es").stream())
-                        .map(x -> x.toLowerCase()).collect(toSet());
-                if(allcands.contains(m.gold_wiki_title.toLowerCase())
-                        || (allcands.size()==0 && m.gold_wiki_title.startsWith("NIL")))
-                    contain++;
-            }
-        }
-        System.out.println("Wiki Titles Accuracy: " + (double) correct / total + ", " + correct + "/" + total);
-        System.out.println("Wiki Titles Coverage: " + (double) contain / total + ", " + contain + "/" + total);
-    }
 }

@@ -89,6 +89,5 @@ public class TAC2014Exp {
     public static void main(String[] args) {
 
         run();
-
     }
 }

@@ -1,12 +1,11 @@
 package edu.illinois.cs.cogcomp.mlner.experiments;
 
 import com.google.gson.Gson;
-import edu.illinois.cs.cogcomp.mlner.core.Utils;
+import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
 import edu.illinois.cs.cogcomp.mlner.experiments.conll.ColumnFormatReader;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.TAC2015Exp;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,12 +32,12 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public class GenWikifierFeatures {
 
-    private Utils utils;
+    private NERUtils utils;
     private NERClassifier unic;
     private static Logger logger = LoggerFactory.getLogger(GenWikifierFeatures.class);
 
     public GenWikifierFeatures(){
-        utils = new Utils();
+        utils = new NERUtils();
     }
 
 

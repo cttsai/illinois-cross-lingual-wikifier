@@ -6,12 +6,11 @@ import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.DocumentReader;
+import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDocReader;
 import edu.illinois.cs.cogcomp.xlwikifier.experiments.reader.WikiDataReader;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import edu.illinois.cs.cogcomp.xlwikifier.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +82,7 @@ public class WikiDataExp {
     public void generateWikiData(String lang, int n_docs, int test_start, int test_end){
         logger.info("Generating WikiData for "+lang);
         WikiCandidateGenerator wcg = new WikiCandidateGenerator();
-        DocumentReader dreader = new DocumentReader();
+        WikiDocReader dreader = new WikiDocReader();
         LangLinker ll = new LangLinker();
 
         List<QueryDocument> docs = dreader.readWikiDocsNew(lang, 0, n_docs);

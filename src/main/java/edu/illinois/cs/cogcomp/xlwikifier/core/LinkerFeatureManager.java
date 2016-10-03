@@ -5,7 +5,6 @@ import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.SearchResult;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -124,10 +123,6 @@ public class LinkerFeatureManager implements Serializable {
         addFeature("SRC:"+cand.src, 1.0, f);
     }
 
-
-    private void addSearchScore(SearchResult sr, Map<String, Double> f){
-        addFeature("SEARCHSCORE", sr.getScore(), f);
-    }
 
     private void addTitleProb(WikiCand cand, Map<String, Double> f){
         addFeature("TITLEPROB", cand.ptgivens, f);

@@ -8,14 +8,12 @@ import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.Constants;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.AnnotatedDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,8 +80,7 @@ public class TACReader {
 //                System.out.println("doc id:" + id);
 
                 String text = FileUtils.readFileToString(p.toFile(), "UTF-8");
-                AnnotatedDocument adoc = readAnnotatedDocs(json_path + id);
-                QueryDocument doc = new QueryDocument(adoc, text);
+                QueryDocument doc = new QueryDocument(id);
 
                 String xmlfile = xml_path+id;
                 if(id.contains("_DF_"))
@@ -334,17 +331,6 @@ public class TACReader {
         return ps;
     }
 
-    private static AnnotatedDocument readAnnotatedDocs(String filename){
-        Gson gson = new Gson();
-        String json = null;
-        try {
-            json = FileUtils.readFileToString(new File(filename), "UTF-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        AnnotatedDocument doc = gson.fromJson(json, AnnotatedDocument.class);
-        return doc;
-    }
 
     public static List<QueryDocument> readChineseDocuments(boolean train){
         String xml_path;
