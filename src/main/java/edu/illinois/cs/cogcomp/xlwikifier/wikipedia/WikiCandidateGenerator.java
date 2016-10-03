@@ -6,9 +6,7 @@ import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.Transliterator;
 import edu.illinois.cs.cogcomp.core.algorithms.LevensteinDistance;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.xlel21.TransLookUp;
 import org.apache.commons.io.FileUtils;
 import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
@@ -49,10 +47,7 @@ public class WikiCandidateGenerator {
     private int each_word_top = 3000;
     private int word_top = 6000;
     public boolean tac = false;
-    public Transliterator tli;
     private Tokenizer tokenizer;
-    public Transliterator trans;
-    private TransLookUp trlu;
     private static Logger logger = LoggerFactory.getLogger(WikiCandidateGenerator.class);
 
     public WikiCandidateGenerator(){
@@ -206,47 +201,6 @@ public class WikiCandidateGenerator {
         return ret;
     }
 
-    public List<WikiCand> getCandsByTransliteration(String surface, String lang){
-        if(trans == null){
-            trans = new Transliterator(lang);
-//            trlu = new TransLookUp(lang);
-        }
-        surface = surface.toLowerCase();
-
-        if(cand_cache.containsKey(surface)){
-            return copyFromCache(surface);
-        }
-
-        String tran;
-        Set<String> poss_tran = new HashSet<>();
-        tran = trans.LookupPhraseMap(surface);
-//        tran = trlu.LookupTrans(surface);
-        if(tran!=null){
-            poss_tran.add(tran);
-        }
-        else {
-            poss_tran.addAll(trans.getEngTransCands(surface));
-        }
-        poss_tran = poss_tran.stream().filter(x -> !x.trim().isEmpty()).collect(Collectors.toSet());
-        List<WikiCand> cands = new ArrayList<>();
-        poss_tran.forEach(x -> cands.addAll(getCandidate1(x, "en")));
-        List<WikiCand> filtered = new ArrayList<>();
-        Set<String> seen = new HashSet<>();
-        for(WikiCand cand: cands){
-            if(seen.contains(cand.title))
-                continue;
-            else{
-                seen.add(cand.title);
-                filtered.add(cand);
-            }
-        }
-//            filtered.forEach(x -> x.src = "trans");
-        filtered = filtered.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(Collectors.toList());
-        cand_cache.put(surface, filtered);
-        return filtered;
-
-    }
-
     /**
      * For the transliterated mentions
      * @param surface
@@ -288,44 +242,6 @@ public class WikiCandidateGenerator {
         return ret;
     }
 
-    private List<WikiCand> sortBySim(String surface, List<WikiCand> cands){
-
-//        Set<String> subi = getBigram(surface, "\\s+");
-        surface = surface.toLowerCase();
-        for(WikiCand cand: cands){
-//            Set<String> cbi = getBigram(cand.title, "_");
-//            double score = jaccard(subi, cbi);
-            String title = cand.title.replaceAll("_", " ");
-            double score = tli.getProbability(surface, title);
-
-//            float score = jwd.getDistance(surface, cand.title.toLowerCase());
-            cand.setScore(score);
-        }
-        return cands.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(toList());
-    }
-
-    private List<WikiCand> sortByDist(String surface, List<WikiCand> cands){
-        surface = surface.toLowerCase();
-        for(WikiCand cand: cands){
-            String title = cand.title.replaceAll("_", " ").toLowerCase();
-//            int idx = title.indexOf("(");
-//            if(idx > 0)
-//                title = title.substring(0, idx).trim();
-            int dist = LevensteinDistance.getLevensteinDistance(surface, title);
-
-//            String rt = (new StringBuilder(title)).reverse().toString();
-//            String[] tokens = rt.split("\\s+");
-//            String rtitle = "";
-//            for(String token: tokens){
-//                rtitle += (new StringBuilder(token)).reverse().toString() + " ";
-//            }
-//            rtitle = rtitle.trim();
-//            int dist1 = LevensteinDistance.getLevensteinDistance(surface, rtitle);
-            cand.psgivent = dist;
-//            cand.setScore(dist);
-        }
-        return cands.stream().sorted((x1, x2) -> Double.compare(x1.psgivent, x2.psgivent)).collect(toList());
-    }
 
     private Set<String> getBigram(String str, String sp){
         str = str.toLowerCase();

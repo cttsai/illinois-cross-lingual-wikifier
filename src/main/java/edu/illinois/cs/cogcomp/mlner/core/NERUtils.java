@@ -8,8 +8,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.Transliterator;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.xlel21.TransLookUp;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
@@ -24,7 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -36,8 +33,6 @@ public class NERUtils {
     public Set<String> stops;
     public String lang;
     private ExecutorService executor;
-    private Transliterator tr;
-    private TransLookUp tlu;
     private LangLinker ll = new LangLinker();
     private WikiCandidateGenerator en_wcg = new WikiCandidateGenerator(true);
 
@@ -346,33 +341,6 @@ public class NERUtils {
                 }
             }
         }
-    }
-
-    public void getTransCands(QueryDocument doc, WikiCandidateGenerator wcg){
-        for (ELMention m : doc.mentions) {
-            if (m.getCandidates().size() == 0) {
-                String surface = m.getMention().toLowerCase();
-                List<String> poss_tran = new ArrayList<>();
-                String tran = tlu.LookupTrans(surface);
-                if(tran!=null) poss_tran.add(tran);
-                if (poss_tran.size()==0) {
-                    poss_tran.addAll(tr.getEngTransCands(surface));
-                }
-
-                List<WikiCand> cands = new ArrayList<>();
-                poss_tran.forEach(x -> cands.addAll(wcg.getCandidate1(x, "en")));
-                m.getCandidates().addAll(cands);
-                m.gold_lang = "en";
-            }
-        }
-    }
-
-    public void setMidByWikiTitle(List<QueryDocument> docs, String lang){
-        System.out.println("Solving by wikipedia titles...");
-        for(QueryDocument doc: docs) {
-            setMidByWikiTitle(doc);
-        }
-
     }
 
 

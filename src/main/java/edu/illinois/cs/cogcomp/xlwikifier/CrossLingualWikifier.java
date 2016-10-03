@@ -1,9 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
-import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
-import edu.illinois.cs.cogcomp.xlwikifier.experiments.TAC2015Exp;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -23,7 +21,6 @@ public class CrossLingualWikifier {
     private static Logger logger = LoggerFactory.getLogger(CrossLingualWikifier.class);
     private static String lang;
     private static LangLinker ll;
-    private static TAC2015Exp te;
 
 
     public CrossLingualWikifier(String lang, WikiCandidateGenerator wcg){
@@ -41,8 +38,6 @@ public class CrossLingualWikifier {
             ranker.fm.ner_mode = false;
             if(ll!=null) ll.closeDB();
             ll = new LangLinker();
-            if(te == null)
-                te = new TAC2015Exp();
         }
     }
 

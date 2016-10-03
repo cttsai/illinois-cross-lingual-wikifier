@@ -72,7 +72,7 @@ public class Evaluator {
         int hard_cor = 0, hard_tot = 0;
         int top5 = 0, top3 = 0;
         int top5_hard = 0, top3_hard = 0;
-		String out = "";
+        String out = "";
         for(QueryDocument doc: docs) {
             for (ELMention m : doc.mentions) {
                 total++;
@@ -81,9 +81,9 @@ public class Evaluator {
                         || (m.getWikiTitle().startsWith("NIL") && m.gold_wiki_title.startsWith("NIL"))) {
                     correct++;
                     if(!m.eazy) hard_cor ++;
-					out += "1\n";
+                    out += "1\n";
                 }
-				else {
+                else {
 //                    System.out.println(m.getMention());
 //                    System.out.println("\t"+m.trans);
 //                    System.out.println("\t"+m.getWikiTitle()+"\t"+m.gold_wiki_title);
@@ -92,7 +92,7 @@ public class Evaluator {
 
                 List<String> cands = m.getCandidates().stream().map(x -> x.getTitle().toLowerCase()).collect(toList());
                 if((cands.size() == 0 && m.gold_wiki_title.startsWith("NIL"))
-                    || (cands.subList(0, Math.min(3,cands.size())).contains(m.gold_wiki_title.toLowerCase()))){
+                        || (cands.subList(0, Math.min(3,cands.size())).contains(m.gold_wiki_title.toLowerCase()))){
                     top3++;
                     if(!m.eazy) top3_hard++;
                 }
@@ -123,10 +123,10 @@ public class Evaluator {
         logger.info("Wiki Title Coverage: " + (double) contain / total + ", " + contain + "/" + total);
         logger.info("Hard Title Coverage: " + (double) contain_hard / hard_tot + ", " + contain_hard + "/" + hard_tot);
         logger.info("Easy Title Coverage: " + (double) (contain-contain_hard) / (total - hard_tot) + ", " + (contain-contain_hard) + "/" + (total-hard_tot));
-		try{
-		FileUtils.writeStringToFile(new File("wikipedia.output"), out);
-		}catch(IOException e){
-		}
+        try{
+            FileUtils.writeStringToFile(new File("wikipedia.output"), out);
+        }catch(IOException e){
+        }
     }
 
 }
