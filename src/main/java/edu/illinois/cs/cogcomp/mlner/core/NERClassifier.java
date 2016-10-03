@@ -50,7 +50,6 @@ public class NERClassifier {
         }
     }
 
-
     public class FeatureExtractor implements Runnable {
 
         private QueryDocument doc;
@@ -143,13 +142,7 @@ public class NERClassifier {
                     out += "\t"+doc.wikifier_features.get(i);
                 for(String key: fmap.keySet())
                         out += "\t"+key+":"+fmap.get(key);
-//                int[] idx = fv.getIdx();
-//                double[] values = fv.getValue();
-//                for(int j = 0; j < idx.length; j++){
-//                    out += "\t"+idx[j]+":"+values[j];
-//                }
                 out += "\n";
-//                System.out.println("c: "+(System.currentTimeMillis() - start)+" "+fv.maxIdx());
             }
 
             try {

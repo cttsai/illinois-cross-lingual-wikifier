@@ -20,46 +20,12 @@ public class ELMention {
     private int start_offset;
     private int end_offset;
     private String language;
-    private String mid = "NIL";
-    private String freebase_title = "NIL";
     private String wiki_title = "NIL";
-    public String en_wiki_title = "NIL";
-    private String eng_para;
-    private String spa_para;
-    private String eng_mention;
-    private List<WikiCand> cands = new ArrayList<>();
-    public List<String> gold_titles = new ArrayList<>();
-    private int eng_start;
-    private int eng_end;
-    private boolean orig_per = false;
-    public List<String> wiki_titles = new ArrayList<>();
-//    private transient Double[] mid_vec;
-    private transient Float[] mid_vec;
-    private transient Double[] mid_vec1;
-    public String gold_enwiki_title;
-    public String gold_mid;
-    public int plain_start;
-    public int plain_end;
-    public int xml_start;
-    public int xml_end;
-    public boolean eazy;
-//    public transient Double[] context30;
-//    public transient Double[] context100;
-//    public transient Double[] context200;
-//    public transient Double[] other_ne;
-//    public transient Double[] pre_title;
-//public transient List<Double[]> pre_title_vecs;
-//    public transient List<Double[]> other_ne_vecs;
-//public transient Double[] mention_vec;
     public String gold_wiki_title;
-    public transient Float[] context30;
-    public transient Float[] context100;
-    public transient Float[] context200;
-    public transient Float[] other_ne;
-    public transient Float[] pre_title;
-    public transient List<Float[]> pre_title_vecs;
-    public transient List<Float[]> other_ne_vecs;
-    public transient Float[] mention_vec;
+    public String en_wiki_title = "NIL";
+    public String gold_enwiki_title;
+    private List<WikiCand> cands = new ArrayList<>();
+    public boolean eazy;
 	public String pred_type;
     public List<String> trans;
     public String gold_lang;
@@ -70,6 +36,25 @@ public class ELMention {
     public boolean is_stop;
     public List<String> types = new ArrayList<>();
     public Map<String, Double> ner_features = new HashMap<>();
+
+    // for ranker features
+    private transient Float[] mid_vec;
+    public transient Float[] context30;
+    public transient Float[] context100;
+    public transient Float[] context200;
+    public transient Float[] other_ne;
+    public transient Float[] pre_title;
+    public transient List<Float[]> pre_title_vecs;
+    public transient List<Float[]> other_ne_vecs;
+    public transient Float[] mention_vec;
+
+    // for tac exp
+    public int plain_start;
+    public int plain_end;
+    public int xml_start;
+    public int xml_end;
+    private String mid = "NIL";
+    public String gold_mid;
     public String noun_type;
 
     public ELMention(){};
@@ -94,27 +79,15 @@ public class ELMention {
     public void setMention(String mention){
         this.mention = mention;
     }
-    public void setFBTitle(String t){ this.freebase_title = t; }
     public void setWikiTitle(String t){ this.wiki_title = t; }
-    public void setEngPara(String t){ this.eng_para = t; }
-    public void setSpaPara(String t){ this.spa_para = t; }
-    public void setEngMention(String t){ this.eng_mention = t;}
-    public void setEngStart(int s){ this.eng_start = s; }
-    public void setEngEnd(int s){ this.eng_end = s; }
-    public void setOrigPer(){ this.orig_per = true; }
-    public boolean isOrigPer(){ return this.orig_per; }
     public void setNounType(String t){ this.noun_type = t; }
     public String getNounType(){ return this.noun_type; }
     public void setMidVec(Float[] vec){ this.mid_vec = vec; }
-    public void setMidVec1(Double[] vec){ this.mid_vec1 = vec; }
     public Float[] getMidVec(){ return this.mid_vec; }
-    public Double[] getMidVec1(){ return this.mid_vec1; }
 
     public String getID(){ return this.id; }
     public String getMention(){ return this.mention; }
     public String getDocID(){ return this.docid; }
-    public int getEngStart(){ return this.eng_start; }
-    public int getEngEnd(){ return this.eng_end; }
     public String getType(){ return this.type; }
     public String getLanguage(){ return this.language; }
     public int getStartOffset(){ return this.start_offset; }
@@ -124,11 +97,7 @@ public class ELMention {
         if(gold_mid.startsWith("NIL"))
             return "NIL";
         return this.gold_mid; }
-    public String getEngPara(){ return this.eng_para; }
-    public String getSpaPara(){ return this.spa_para; }
-    public String getEngMention(){ return this.eng_mention;}
     public String getWikiTitle(){ return this.wiki_title; }
-    public String getFBTitle(){ return this.freebase_title; }
     public String getGoldMid(){ return this.gold_mid; }
 
     @Override

@@ -19,10 +19,8 @@ import static java.util.stream.Collectors.toList;
  */
 public class QueryDocument {
     private String id;
-    public String translated_text;
     public String xml_text;
     private transient TextAnnotation ta;
-    public List<String> ne_words_es;
     public List<ELMention> mentions = new ArrayList<>();
     public List<ELMention> golds;
     public List<ELMention> authors = new ArrayList<>();
@@ -43,15 +41,12 @@ public class QueryDocument {
     }
     public TextAnnotation getTextAnnotation(){ return this.ta; }
 
-
-    public String getTranslatedText(){ return translated_text; }
     public String getXmlText(){ return this.xml_text; }
 
     public void setXmlText(String text){
         this.xml_text = text;
         this.xml_text = this.xml_text.replaceAll("\n", " ");
 
-//        this.plain_text = xml_text.replaceAll("\\<quote.*?/quote\\>", " ");
         this.plain_text = xml_text.replaceAll("\\<.*?\\>", " ");
         this.plain_text = Arrays.asList(this.plain_text.split("\n")).stream()
                 .filter(x -> !x.startsWith("http:"))
@@ -69,20 +64,10 @@ public class QueryDocument {
             if(c.equals("　")) c = "";
             if(!inxml && c.equals("<"))
                 inxml = true;
-//            if(!inquote && xml_text.substring(next_start).startsWith("<quote"))
-//                inquote = true;
-//            if(!inxml && xml_text.substring(next_start).startsWith("http:"))
-//                inhttp = true;
 
             if(!c.isEmpty() && !inxml && !inquote){
                 break;
             }
-
-//            if(c.isEmpty() && inhttp)
-//                inhttp = false;
-
-//            if(!inquote && xml_text.substring(next_start).startsWith("/quote>"))
-//                inquote = false;
             if(inxml && c.equals(">"))
                 inxml = false;
         }

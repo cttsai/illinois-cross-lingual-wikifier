@@ -93,50 +93,6 @@ public class NEREvaluator {
         return ret;
     }
 
-    public void evalMentionBoundary(QueryDocument doc){
-
-        List<ELMention> preds = getPredictions(doc.mentions);
-
-        System.out.println("Predictions:");
-        preds.forEach(x -> System.out.println("\t"+x+" "+x.ngram));
-        System.out.println("Golds:");
-        doc.golds.forEach(x -> System.out.println("\t"+x));
-
-        for(ELMention pred: preds){
-            for(ELMention gold: doc.golds){
-                if(pred.getStartOffset() == gold.getStartOffset()
-                        && pred.getEndOffset() == gold.getEndOffset()) {
-                    correct1++;
-                    if(pred.types.contains(gold.getType()))
-                        correct2++;
-
-                    Map<String, Long> typecount = pred.types.stream().collect(groupingBy(x -> x, counting()));
-                    List<Map.Entry<String, Long>> typesort = pred.types.stream().collect(groupingBy(x -> x, counting()))
-                            .entrySet().stream().sorted((x1, x2) -> Long.compare(x2.getValue(), x1.getValue()))
-                            .collect(toList());
-
-                    String type = typesort.get(0).getKey();
-                    if(typecount.get(type) == typecount.get(pred.types.get(0)))
-                        type = pred.types.get(0);
-
-                    if(gold.getType().equals(type))
-                        correct4++;
-
-                    type = typesort.get(0).getKey();
-                    if(typecount.get(type) == typecount.get(pred.types.get(pred.types.size()-1)))
-                        type = pred.types.get(pred.types.size()-1);
-
-                    if(gold.getType().equals(type))
-                        correct5++;
-
-                    break;
-                }
-            }
-        }
-
-        gp1 += doc.golds.size();
-        pp1 += preds.size();
-    }
 
     public void printResults(){
         System.out.println("Token Level");
