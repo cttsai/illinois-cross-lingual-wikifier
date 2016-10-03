@@ -27,7 +27,7 @@ public class TFIDFManager {
     }
 
     public void loadDB(String lang){
-        db = DBMaker.newFileDB(new File(Constants.dbpath1+"/tfidf", lang))
+        db = DBMaker.newFileDB(new File(Constants.dbpath+"/tfidf", lang))
                 .mmapFileEnableIfSupported()
                 .cacheSize(10000)
                 .transactionDisable()
@@ -114,12 +114,6 @@ public class TFIDFManager {
 
     public static void main(String[] args) {
         TFIDFManager tm = new TFIDFManager();
-//        List<String> tmp = new ArrayList<>();
-//        tmp.add("this");
-//        tmp.add("is");
-//        tmp.add("is");
-//        tmp.add("title_illinois");
-//        System.out.println(tm.getWordWeights(tmp, "en"));
         String lang = "ar";
         try {
             tm.populateDB(lang, "/shared/bronte/ctsai12/multilingual/text/"+lang+".withtitle");

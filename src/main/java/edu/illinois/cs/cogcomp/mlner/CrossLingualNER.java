@@ -95,7 +95,6 @@ public class CrossLingualNER {
         int psen = -1;
         sentences.add(new LinkedVector());
         for(ELMention m: doc.mentions){
-//            System.out.println(m.getWikiTitle()+" "+m.getMid());
             int tokenid = ta.getTokenIdFromCharacterOffset(m.getStartOffset());
             int senid = ta.getSentenceId(tokenid);
             if(senid != psen){

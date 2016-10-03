@@ -1,4 +1,4 @@
-package edu.illinois.cs.cogcomp.xlwikifier.experiments.reader;
+package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.LineIO;

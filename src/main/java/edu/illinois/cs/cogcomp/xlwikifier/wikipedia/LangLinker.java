@@ -39,7 +39,7 @@ public class LangLinker {
             System.out.println("no en db for lang link");
             System.exit(-1);
         }
-        db = DBMaker.newFileDB(new File(Constants.dbpath1+"/titlelang", lang))
+        db = DBMaker.newFileDB(new File(Constants.dbpath+"/titlelang", lang))
                 .cacheSize(1000)
                 .transactionDisable()
                 .closeOnJvmShutdown()

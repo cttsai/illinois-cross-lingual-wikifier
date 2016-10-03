@@ -34,11 +34,6 @@ public class Ranker {
         fm.we.closeDB();
     }
 
-    public static Ranker loadPreTrainedRanker(String lang){
-        String defaultmodel = "ranker/default/"+lang+"/model";
-        return loadPreTrainedRanker(lang, defaultmodel);
-    }
-
     public static Ranker loadPreTrainedRanker(String lang, String filepath){
         logger.info("Loading ranker model: "+filepath);
         if(!new File(filepath).exists()){
@@ -189,8 +184,6 @@ public class Ranker {
                 m.setMidVec(null);
             }
         }
-
-        doc.free();
     }
 
     public String getFeatureString(WikiCand cand, ELMention m, QueryDocument doc, int qid){

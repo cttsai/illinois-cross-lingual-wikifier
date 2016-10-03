@@ -19,7 +19,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.Constants;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -30,7 +29,6 @@ public class WikiCandidateGenerator {
 
     private DB db;
     private Map<String, DB> db_pool = new HashMap<>();
-    private DB ng_db;
     public ConcurrentNavigableMap<String, String[]> surface2titles;
     public ConcurrentNavigableMap<String, String[]> word2titles;
     public ConcurrentNavigableMap<String, String[]> fourgramidx;
@@ -44,8 +42,6 @@ public class WikiCandidateGenerator {
     private Map<String, List<WikiCand>> cand_cache = new HashMap<>();
     private boolean use_cache = false;
     private int top = 10;
-    private int each_word_top = 3000;
-    private int word_top = 6000;
     public boolean tac = false;
     private Tokenizer tokenizer;
     private static Logger logger = LoggerFactory.getLogger(WikiCandidateGenerator.class);
@@ -70,13 +66,7 @@ public class WikiCandidateGenerator {
         this.lang = lang;
         if(db_pool.containsKey(lang)) db = db_pool.get(lang);
         else {
-            String dbfile = Constants.dbpath1+"/candidates/"+lang+"_candidates";
-//            String dbfile = "/shared/preprocessed/ctsai12/multilingual/mapdb/candidates/"+lang+"_candidates";
-			/*
-            if(new File(dbfile).exists()){
-                logger.info("cand db exists "+dbfile);
-                System.exit(-1);
-            }*/
+            String dbfile = Constants.dbpath+"/candidates/"+lang+"_candidates";
             db = DBMaker.newFileDB(new File(dbfile))
                     .cacheSize(1000)
                     .transactionDisable()
@@ -105,24 +95,12 @@ public class WikiCandidateGenerator {
         pssgivent = db.createTreeSet("psst")
                 .serializer(BTreeKeySerializer.TUPLE3)
                 .makeOrGet();
-//        ng_db = DBMaker.newFileDB(new File(Constants.dbpath+"/candidates", lang+"_ng"))
-//                .cacheSize(1000)
-//                .transactionDisable()
-//                .closeOnJvmShutdown()
-//                .make();
-//        trigramidx = ng_db.createTreeMap("3gram")
-//                .keySerializer(BTreeKeySerializer.STRING)
-//                .makeOrGet();
     }
 
     public void closeDB(){
         if(db!=null && !db.isClosed()) {
             db.commit();
             db.close();
-        }
-        if(ng_db!=null && !ng_db.isClosed()) {
-            ng_db.commit();
-            ng_db.close();
         }
         this.lang = null;
     }
@@ -151,7 +129,6 @@ public class WikiCandidateGenerator {
                 List<WikiCand> cands = getCandidate(m.getMention(), lang);
 
                 cands = cands.subList(0, Math.min(top, cands.size()));
-//            m.setCandidates(cands);
                 m.getCandidates().addAll(cands);
             }
         }
@@ -170,89 +147,16 @@ public class WikiCandidateGenerator {
         }
         surface = surface.toLowerCase().trim();
 
-//        if(cand_cache.containsKey(surface))
-//            return cand_cache.get(surface);
-
-
         List<WikiCand> cands = getCandsBySurface(surface, lang, false);
         if (cands.size() == 0 && !tac)
             cands = getCandidateByWord(surface, lang, 6);
-//        if(tac && cands.size() == 0) {  // NAACL
-//            cands = getCandsBySurface(surface, "en", false);
-//        }
-
-
-//        cand_cache.put(surface, cands);
+        if(tac && cands.size() == 0) {  // NAACL
+            cands = getCandsBySurface(surface, "en", false);
+        }
 
         return cands;
     }
 
-    private List<WikiCand> copyFromCache(String key){
-        List<WikiCand> ret = new ArrayList<>();
-        for(WikiCand c: cand_cache.get(key)){
-            WikiCand nc = new WikiCand(c.title, c.score);
-            nc.psgivent = c.psgivent;
-            nc.ptgivens = c.ptgivens;
-            nc.lang = c.lang;
-            nc.src = c.src;
-            nc.query_surface = c.query_surface;
-            ret.add(nc);
-        }
-        return ret;
-    }
-
-    /**
-     * For the transliterated mentions
-     * @param surface
-     * @param lang
-     * @return
-     */
-    public List<WikiCand> getCandidate1(String surface, String lang){
-        if(this.lang == null || !this.lang.equals(lang)) {
-            loadDB(lang);
-            this.lang = lang;
-        }
-        surface = surface.toLowerCase().trim();
-        List<WikiCand> cands = getCandsBySurface(surface, lang, true);
-        List<WikiCand> word_cands = getCandidateByWord(surface, lang, word_top);
-//        List<WikiCand> ng_cands = getCandidatesByNgram(surface);
-//        word_cands.addAll(ng_cands);
-//        ng_cands.addAll(word_cands);
-        word_cands = word_cands.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(Collectors.toList());
-//        ng_cands = sortByDist(surface, ng_cands);
-//        ng_cands = sortBySim(surface, ng_cands);
-
-//        ng_cands = ng_cands.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(toList());
-
-        cands.addAll(word_cands.subList(0, Math.min(word_cands.size(), 20)));
-        return cands;
-    }
-
-    private List<WikiCand> mergeCands(List<WikiCand> cands1, List<WikiCand> cands2){
-        Set<String> cands1_set = cands1.stream().map(x -> x.title).collect(toSet());
-        Set<String> cands2_set = cands2.stream().map(x -> x.title).collect(toSet());
-        cands1_set.addAll(cands2_set);
-
-        List<WikiCand> ret = new ArrayList<>();
-
-        for(String c: cands1_set){
-            WikiCand cand = new WikiCand(c, 0);
-            ret.add(cand);
-        }
-        return ret;
-    }
-
-
-    private Set<String> getBigram(String str, String sp){
-        str = str.toLowerCase();
-        Set<String> ret = new HashSet<>();
-        String[] tokens = str.split(sp);
-        for(String token: tokens){
-            for(int i = 0; i < token.length()-2; i++)
-                ret.add(str.substring(i, i+2));
-        }
-        return ret;
-    }
 
     public List<WikiCand> getCandsBySurface(String surface, String lang, boolean extend){
         if(this.lang == null || !this.lang.equals(lang)) {
@@ -315,14 +219,6 @@ public class WikiCandidateGenerator {
         return dist;
     }
 
-
-    private double jaccard(Set<String> s1, Set<String> s2){
-        Set<String> union = new HashSet<>();
-        s1.forEach(x -> union.add(x));
-        union.retainAll(s2);
-        s2.addAll(s1);
-        return (float)union.size()/s2.size();
-    }
 
     public List<WikiCand> getCandidateByWord(String surface, String lang, int max_cand){
         if(this.lang == null || !this.lang.equals(lang)) {
@@ -687,51 +583,11 @@ public class WikiCandidateGenerator {
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         if(db == null || db.isClosed() || this.lang != lang)
             loadDB(lang);
-        int cnt = 0;
         for(QueryDocument doc: docs) {
-//            System.out.print("Processed "+cnt+" docs...\r");
-            cnt++;
             setCandidates(doc, lang);
-
-//            List<ELMention> hard = doc.mentions.stream().filter(x -> x.gold_wiki_title == null || x.getCandidates().size()==0
-//                    || !x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
-//                    .collect(toList());
-//            hard.forEach(x -> x.eazy = false);
-//            List<ELMention> easy = doc.mentions.stream().filter(x -> x.gold_wiki_title == null || x.getCandidates().size()>0
-//                    && x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
-//                    .collect(toList());
-//            easy.forEach(x -> x.eazy = true);
         }
-//        closeDB();
     }
 
-    public void selectMentions(List<QueryDocument> docs, double p){
-        System.out.println("#mentions before selection: "+docs.stream().flatMap(x -> x.mentions.stream()).count());
-        List<ELMention> easy_all = new ArrayList<>();
-        List<ELMention> hard_all = new ArrayList<>();
-        for(QueryDocument doc: docs) {
-            List<ELMention> hard = doc.mentions.stream().filter(x -> x.getCandidates().size()==0
-                    || !x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
-                    .collect(toList());
-            hard.forEach(x -> x.eazy = false);
-            hard_all.addAll(hard);
-            List<ELMention> easy = doc.mentions.stream().filter(x -> x.getCandidates().size()>0
-                    && x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
-                    .collect(toList());
-            easy.forEach(x -> x.eazy = true);
-            easy_all.addAll(easy);
-
-        }
-        System.out.println("#hard "+hard_all.size()+" #easy "+easy_all.size());
-        Collections.shuffle(easy_all, new Random(0));
-        hard_all.addAll(easy_all.subList(0, (int) Math.min(easy_all.size(), hard_all.size()*p)));
-        for(QueryDocument doc: docs){
-            doc.mentions = hard_all.stream().filter(x -> x.getDocID().equals(doc.getDocID()))
-                    .sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
-                    .collect(toList());
-        }
-        logger.info("#mentions after selection: "+docs.stream().flatMap(x -> x.mentions.stream()).count());
-    }
 
     public static void main(String[] args) {
         WikiCandidateGenerator g = new WikiCandidateGenerator();

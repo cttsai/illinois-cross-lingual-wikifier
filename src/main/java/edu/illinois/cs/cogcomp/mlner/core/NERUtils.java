@@ -1,6 +1,5 @@
 package edu.illinois.cs.cogcomp.mlner.core;
 
-import com.google.gson.Gson;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
@@ -13,14 +12,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
 
@@ -32,84 +24,16 @@ public class NERUtils {
     public Tokenizer tokenizer;
     public Set<String> stops;
     public String lang;
-    private ExecutorService executor;
     private LangLinker ll = new LangLinker();
     private WikiCandidateGenerator en_wcg = new WikiCandidateGenerator(true);
 
     public NERUtils(){
-//        tr = new Transliterator(lang);
-//        tlu = new TransLookUp(lang);
     }
 
     public void setLang(String lang){
         this.lang = lang;
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         stops = StopWord.getStopWords(lang);
-    }
-
-
-    public List<ELMention> getNgramMentions(QueryDocument doc, TextAnnotation ta, boolean con, int n){
-
-        List<ELMention> mentions = new ArrayList<>();
-        List<ELMention> preds = null;
-        List<ELMention> golds = null;
-
-        if (con) {
-            preds = doc.mentions.stream().filter(x -> x.is_ne).collect(toList());
-            golds = doc.golds;
-        } else {
-            golds = doc.mentions;
-            doc.golds = golds;
-        }
-
-        for (int i = 0; i < ta.getTokens().length - n - 1; i++) {
-            if (ta.getSentenceId(i) != ta.getSentenceId(i + n - 1))
-                continue;
-            IntPair offset = ta.getTokenCharacterOffset(i);
-            IntPair offset1 = ta.getTokenCharacterOffset(i + n - 1);
-            ELMention m = new ELMention(doc.getDocID(), offset.getFirst(), offset1.getSecond());
-            String surface = ta.getToken(i);
-            for (int j = i+1; j < i+n; j++)
-                surface += " " + ta.getToken(j);
-            m.setMention(surface);
-            m.ngram = n;
-            m.is_stop = false;
-            if (n == 1 && stops.contains(surface.toLowerCase()))
-                m.is_stop = true;
-            m.is_ne_gold = false;
-            m.setType("O");
-            for (ELMention gold : golds) {
-                if (m.getStartOffset() >= gold.getStartOffset()
-                        && m.getEndOffset() <= gold.getEndOffset()) {
-                    m.is_ne_gold = true;
-                    m.setType(gold.getType());
-                    m.gold_mid = gold.gold_mid;
-                    break;
-                }
-            }
-
-            m.is_ne = false;
-            m.pred_type = "O";
-            if (con) {
-                for (ELMention pred : preds) {
-                    if (m.getStartOffset() >= pred.getStartOffset()
-                            && m.getEndOffset() <= pred.getEndOffset()) {
-                        m.is_ne = true;
-                        m.setMid(pred.getMid());
-                        m.setCandidates(pred.getCandidates());
-                        m.setMidVec(pred.getMidVec());
-                        m.setWikiTitle(pred.getWikiTitle());
-                        m.pred_type = pred.pred_type;
-                        break;
-                    }
-                }
-            }
-            mentions.add(m);
-        }
-
-        mentions = mentions.stream().sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
-                .collect(toList());
-        return mentions;
     }
 
     public List<ELMention> getNgramMentions(QueryDocument doc, int n){
@@ -155,59 +79,6 @@ public class NERUtils {
         return mentions;
     }
 
-
-    public void setNgramMention(List<QueryDocument> docs, List<TextAnnotation> tas, int n){
-        for(int k = 0; k < docs.size(); k++){
-            QueryDocument doc = docs.get(k);
-//            if(doc == null) continue;
-            TextAnnotation ta;
-            if(tas == null)
-                ta = tokenizer.getTextAnnotation(doc.plain_text);
-            else
-                ta = tas.get(k);
-            List<ELMention> mentions = new ArrayList<>();
-
-
-            for (int i = 0; i < ta.getTokens().length - n + 1; i++) {
-                if(ta.getSentenceId(i)!=ta.getSentenceId(i+n-1))
-                    continue;
-                IntPair offset = ta.getTokenCharacterOffset(i);
-                IntPair offset1 = ta.getTokenCharacterOffset(i + n -1);
-                ELMention m = new ELMention(doc.getDocID(), offset.getFirst(), offset1.getSecond());
-                String surface = ta.getToken(i);
-                for(int j = i+1; j < i+n; j++)
-                    surface += " "+ta.getToken(j);
-                m.setMention(surface);
-                m.ngram = n;
-                m.is_stop = false;
-                List<String> tokens = Arrays.asList(surface.toLowerCase().split("\\s+"));
-                if(tokens.stream().filter(x -> stops.contains(x)).count() == tokens.size())
-                    m.is_stop = true;
-                m.is_ne_gold = false;
-                m.setType("O");
-                for(ELMention gold: doc.golds){
-                    if(m.getStartOffset() >= gold.getStartOffset()
-                            && m.getEndOffset() <= gold.getEndOffset()) {
-                        m.is_ne_gold = true;
-                        m.setType(gold.getType());
-                        m.gold_mid = gold.gold_mid;
-                        break;
-                    }
-                }
-
-                m.is_ne = false;
-                m.pred_type = "O";
-                mentions.add(m);
-            }
-
-            mentions = mentions.stream().sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
-                    .collect(toList());
-            mentions.forEach(x -> x.setLanguage(lang));
-            doc.mentions = mentions;
-        }
-    }
-
-
     public void wikifyMentions(QueryDocument doc, int n, WikiCandidateGenerator wcg, Ranker ranker){
         for(ELMention m: doc.mentions){
             if(!m.getWikiTitle().startsWith("NIL")) continue;
@@ -235,33 +106,6 @@ public class NERUtils {
                 }
             }
 
-//            if(n==1) {
-//                boolean allcap = true;
-////                String[] tokens = m.getMention().split("\\s+");
-////                for (String token : tokens) {
-////                    String init = token.substring(0, 1);
-////                    if (!init.toLowerCase().equals(init))
-////                        allcap = false;
-////                }
-//                if (allcap) {   // capitalized
-//                    if (cands.size() == 0 ) {
-//                        cands = en_wcg.getCandsByTransliteration(surface, lang);
-//
-//                        List<WikiCand> cands_ = new ArrayList<>();
-//
-//                        for(WikiCand cand: cands){
-//                            List<String> types = FreeBaseQuery.getTypesFromTitle(cand.title, "en");
-//                            if (types.contains("people.person") || types.contains("location.location") ||
-//                                    types.contains("organization.organization"))
-//                                cands_.add(cand);
-//                            if(cands_.size()==2) break;
-//                        }
-////                        System.out.println("Trans "+m.getMention()+" gets "+cands.size()+" cands");
-//                        m.getCandidates().addAll(cands_);
-//                    }
-//                }
-//            }
-
             m.setCandidates(cands);
         }
 
@@ -278,86 +122,16 @@ public class NERUtils {
 
     }
 
-
-    public void genNERTrainingCache(List<QueryDocument> docs, String dir, int n, WikiCandidateGenerator wcg, Ranker ranker){
-        System.out.println("#docs "+docs.size());
-        int n_thread = 10;
-        executor = Executors.newFixedThreadPool(n_thread);
-        for(int i = 0; i < docs.size(); i++){
-            QueryDocument doc = docs.get(i);
-//            if(!doc.getDocID().equals("SPA_NW_001278_20130122_F00014N0S")) continue;
-            doc.mentions = getNgramMentions(doc, n);
-            wikifyMentions(docs.get(i), n, wcg, ranker);
-            executor.execute(new DocumentWorker(docs.get(i), dir));
-//            docs.set(i, null);
-        }
-        executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public class DocumentWorker implements Runnable {
-
-        private QueryDocument doc;
-        private Gson gson;
-        private String dir;
-
-        public DocumentWorker(QueryDocument doc, String dir) {
-            this.doc = doc;
-            this.gson = new Gson();
-            this.dir = dir;
-        }
-
-        @Override
-        public void run() {
-            String json = gson.toJson(doc, QueryDocument.class);
-            try {
-                FileUtils.writeStringToFile(new File(dir, doc.getDocID()), json, "UTF-8");
-                doc.mentions = new ArrayList<>();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    public void getEnCands(List<QueryDocument> docs){
-        for(QueryDocument doc: docs){
-            getEnCands(doc);
-        }
-    }
-
-    public void getEnCands(QueryDocument doc){
-        for (ELMention m : doc.mentions) {
-            if (m.getCandidates().size() == 0) {
-                List<WikiCand> cands = en_wcg.getCandsBySurface(m.getMention().toLowerCase(), "en", false);
-                if (cands.size() > 0) {
-                    System.out.println("get cands from en");
-                    m.setCandidates(cands);
-//                    m.gold_lang = "en";
-                }
-            }
-        }
-    }
-
-
     public void setMidByWikiTitle(QueryDocument doc){
-        boolean search = false;
         for (ELMention m : doc.mentions) {
             if(m.is_ne) continue;
-            if(m.ngram>1) search = false;
-            else search = true;
-//            search = false;
 
             if (m.getWikiTitle().startsWith("NIL")){
                 m.setMid("NIL");
             }
 
             for (WikiCand c : m.getCandidates()) {
-                String mid = getMidByWikiTitle(c.getTitle(), ll, c.lang, search);
+                String mid = getMidByWikiTitle(c.getTitle(), ll, c.lang);
                 c.orig_title = c.title;
                 if (mid != null)
                     c.title = mid;
@@ -372,7 +146,7 @@ public class NERUtils {
         }
     }
 
-    public String getMidByWikiTitle(String title, LangLinker ll, String lang, boolean search){
+    public String getMidByWikiTitle(String title, LangLinker ll, String lang){
         if(title.trim().isEmpty())
             return null;
         if(title.startsWith("NIL"))
@@ -383,32 +157,12 @@ public class NERUtils {
 
         String mid = FreeBaseQuery.getMidFromTitle(title, lang);
         if(mid != null) return mid; // in the m.12345 format
-//        String mid = qm.lookupMidFromTitle(title, lang);
-//        if (mid != null) {
-//            mid = mid.substring(1).replaceAll("/", ".");
-//            return mid;
-//        }
 
         if(ent!=null){
             ent = formatTitle(ent);
             mid = FreeBaseQuery.getMidFromTitle(ent, "en");
             if(mid!=null) return mid;
-//            mid = qm.lookupMidFromTitle(ent, "en");
-//            if (mid != null) {
-//                mid = mid.substring(1).replaceAll("/", ".");
-//                return mid;
-//            }
         }
-
-//        if(search && (!lang.equals("uz") && !lang.equals("ha") && !lang.equals("bn")
-//            && !lang.equals("yo")&& !lang.equals("ta") && !lang.equals("ug"))) {
-////            System.out.println(title+" "+lang);
-//            List<SearchResult> answers = fb.lookup(title, lang, "");
-//            if (answers.size() > 0) {
-//                return answers.get(0).getMid().substring(1).replaceAll("/", ".");
-//            }
-//        }
-
         return null;
     }
 
@@ -422,57 +176,6 @@ public class NERUtils {
             tmp+="_";
         }
         return tmp.substring(0, tmp.length()-1);
-    }
-
-
-    public void setWikiTitleFromMid(String lang, ELMention m){
-        String mid = m.getGoldMid();
-        if(mid.startsWith("NIL"))
-            m.gold_wiki_title = "NIL";
-        else {
-//            List<String> titles = qm.lookupWikiTitleFromMid(mid, lang);
-
-            List<String> titles = FreeBaseQuery.getTitlesFromMid(mid, lang);
-
-            if (titles != null && titles.size() > 0) {
-                m.gold_wiki_title = titles.get(0);
-                m.gold_lang = lang;
-                return;
-            }
-
-//            titles = qm.lookupWikiTitleFromMid(mid, "en");
-            titles = FreeBaseQuery.getTitlesFromMid(mid, "en");
-
-            if(titles != null && titles.size()>0){
-                m.gold_wiki_title = titles.get(0);
-                m.gold_lang = "en";
-            }
-            else{
-                m.gold_wiki_title = "NIL";
-                System.out.println("Couldn't map mid "+mid);
-            }
-        }
-    }
-
-    public void setBIOGolds(List<QueryDocument> docs){
-        for(QueryDocument doc: docs){
-            for(ELMention m: doc.mentions){
-                boolean get = false;
-                for(ELMention gold: doc.golds){
-                    if(m.getStartOffset() >= gold.getStartOffset()
-                            && m.getEndOffset() <= gold.getEndOffset()){
-                        if(m.getStartOffset() == gold.getStartOffset())
-                            m.setType("B-"+gold.getType());
-                        else
-                            m.setType("I-"+gold.getType());
-                        get = true;
-                        break;
-                    }
-                }
-                if(!get)
-                    m.setType("O");
-            }
-        }
     }
 
     public void propFeatures(QueryDocument doc, List<ELMention> prevms){
@@ -501,44 +204,5 @@ public class NERUtils {
                 }
             }
         }
-
-    }
-
-    public void propFeatures(List<QueryDocument> docs, Map<String, List<ELMention>> did2ms){
-        System.out.print("Propogating features...");
-        for(QueryDocument doc: docs){
-            if(did2ms.containsKey(doc.getDocID())) {
-                List<ELMention> prevms = did2ms.get(doc.getDocID());
-                propFeatures(doc, prevms);
-            }
-        }
-        System.out.println("Done");
-    }
-
-    public void filterMentions(List<QueryDocument> docs, Map<String, List<ELMention>> id2preds){
-        System.out.print("Filtering mentions...");
-        for(QueryDocument doc: docs){
-            if(!id2preds.containsKey(doc.getDocID())){
-                continue;
-            }
-            List<ELMention> preds = id2preds.get(doc.getDocID());
-            for(ELMention m: doc.mentions){
-                for (ELMention pred : preds) {
-                    if (m.getStartOffset() >= pred.getStartOffset()
-                            && m.getEndOffset() <= pred.getEndOffset()) {
-                        m.is_ne = true;
-                        m.setMid(pred.getMid());
-                        m.ngram = pred.ngram;
-                        m.setCandidates(pred.getCandidates());
-                        m.setMidVec(pred.getMidVec());
-                        m.setWikiTitle(pred.getWikiTitle());
-                        m.setType(pred.getType());
-                        m.pred_type = pred.pred_type;
-                        break;
-                    }
-                }
-            }
-        }
-        System.out.println("Done");
     }
 }

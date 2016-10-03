@@ -23,18 +23,14 @@ public class ELMention {
     private String wiki_title = "NIL";
     public String gold_wiki_title;
     public String en_wiki_title = "NIL";
-    public String gold_enwiki_title;
     private List<WikiCand> cands = new ArrayList<>();
     public boolean eazy;
 	public String pred_type;
-    public List<String> trans;
     public String gold_lang;
-    public String en_gold_trans;
     public boolean is_ne;
     public boolean is_ne_gold;
     public int ngram;
     public boolean is_stop;
-    public List<String> types = new ArrayList<>();
     public Map<String, Double> ner_features = new HashMap<>();
 
     // for ranker features
@@ -49,10 +45,6 @@ public class ELMention {
     public transient Float[] mention_vec;
 
     // for tac exp
-    public int plain_start;
-    public int plain_end;
-    public int xml_start;
-    public int xml_end;
     private String mid = "NIL";
     public String gold_mid;
     public String noun_type;

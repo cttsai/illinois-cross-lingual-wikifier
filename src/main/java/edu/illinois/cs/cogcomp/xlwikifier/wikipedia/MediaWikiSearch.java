@@ -321,10 +321,5 @@ public class MediaWikiSearch {
 //
 //        }
 
-
-
-//        System.out.println(s.getCategories("Erkin_Alptekin", "en"));
-
-//        System.out.println(s.getRedirectsTo("Dzhokhar Tsarnaev","en"));
     }
 }

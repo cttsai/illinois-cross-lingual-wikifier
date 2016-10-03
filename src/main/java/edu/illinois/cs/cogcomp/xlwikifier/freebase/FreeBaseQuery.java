@@ -14,8 +14,6 @@ import static java.util.stream.Collectors.toSet;
  */
 public class FreeBaseQuery {
     private static DB db;
-//    private static NavigableSet<Fun.Tuple3<String, String, String[]>> midlang2title;
-//    private static NavigableSet<Fun.Tuple3<String, String, String>> titlelang2mid;
     private static ConcurrentNavigableMap<String, String[]> mid2types;
     public static ConcurrentNavigableMap<String, String> titlelang2mid;
     private static ConcurrentNavigableMap<String, String[]> midlang2title;
