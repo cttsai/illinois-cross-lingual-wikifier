@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<trainingPaths>
+    <FULLDUMP_PATH>/shared/bronte/cheng88/wikidump/enwiki-latest-pages-articles2014Jan.xml.bz2</FULLDUMP_PATH>
+    <FINAL_PRODUCTION_INDEX>/shared/bronte/ctsai12/wikiAccess/</FINAL_PRODUCTION_INDEX>
+    <DB_LOC>/shared/bronte/ctsai12/importDBs/</DB_LOC>
+	<OLD_SUMMARY_PROTO>data/MapDBIndex/WikiSummary.proto.save</OLD_SUMMARY_PROTO>
+    <TRAINING_DATA>data/training2014/</TRAINING_DATA>
+    <TRAINING_DOC_NUM>2000</TRAINING_DOC_NUM>
+    <MIN_MENTION_PER_DOC>20</MIN_MENTION_PER_DOC>
+    <TRAINING_MODELS>data/Models/2014/</TRAINING_MODELS>
+    <TRAINING_ANNOTATION_CACHE>.trainingCache</TRAINING_ANNOTATION_CACHE>
+</trainingPaths>
