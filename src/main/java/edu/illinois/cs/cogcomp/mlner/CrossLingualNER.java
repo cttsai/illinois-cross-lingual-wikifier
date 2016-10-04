@@ -47,7 +47,8 @@ public class CrossLingualNER {
             ConfigParameters param = new ConfigParameters();
             param.getPropValues();
 
-            FreeBaseQuery.loadDB(true);
+            if(!FreeBaseQuery.isloaded())
+                FreeBaseQuery.loadDB(true);
 
             transfer = trans;
             lang = l;

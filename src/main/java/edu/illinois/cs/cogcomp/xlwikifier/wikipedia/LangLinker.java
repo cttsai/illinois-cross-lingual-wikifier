@@ -34,16 +34,28 @@ public class LangLinker {
 
     }
 
-    public void loadDB(String lang){
+    public void loadDB(String lang, boolean read_only){
         if(lang.equals("en")){
             System.out.println("no en db for lang link");
             System.exit(-1);
         }
-        db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/titlelang", lang))
-                .cacheSize(1000)
-                .transactionDisable()
-                .closeOnJvmShutdown()
-                .make();
+
+        if(read_only){
+            db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/titlelang", lang))
+                    .cacheSize(1000)
+                    .transactionDisable()
+                    .closeOnJvmShutdown()
+                    .readOnly()
+                    .make();
+
+        }
+        else {
+            db = DBMaker.newFileDB(new File(ConfigParameters.db_path + "/titlelang", lang))
+                    .cacheSize(1000)
+                    .transactionDisable()
+                    .closeOnJvmShutdown()
+                    .make();
+        }
         to_en = db.createTreeMap("toen")
                 .keySerializer(BTreeKeySerializer.STRING)
                 .makeOrGet();
@@ -76,7 +88,7 @@ public class LangLinker {
         ChineseTokenizer ct = null;
         if(lang.equals("zh"))
             ct = new ChineseTokenizer();
-        loadDB(lang);
+        loadDB(lang, false);
         DumpReader dr = new DumpReader();
         dr.readTitle2ID(page_file);
         dr.readId2En(lang_file, "en");
@@ -108,32 +120,6 @@ public class LangLinker {
         return Arrays.asList(tokens).stream().collect(joining("_"));
     }
 
-    public void populateDB(String lang){
-        loadDB(lang);
-
-        ArrayList<String> lines = null;
-        try {
-            lines = LineIO.read("/shared/bronte/ctsai12/multilingual/wikidump/titles.en" + lang + ".align");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        int cnt = 0;
-        for(String line: lines){
-            if((++cnt)%1000 == 0)
-                System.out.println(cnt+"/"+lines.size());
-            String[] tokens = line.split("\\s+");
-            String en = tokens[0].substring(6, tokens[0].length()).trim();
-            String target = tokens[2].substring(6, tokens[2].length()).trim();
-            if(!en.isEmpty() && !target.isEmpty()){
-                to_en.put(target, en);
-                from_en.put(en, target);
-            }
-        }
-
-		System.out.println(to_en.size()+"_"+from_en.size());
-
-    }
-
     public String translateToEn(String title, String lang){
         if(lang.equals("en")){
             return title;
@@ -141,7 +127,7 @@ public class LangLinker {
 //            System.exit(-1);
         }
         if(db == null || this.lang == null || !this.lang.equals(lang)){
-            loadDB(lang);
+            loadDB(lang, true);
             this.lang = lang;
             if(to_en.size()==0){
                 System.out.println("lang link db is empty");
@@ -174,7 +160,7 @@ public class LangLinker {
             System.exit(-1);
         }
         if(db == null || !this.lang.equals(lang)){
-            loadDB(lang);
+            loadDB(lang, true);
             this.lang = lang;
             if(from_en.size()==0){
                 System.out.println("lang link db is empty");
@@ -202,7 +188,7 @@ public class LangLinker {
     public static void main(String[] args) {
 
         LangLinker ll = new LangLinker();
-        ll.loadDB("tr");
+        ll.loadDB("tr", true);
         System.out.println(ll.to_en.size());
 //        ll.translateToEn("", "tr");
 //        String page = "/shared/bronte/ctsai12/multilingual/wikidump/es/eswiki-20150901-page.sql";

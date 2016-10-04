@@ -62,16 +62,26 @@ public class WikiCandidateGenerator {
         this.title2id = map;
     }
 
-    public void loadDB(String lang){
+    public void loadDB(String lang, boolean read_only){
         this.lang = lang;
         if(db_pool.containsKey(lang)) db = db_pool.get(lang);
         else {
             String dbfile = ConfigParameters.db_path+"/candidates/"+lang+"_candidates";
-            db = DBMaker.newFileDB(new File(dbfile))
-                    .cacheSize(1000)
-                    .transactionDisable()
-                    .closeOnJvmShutdown()
-                    .make();
+            if(read_only) {
+                db = DBMaker.newFileDB(new File(dbfile))
+                        .cacheSize(1000)
+                        .transactionDisable()
+                        .closeOnJvmShutdown()
+                        .readOnly()
+                        .make();
+            }
+            else {
+                db = DBMaker.newFileDB(new File(dbfile))
+                        .cacheSize(1000)
+                        .transactionDisable()
+                        .closeOnJvmShutdown()
+                        .make();
+            }
             db_pool.put(lang, db);
         }
         surface2titles = db.createTreeMap("s2t")
@@ -142,7 +152,7 @@ public class WikiCandidateGenerator {
      */
     public List<WikiCand> getCandidate(String surface, String lang){
         if(this.lang == null || !this.lang.equals(lang)) {
-            loadDB(lang);
+            loadDB(lang, true);
             this.lang = lang;
         }
         surface = surface.toLowerCase().trim();
@@ -161,7 +171,7 @@ public class WikiCandidateGenerator {
     public List<WikiCand> getCandsBySurface(String surface, String lang, boolean extend){
         if(this.lang == null || !this.lang.equals(lang)) {
             tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-            loadDB(lang);
+            loadDB(lang, true);
             this.lang = lang;
         }
         List<WikiCand> cands = new ArrayList<>();
@@ -222,7 +232,7 @@ public class WikiCandidateGenerator {
 
     public List<WikiCand> getCandidateByWord(String surface, String lang, int max_cand){
         if(this.lang == null || !this.lang.equals(lang)) {
-            loadDB(lang);
+            loadDB(lang, true);
             tokenizer = MultiLingualTokenizer.getTokenizer(lang);
             this.lang = lang;
         }
@@ -308,7 +318,7 @@ public class WikiCandidateGenerator {
     private void populateWord2Title(String file, String lang){
         logger.info("Populating "+lang+" candidate database from "+file);
         if(db==null)
-            loadDB(lang);
+            loadDB(lang, false);
 
         word2titles.clear();
         pssgivent.clear();
@@ -422,7 +432,7 @@ public class WikiCandidateGenerator {
     }
 
     public void populate4GramIdx(String lang, String redirect_file, String page_file){
-        loadDB(lang);
+        loadDB(lang, false);
         DumpReader dr = new DumpReader();
         dr.readRedirects(redirect_file);
         dr.readTitle2ID(page_file);
@@ -497,7 +507,7 @@ public class WikiCandidateGenerator {
     private void populateMentionDB(String file, String lang){
         logger.info("Populating "+lang+" candidate database from "+file);
         if(db == null)
-            loadDB(lang);
+            loadDB(lang, false);
 
         surface2titles.clear();
         psgivent.clear();
@@ -582,7 +592,7 @@ public class WikiCandidateGenerator {
         logger.info("Generating candidates...");
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         if(db == null || db.isClosed() || this.lang != lang)
-            loadDB(lang);
+            loadDB(lang, false);
         for(QueryDocument doc: docs) {
             setCandidates(doc, lang);
         }
@@ -619,7 +629,7 @@ public class WikiCandidateGenerator {
     public static void main(String[] args) {
         WikiCandidateGenerator g = new WikiCandidateGenerator();
         g.tac = true;
-        g.loadDB("en");
+        g.loadDB("en", true);
         System.out.println(g.getCandsBySurface("Michael Pettis", "en", false));
         System.exit(-1);
 

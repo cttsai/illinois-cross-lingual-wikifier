@@ -26,13 +26,24 @@ public class TFIDFManager {
 
     }
 
-    public void loadDB(String lang){
-        db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/tfidf", lang))
-                .mmapFileEnableIfSupported()
-                .cacheSize(10000)
-                .transactionDisable()
-                .closeOnJvmShutdown()
-                .make();
+    public void loadDB(String lang, boolean read_only){
+        if(read_only){
+            db = DBMaker.newFileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
+                    .mmapFileEnableIfSupported()
+                    .cacheSize(10000)
+                    .transactionDisable()
+                    .closeOnJvmShutdown()
+                    .readOnly()
+                    .make();
+        }
+        else {
+            db = DBMaker.newFileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
+                    .mmapFileEnableIfSupported()
+                    .cacheSize(10000)
+                    .transactionDisable()
+                    .closeOnJvmShutdown()
+                    .make();
+        }
         word2df = db.createTreeMap("df")
                 .keySerializer(BTreeKeySerializer.STRING).makeOrGet();
         this.lang = lang;
@@ -42,7 +53,7 @@ public class TFIDFManager {
 
     public Map<String, Float> getWordWeights(List<String> words, String lang){
         if(db == null || !this.lang.equals(lang)) {
-            loadDB(lang);
+            loadDB(lang, true);
             if(word2df.size() == 0){
                 System.out.println("TFIDF db of "+lang+" is empty");
                 System.exit(-1);
@@ -77,7 +88,7 @@ public class TFIDFManager {
     }
 
     public void populateDB(String lang, String file) throws IOException {
-        loadDB(lang);
+        loadDB(lang, false);
         word2df.clear();
 
 

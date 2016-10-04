@@ -57,40 +57,27 @@ public class WordEmbedding {
     }
 
 
-    public void loadMonoDBNew(String lang) {
-        logger.info("Loading mono vectores "+lang);
-//        if(mono_db != null && !mono_db.isClosed())
-//            mono_db.close();
-        mono_db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/mono-embeddings", lang))
-                .cacheSize(100000)
-                .transactionDisable()
-                .closeOnJvmShutdown()
-                .make();
-        mono_vec = mono_db.createTreeMap(lang)
-                .keySerializer(BTreeKeySerializer.STRING)
-                .makeOrGet();
-        loadStopWords(lang);
+//    public void loadMonoDBNew(String lang) {
+//        logger.info("Loading mono vectores "+lang);
+////        if(mono_db != null && !mono_db.isClosed())
+////            mono_db.close();
+//        mono_db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/mono-embeddings", lang))
+//                .cacheSize(100000)
+//                .transactionDisable()
+//                .closeOnJvmShutdown()
+//                .make();
+//        mono_vec = mono_db.createTreeMap(lang)
+//                .keySerializer(BTreeKeySerializer.STRING)
+//                .makeOrGet();
+//        loadStopWords(lang);
+//
+//        multi_vecs.put(lang, mono_vec);  // because it gets vector from multi_vecs always
+//        if(multi_vecs.get(lang).containsKey("obama"))
+//            dim = multi_vecs.get(lang).get("obama").length;
+//        else
+//            logger.info("no vec for obama");
+//    }
 
-        multi_vecs.put(lang, mono_vec);  // because it gets vector from multi_vecs always
-        if(multi_vecs.get(lang).containsKey("obama"))
-            dim = multi_vecs.get(lang).get("obama").length;
-        else
-            logger.info("no vec for obama");
-    }
-
-    /**
-     * This is for mono embed experiments of NAACL paper
-     * @param lang
-     */
-    public void setMonoVecsNew(String lang) {
-        if(!lang.equals("en")) {
-            loadMonoDBNew(lang);
-            multi_vecs.put(lang, mono_vec);
-        }
-        loadMonoDBNew("en");
-        multi_vecs.put("en", mono_vec);
-        dim = multi_vecs.get("en").get("obama").length;
-    }
 
     public void createMultiVec(String lang) {
 
@@ -99,7 +86,7 @@ public class WordEmbedding {
 
         logger.info("Creating dictionary: "+path);
         dir.mkdir();
-        loadMultiDBNew(lang);
+        loadMultiDBNew(lang, false);
         if(multi_vec_lang.size()!=0 || multi_vec_en.size()!=0){
             System.out.println("map is not empty");
             System.exit(-1);
@@ -107,14 +94,25 @@ public class WordEmbedding {
     }
 
 
-    public void loadMultiDBNew(String lang) {
+    public void loadMultiDBNew(String lang, boolean read_only) {
         logger.info("Loading "+lang+" multi vectors...");
         File f = new File(ConfigParameters.db_path, "multi-embeddings/"+lang+"/"+lang);
-        multi_db = DBMaker.newFileDB(f)
-                .cacheSize(100000)
-                .transactionDisable()
-                .closeOnJvmShutdown()
-                .make();
+
+        if(read_only){
+            multi_db = DBMaker.newFileDB(f)
+                    .cacheSize(100000)
+                    .transactionDisable()
+                    .closeOnJvmShutdown()
+                    .readOnly()
+                    .make();
+        }
+        else {
+            multi_db = DBMaker.newFileDB(f)
+                    .cacheSize(100000)
+                    .transactionDisable()
+                    .closeOnJvmShutdown()
+                    .make();
+        }
         multi_vec_en = multi_db.createTreeMap("en")
                 .keySerializer(BTreeKeySerializer.STRING)
                 .makeOrGet();
