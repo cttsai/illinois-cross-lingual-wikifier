@@ -4,7 +4,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
-import edu.illinois.cs.cogcomp.xlwikifier.Constants;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.*;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class WikiDocReader {
     }
 
     public QueryDocument readWikiDocSingle(String lang, String filename, boolean check){
-        String dir = Constants.wikidumpdir+lang+"/"+lang+"_wiki_view/";
+        String dir = ConfigParameters.dump_path+lang+"/"+lang+"_wiki_view/";
         List<String> lines = null;
         TextAnnotation ta = null;
         try {

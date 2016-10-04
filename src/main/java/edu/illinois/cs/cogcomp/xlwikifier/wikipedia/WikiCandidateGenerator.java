@@ -3,6 +3,7 @@ package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
@@ -14,7 +15,6 @@ import org.mapdb.DBMaker;
 import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import edu.illinois.cs.cogcomp.xlwikifier.Constants;
 
 import java.io.*;
 import java.util.*;
@@ -66,7 +66,7 @@ public class WikiCandidateGenerator {
         this.lang = lang;
         if(db_pool.containsKey(lang)) db = db_pool.get(lang);
         else {
-            String dbfile = Constants.dbpath+"/candidates/"+lang+"_candidates";
+            String dbfile = ConfigParameters.db_path+"/candidates/"+lang+"_candidates";
             db = DBMaker.newFileDB(new File(dbfile))
                     .cacheSize(1000)
                     .transactionDisable()
@@ -471,8 +471,8 @@ public class WikiCandidateGenerator {
 
         try {
 
-            String plain = FileUtils.readFileToString(new File(Constants.wikidumpdir+lang+"/"+lang+"_wiki_view/plain/"+title), "UTF-8");
-            for(String line: LineIO.read(Constants.wikidumpdir+lang+"/"+lang+"_wiki_view/annotation/"+title)){
+            String plain = FileUtils.readFileToString(new File(ConfigParameters.dump_path+lang+"/"+lang+"_wiki_view/plain/"+title), "UTF-8");
+            for(String line: LineIO.read(ConfigParameters.dump_path+lang+"/"+lang+"_wiki_view/annotation/"+title)){
 
                 if(line.startsWith("#")){
 
@@ -506,7 +506,7 @@ public class WikiCandidateGenerator {
         Map<String, List<String>> s2t = new HashMap<>();
         Map<String, List<String>> t2s = new HashMap<>();
 
-        String wikidir = Constants.wikidumpdir+lang+"/"+lang+"_wiki_view/annotation";
+        String wikidir = ConfigParameters.dump_path+lang+"/"+lang+"_wiki_view/annotation";
 
         try {
             for(String line: LineIO.read(file)){
@@ -588,6 +588,33 @@ public class WikiCandidateGenerator {
         }
     }
 
+    public void selectMentions(List<QueryDocument> docs, double p){
+        System.out.println("#mentions before selection: "+docs.stream().flatMap(x -> x.mentions.stream()).count());
+        List<ELMention> easy_all = new ArrayList<>();
+        List<ELMention> hard_all = new ArrayList<>();
+        for(QueryDocument doc: docs) {
+            List<ELMention> hard = doc.mentions.stream().filter(x -> x.getCandidates().size()==0
+                    || !x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
+                    .collect(toList());
+            hard.forEach(x -> x.eazy = false);
+            hard_all.addAll(hard);
+            List<ELMention> easy = doc.mentions.stream().filter(x -> x.getCandidates().size()>0
+                    && x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
+                    .collect(toList());
+            easy.forEach(x -> x.eazy = true);
+            easy_all.addAll(easy);
+
+        }
+        System.out.println("#hard "+hard_all.size()+" #easy "+easy_all.size());
+        Collections.shuffle(easy_all, new Random(0));
+        hard_all.addAll(easy_all.subList(0, (int) Math.min(easy_all.size(), hard_all.size()*p)));
+        for(QueryDocument doc: docs){
+            doc.mentions = hard_all.stream().filter(x -> x.getDocID().equals(doc.getDocID()))
+                    .sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
+                    .collect(toList());
+        }
+        logger.info("#mentions after selection: "+docs.stream().flatMap(x -> x.mentions.stream()).count());
+    }
 
     public static void main(String[] args) {
         WikiCandidateGenerator g = new WikiCandidateGenerator();

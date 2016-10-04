@@ -5,6 +5,7 @@ import edu.illinois.cs.cogcomp.LbjNer.InferenceMethods.Decoder;
 import edu.illinois.cs.cogcomp.LbjNer.LbjFeatures.NETaggerLevel1;
 import edu.illinois.cs.cogcomp.LbjNer.LbjFeatures.NETaggerLevel2;
 import edu.illinois.cs.cogcomp.LbjNer.LbjTagger.*;
+import edu.illinois.cs.cogcomp.LbjNer.LbjTagger.Parameters;
 import edu.illinois.cs.cogcomp.LbjNer.ParsingProcessingData.TaggedDataReader;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.lbjava.nlp.Word;
@@ -13,6 +14,7 @@ import edu.illinois.cs.cogcomp.mlner.core.NERClassifier;
 import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -34,13 +36,16 @@ public class CrossLingualNER {
     private static WikiCandidateGenerator wcg;
     private static Ranker ranker;
     private static NERClassifier nc;
-    private static String configpath = "/shared/experiments/ctsai12/workspace/xlwikifier/config/ner/";
+    private static String configpath = "config/ner/";
     public static boolean transfer = true;
 
     private static Logger logger = LoggerFactory.getLogger(CrossLingualNER.class);
 
-    public static void setLang(String l, boolean trans){
+    public static void init(String l, boolean trans){
         if(!l.equals(lang) || trans != transfer) {
+            ConfigParameters param = new ConfigParameters();
+            param.getPropValues();
+
             transfer = trans;
             lang = l;
             logger.info("Setting lang in xlner: " + lang);
@@ -49,7 +54,7 @@ public class CrossLingualNER {
             utils.setLang(lang);
             wcg = new WikiCandidateGenerator(true);
             if(ranker != null) ranker.closeDBs();
-            ranker = Ranker.loadPreTrainedRanker(lang, "models/ranker/ner/" + lang+"/ranker.model");
+            ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/ner/" + lang+"/ranker.model");
             ranker.fm.ner_mode = true;
             nc = new NERClassifier(lang);
             try {
@@ -211,7 +216,7 @@ public class CrossLingualNER {
     }
 
     public static void main(String[] args) {
-        CrossLingualNER.setLang("es", true);
+        CrossLingualNER.init("es", false);
         QueryDocument doc = CrossLingualNER.annotate("Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu ."); // from DF_FTR_TUR_0514802_20140900
 //        CrossLingualWikifier.setLang("tr");
 //        CrossLingualWikifier.wikify(doc);

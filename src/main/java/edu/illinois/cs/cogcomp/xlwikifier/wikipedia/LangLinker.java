@@ -2,11 +2,11 @@ package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.ChineseTokenizer;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import org.apache.commons.io.FileUtils;
 import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import edu.illinois.cs.cogcomp.xlwikifier.Constants;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +39,7 @@ public class LangLinker {
             System.out.println("no en db for lang link");
             System.exit(-1);
         }
-        db = DBMaker.newFileDB(new File(Constants.dbpath+"/titlelang", lang))
+        db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/titlelang", lang))
                 .cacheSize(1000)
                 .transactionDisable()
                 .closeOnJvmShutdown()

@@ -1,13 +1,17 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
+import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
+import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiDocReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 
 import java.io.*;
 import java.util.*;
@@ -94,7 +98,7 @@ public class Ranker {
             e.printStackTrace();
         }
         trainSVM(modelname);
-        this.readModel("models/"+modelname);
+        this.readModel(modelname);
     }
 
     public void writeSVMData(List<QueryDocument> docs, String name)throws IOException {
@@ -126,8 +130,7 @@ public class Ranker {
 
     public void trainSVM(String name){
         System.out.println("Training...");
-        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata/" + name + " models/" + name );
-//        executeCmd("liblinear-ranksvm-1.95/train svmdata/" + name + " models/" + name + ".model");
+        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata/" + name + " " + name );
     }
 
     public void setWikiTitleByTopCand(List<QueryDocument> docs){
@@ -229,6 +232,30 @@ public class Ranker {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static Ranker trainRanker(String lang, int n_docs, double ratio, String modelfile){
+        Ranker ranker = new Ranker(lang);
+        ranker.fm.ner_mode = false;
+
+        WikiDocReader reader = new WikiDocReader();
+        List<QueryDocument> docs = reader.readWikiDocsNew(lang, 0, n_docs);
+
+        FreeBaseQuery.loadDB(true);
+        WikiCandidateGenerator wcg = new WikiCandidateGenerator(true);
+        wcg.genCandidates(docs, lang);
+        wcg.selectMentions(docs, ratio);
+        ranker.train(docs, modelfile);
+        ranker.saveLexicalManager(modelfile+".lm");
+        return ranker;
+    }
+
+    public static void main(String[] args) {
+
+        ConfigParameters param = new ConfigParameters();
+        param.getPropValues();
+
+        trainRanker("en", 1000, 0.4, "models/test");
     }
 
 }

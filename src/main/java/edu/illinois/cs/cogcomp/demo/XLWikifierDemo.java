@@ -20,14 +20,14 @@ public class XLWikifierDemo {
     public XLWikifierDemo(String text, String lang, boolean transfer){
         FreeBaseQuery.loadDB(true);
         long startTime = System.currentTimeMillis();
-        CrossLingualNER.setLang(lang, transfer);
+        CrossLingualNER.init(lang, transfer);
         QueryDocument doc = CrossLingualNER.annotate(text);
         double totaltime = (System.currentTimeMillis() - startTime) / 1000.0;
         logger.info("Time "+totaltime+" secs");
         runtime = "";
         runtime += "NER took: "+totaltime+" secs. ";
         startTime = System.currentTimeMillis();
-        CrossLingualWikifier.setLang(lang);
+        CrossLingualWikifier.init(lang);
         CrossLingualWikifier.wikify(doc);
         totaltime = (System.currentTimeMillis() - startTime) / 1000.0;
         logger.info("Time "+totaltime+" secs");

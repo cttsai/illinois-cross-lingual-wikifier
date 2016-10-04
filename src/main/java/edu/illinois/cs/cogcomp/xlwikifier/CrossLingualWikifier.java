@@ -28,13 +28,19 @@ public class CrossLingualWikifier {
         setCandidateGenerator(wcg);
     }
 
-    public static void setLang(String l){
+    public static void init(String l){
+
         if(!l.equals(lang)) {
+            if(ConfigParameters.db_path == null){
+                ConfigParameters param = new ConfigParameters();
+                param.getPropValues();
+            }
+
             logger.info("Setting up xlwikifier for language: "+l);
             lang = l;
             wcg = new WikiCandidateGenerator();
             if(ranker != null) ranker.closeDBs();
-            ranker = Ranker.loadPreTrainedRanker(lang, "models/ranker/default/"+lang+"/ranker.model");
+            ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/default/"+lang+"/ranker.model");
             ranker.fm.ner_mode = false;
             if(ll!=null) ll.closeDB();
             ll = new LangLinker();
@@ -87,7 +93,7 @@ public class CrossLingualWikifier {
     }
 
     public static void main(String[] args) {
-        CrossLingualWikifier.setLang("en");
+        CrossLingualWikifier.init("en");
 
     }
 }

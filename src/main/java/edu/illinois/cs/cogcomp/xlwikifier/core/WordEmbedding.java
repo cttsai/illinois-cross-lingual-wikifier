@@ -1,6 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
-import edu.illinois.cs.cogcomp.xlwikifier.Constants;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiDocReader;
 import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
@@ -61,7 +61,7 @@ public class WordEmbedding {
         logger.info("Loading mono vectores "+lang);
 //        if(mono_db != null && !mono_db.isClosed())
 //            mono_db.close();
-        mono_db = DBMaker.newFileDB(new File(Constants.dbpath+"/mono-embeddings", lang))
+        mono_db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/mono-embeddings", lang))
                 .cacheSize(100000)
                 .transactionDisable()
                 .closeOnJvmShutdown()
@@ -94,7 +94,7 @@ public class WordEmbedding {
 
     public void createMultiVec(String lang) {
 
-        String path = Constants.dbpath+"/multi-embeddings/"+lang;
+        String path = ConfigParameters.db_path+"/multi-embeddings/"+lang;
         File dir = new File(path);
 
         logger.info("Creating dictionary: "+path);
@@ -109,7 +109,7 @@ public class WordEmbedding {
 
     public void loadMultiDBNew(String lang) {
         logger.info("Loading "+lang+" multi vectors...");
-        File f = new File(Constants.dbpath, "multi-embeddings/"+lang+"/"+lang);
+        File f = new File(ConfigParameters.db_path, "multi-embeddings/"+lang+"/"+lang);
         multi_db = DBMaker.newFileDB(f)
                 .cacheSize(100000)
                 .transactionDisable()

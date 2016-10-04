@@ -1,6 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
-import edu.illinois.cs.cogcomp.xlwikifier.Constants;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.core.TFIDFManager;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
@@ -45,16 +45,16 @@ public class Importer {
     }
 
     public void setPath(){
-        String dumpdir = Constants.rootdir+"wikidump/"+lang;
+        String dumpdir = ConfigParameters.dump_path+lang;
         if(!(new File(dumpdir).exists()))
             new File(dumpdir).mkdir();
-        dumpfile = Constants.wikidumpdir+lang+"/"+lang+"wiki-"+date+"-pages-articles.xml.bz2";
-        pagefile = Constants.wikidumpdir+lang+"/"+lang+"wiki-"+date+"-page.sql.gz";
-        langfile = Constants.wikidumpdir+lang+"/"+lang+"wiki-"+date+"-langlinks.sql.gz";
-        redirectfile = Constants.wikidumpdir+lang+"/"+lang+"wiki-"+date+"-redirect.sql.gz";
-        docdir = Constants.wikidumpdir+lang+"/docs/";
-        candfile = Constants.wikidumpdir+lang+"/links";
-        textfile = Constants.rootdir+"text1/"+lang+".withtitle";
+        dumpfile = dumpdir+"/"+lang+"wiki-"+date+"-pages-articles.xml.bz2";
+        pagefile = dumpdir+"/"+lang+"wiki-"+date+"-page.sql.gz";
+        langfile = dumpdir+"/"+lang+"wiki-"+date+"-langlinks.sql.gz";
+        redirectfile = dumpdir+"/"+lang+"wiki-"+date+"-redirect.sql.gz";
+        docdir = dumpdir+"/docs/";
+        candfile = dumpdir+"/links";
+        textfile = dumpdir+"sg.withtitle";
 
 //        if(new File(textfile).exists()){
 //            logger.warn(textfile+" exists!");

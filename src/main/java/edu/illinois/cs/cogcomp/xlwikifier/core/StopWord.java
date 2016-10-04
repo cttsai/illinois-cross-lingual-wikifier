@@ -1,6 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
 import edu.illinois.cs.cogcomp.core.io.LineIO;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 
 import java.io.File;
 import java.util.HashSet;
@@ -16,13 +17,15 @@ public class StopWord {
     public static Set<String> getStopWords(String lang){
         Set<String> ret = new HashSet<>();
         try {
-            if((new File("stopwords/stopwords."+lang)).exists()) {
-                ret.addAll(LineIO.read("stopwords/stopwords." + lang).stream()
+            File f = new File(ConfigParameters.stopword_path, "stopwords."+lang);
+            if(f.exists()) {
+                ret.addAll(LineIO.read(f.getAbsolutePath()).stream()
                         .map(x -> x.trim().toLowerCase()).collect(toSet()));
             }
             else
                 System.out.println("No stopwords for "+lang);
-            ret.addAll(LineIO.read("stopwords/puncs").stream().collect(toSet()));
+
+            ret.addAll(LineIO.read(ConfigParameters.stopword_path+"/puncs").stream().collect(toSet()));
         } catch (Exception e) {
             e.printStackTrace();
         }

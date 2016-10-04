@@ -23,8 +23,6 @@ public class RankerFeatureManager implements Serializable {
     public WordEmbedding we;
     private String lang;
     private LangLinker ll = new LangLinker();
-    public boolean mono_mode = false;
-    public boolean word_align_mode = false;
     public TFIDFManager tfidf = new TFIDFManager();
     public String context_lang;
     public Tokenizer tokenizer;
@@ -47,7 +45,8 @@ public class RankerFeatureManager implements Serializable {
 
     public void loadVectors() {
         if (lang.equals("en")) {
-            we.setMonoVecsNew("en");
+//            we.setMonoVecsNew("en");
+            we.loadMultiDBNew("es");
         } else {
             we.loadMultiDBNew(lang);
         }

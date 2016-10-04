@@ -1,9 +1,9 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import edu.illinois.cs.cogcomp.xlwikifier.Constants;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,7 +27,7 @@ public class TFIDFManager {
     }
 
     public void loadDB(String lang){
-        db = DBMaker.newFileDB(new File(Constants.dbpath+"/tfidf", lang))
+        db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/tfidf", lang))
                 .mmapFileEnableIfSupported()
                 .cacheSize(10000)
                 .transactionDisable()
