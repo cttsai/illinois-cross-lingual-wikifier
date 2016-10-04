@@ -130,6 +130,12 @@ public class Ranker {
 
     public void trainSVM(String name){
         System.out.println("Training...");
+        if(name.contains("/")) {
+            File dir = new File(name.substring(0, name.lastIndexOf("/")));
+            if(!dir.isDirectory() && !dir.exists())
+                dir.mkdirs();
+        }
+
         executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata/tmp " + name );
     }
 
