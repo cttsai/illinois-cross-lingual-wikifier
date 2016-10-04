@@ -103,7 +103,7 @@ public class Ranker {
 
     public void writeSVMData(List<QueryDocument> docs, String name)throws IOException {
         System.out.println("Generating svm data...");
-        BufferedWriter bw = new BufferedWriter(new FileWriter("svmdata/"+name));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("svmdata/tmp"));
         int mcnt = 0, dcnt = 0, qid = 1;
         for(QueryDocument doc: docs){
             dcnt++;
@@ -130,7 +130,7 @@ public class Ranker {
 
     public void trainSVM(String name){
         System.out.println("Training...");
-        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata/" + name + " " + name );
+        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata/tmp " + name );
     }
 
     public void setWikiTitleByTopCand(List<QueryDocument> docs){
