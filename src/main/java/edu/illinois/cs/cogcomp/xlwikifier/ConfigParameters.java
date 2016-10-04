@@ -22,10 +22,10 @@ public class ConfigParameters {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        db_path = rm.getString("db_path");
-        dump_path = rm.getString("dump_path");
-        stopword_path = rm.getString("stopword_path");
-        model_path = rm.getString("model_path");
+        db_path = rm.getString("db_path").trim();
+        dump_path = rm.getString("dump_path").trim();
+        stopword_path = rm.getString("stopword_path").trim();
+        model_path = rm.getString("model_path").trim();
 
     }
 

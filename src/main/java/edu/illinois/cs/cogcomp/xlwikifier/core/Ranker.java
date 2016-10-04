@@ -255,7 +255,9 @@ public class Ranker {
         ConfigParameters param = new ConfigParameters();
         param.getPropValues();
 
-        trainRanker("en", 1000, 0.4, "models/test");
+        String lang = args[0];
+
+        trainRanker(lang, 100, 0.5, "models/ranker/default/"+lang+"/ranker.model");
     }
 
 }

@@ -592,7 +592,7 @@ public class WikiCandidateGenerator {
         logger.info("Generating candidates...");
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         if(db == null || db.isClosed() || this.lang != lang)
-            loadDB(lang, false);
+            loadDB(lang, true);
         for(QueryDocument doc: docs) {
             setCandidates(doc, lang);
         }
