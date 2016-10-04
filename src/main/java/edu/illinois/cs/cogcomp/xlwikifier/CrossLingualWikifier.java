@@ -1,7 +1,9 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
+import edu.illinois.cs.cogcomp.mlner.CrossLingualNER;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
+import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -35,6 +37,9 @@ public class CrossLingualWikifier {
                 ConfigParameters param = new ConfigParameters();
                 param.getPropValues();
             }
+
+            if(!FreeBaseQuery.isloaded())
+                FreeBaseQuery.loadDB(true);
 
             logger.info("Setting up xlwikifier for language: "+l);
             lang = l;
@@ -93,7 +98,11 @@ public class CrossLingualWikifier {
     }
 
     public static void main(String[] args) {
-        CrossLingualWikifier.init("en");
+        CrossLingualNER.init("es", false);
+        QueryDocument doc = CrossLingualNER.annotate("Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu ."); // from DF_FTR_TUR_0514802_20140900
+        CrossLingualWikifier.init("es");
+        CrossLingualWikifier.wikify(doc);
+        doc.mentions.forEach(x -> System.out.println(x.getMention()+" "+x.getWikiTitle()));
 
     }
 }

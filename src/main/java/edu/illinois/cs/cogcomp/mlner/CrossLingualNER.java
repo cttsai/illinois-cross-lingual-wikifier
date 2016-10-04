@@ -18,6 +18,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
+import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,8 @@ public class CrossLingualNER {
         if(!l.equals(lang) || trans != transfer) {
             ConfigParameters param = new ConfigParameters();
             param.getPropValues();
+
+            FreeBaseQuery.loadDB(true);
 
             transfer = trans;
             lang = l;
