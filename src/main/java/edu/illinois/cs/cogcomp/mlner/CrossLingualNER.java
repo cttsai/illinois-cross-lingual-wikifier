@@ -57,7 +57,7 @@ public class CrossLingualNER {
             utils = new NERUtils();
             utils.setLang(lang);
             wcg = new WikiCandidateGenerator(true);
-            if(ranker != null) ranker.closeDBs();
+//            if(ranker != null) ranker.closeDBs();
             ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/ner/" + lang+"/ranker.model");
             ranker.fm.ner_mode = true;
             nc = new NERClassifier(lang);

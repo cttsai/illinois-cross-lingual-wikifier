@@ -44,10 +44,10 @@ public class CrossLingualWikifier {
             logger.info("Setting up xlwikifier for language: "+l);
             lang = l;
             wcg = new WikiCandidateGenerator();
-            if(ranker != null) ranker.closeDBs();
+//            if(ranker != null) ranker.closeDBs();
             ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/default/"+lang+"/ranker.model");
             ranker.fm.ner_mode = false;
-            if(ll!=null) ll.closeDB();
+//            if(ll!=null) ll.closeDB();
             ll = new LangLinker();
         }
     }

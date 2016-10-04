@@ -57,7 +57,7 @@ public class XLWikifierDemo {
             //    ref = "http://"+lang+".wikipedia.org/wiki/"+m.getWikiTitle();
             //String tip = "English Wiki: "+m.en_wiki_title+" <br> "+lang+": "+m.getWikiTitle()+" <br> "+m.getType();
             String tip = "English Wiki: "+en_title+" <br> Entity Type: "+m.getType();
-            out += "<a class=\"top\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\""+ref+"\" data-original-title=\""+tip+"\">"+m.getMention()+"</a>";
+            out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\""+ref+"\" data-original-title=\""+tip+"\">"+m.getMention()+"</a>";
             pend = m.getEndOffset();
         }
         out += doc.plain_text.substring(pend, doc.plain_text.length());
