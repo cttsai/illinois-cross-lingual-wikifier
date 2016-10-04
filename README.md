@@ -7,6 +7,7 @@ The [live demo](http://bilbo.cs.illinois.edu/~ctsai12/xlwikifier/) will give you
 
 ### Setup (for CogComp members)
 To run an example with defualt models:
+* Fork the project, checkout the demo branch, and go to the root directory of the project 
 * ln -s /shared/preprocessed/ctsai12/multilingual/xlwikifier-data/brown-clusters/ brown-clusters
 * ln -s /shared/preprocessed/ctsai12/multilingual/xlwikifier-data/models models
 * mvn dependency:copy-dependencies
