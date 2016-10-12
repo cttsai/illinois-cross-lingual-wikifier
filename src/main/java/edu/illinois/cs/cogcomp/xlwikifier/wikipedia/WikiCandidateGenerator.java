@@ -66,7 +66,8 @@ public class WikiCandidateGenerator {
         this.lang = lang;
         if(db_pool.containsKey(lang)) db = db_pool.get(lang);
         else {
-            String dbfile = ConfigParameters.db_path+"/candidates/"+lang+"_candidates";
+//            String dbfile = ConfigParameters.db_path+"/candidates/"+lang+"_candidates";
+            String dbfile = "/shared/preprocessed/ctsai12/multilingual/mapdb/candidates/"+lang+"_candidates";
             if(read_only) {
                 db = DBMaker.newFileDB(new File(dbfile))
                         .cacheSize(1000)
@@ -411,6 +412,7 @@ public class WikiCandidateGenerator {
                 pssgivent.add(new Fun.Tuple3<>(surface, title, s2cnt.get(surface)/sum));
             }
         }
+
     }
 
     /**
@@ -429,6 +431,9 @@ public class WikiCandidateGenerator {
         this.setTitle2Id(dr.title2id);
         populateMentionDB(cand_file, lang);
         populateWord2Title(cand_file, lang);
+        db.commit();
+        db.close();
+//        loadDB(lang, true);
     }
 
     public void populate4GramIdx(String lang, String redirect_file, String page_file){
@@ -627,9 +632,11 @@ public class WikiCandidateGenerator {
     }
 
     public static void main(String[] args) {
+        ConfigParameters params = new ConfigParameters();
+        params.getPropValues();
         WikiCandidateGenerator g = new WikiCandidateGenerator();
         g.tac = true;
-        g.loadDB("en", true);
+        g.loadDB(args[0], false);
         System.out.println(g.getCandsBySurface("Michael Pettis", "en", false));
         System.exit(-1);
 

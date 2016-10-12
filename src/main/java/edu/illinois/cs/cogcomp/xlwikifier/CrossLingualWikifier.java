@@ -98,9 +98,9 @@ public class CrossLingualWikifier {
     }
 
     public static void main(String[] args) {
-        CrossLingualNER.init("es", false);
+        CrossLingualNER.init("tr", false);
         QueryDocument doc = CrossLingualNER.annotate("Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu ."); // from DF_FTR_TUR_0514802_20140900
-        CrossLingualWikifier.init("es");
+        CrossLingualWikifier.init("tr");
         CrossLingualWikifier.wikify(doc);
         doc.mentions.forEach(x -> System.out.println(x.getMention()+" "+x.getWikiTitle()));
 

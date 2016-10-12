@@ -263,7 +263,7 @@ public class Ranker {
 
         String lang = args[0];
 
-        trainRanker(lang, 100, 0.5, "models/ranker/default/"+lang+"/ranker.model");
+        trainRanker(lang, 20000, 0.5, "models/ranker/default/"+lang+"/ranker.model");
     }
 
 }
