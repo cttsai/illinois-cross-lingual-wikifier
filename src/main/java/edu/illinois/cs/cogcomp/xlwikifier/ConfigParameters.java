@@ -14,7 +14,7 @@ public class ConfigParameters {
     public static String stopword_path;
     public static String model_path;
 
-    public void getPropValues(){
+    public static void getPropValues(){
         String propfile = "config/xlwikifier.config";
         ResourceManager rm = null;
         try {

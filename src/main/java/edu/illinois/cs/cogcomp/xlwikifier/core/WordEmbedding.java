@@ -243,6 +243,8 @@ public class WordEmbedding {
     }
 
     public static void main(String[] args) {
+        ConfigParameters.getPropValues();
+
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";
 		String name = args[0];

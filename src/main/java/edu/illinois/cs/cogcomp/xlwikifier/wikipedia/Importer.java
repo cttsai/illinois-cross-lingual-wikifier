@@ -222,8 +222,8 @@ public class Importer {
         try {
 //            importer.downloadDump();
 //            importer.parseWikiDump();
-//            importer.importLangLinks();
-            importer.importCandidates();
+            importer.importLangLinks();
+//            importer.importCandidates();
             importer.importTFIDF();
         } catch (Exception e) {
             e.printStackTrace();
