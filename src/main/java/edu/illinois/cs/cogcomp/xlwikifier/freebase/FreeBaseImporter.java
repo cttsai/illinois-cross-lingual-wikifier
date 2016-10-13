@@ -34,7 +34,7 @@ public class FreeBaseImporter {
             // done with the previous mid, put into DB
             if(!parts[0].equals(mid) && !mid.isEmpty()){
                 typecollect.put(mid, types);
-//                titlecollect.put(mid, lang2titles);
+                titlecollect.put(mid, lang2titles);
                 types = new ArrayList<>();
                 lang2titles = new HashMap<>();
             }
@@ -47,7 +47,7 @@ public class FreeBaseImporter {
                 String title = parts[2];
                 if(!lang2titles.containsKey(lang)) lang2titles.put(lang, new ArrayList<>());
                 lang2titles.get(lang).add(title);
-//                titlelangcollect.put(title+"|"+lang, mid);
+                titlelangcollect.put(title+"|"+lang, mid);
             }
 
             line = br.readLine();
@@ -59,78 +59,78 @@ public class FreeBaseImporter {
     private static void writeToDB(){
         System.out.println("Writing to DB...");
         System.out.println("\tProcessing types..."+typecollect.size());
-        FreeBaseQuery.pumpMid2Types(typecollect);
-//        int cnt = 0;
-//        for(String key: typecollect.keySet()) {
-//            if(cnt++%100000 == 0) System.out.print(cnt+"\r");
-//            FreeBaseQuery.populateMid2Types(key, typecollect.get(key));
-//        }
-//        System.out.println("\tProcessing mid to titles..."+titlecollect.size());
-//        cnt = 0;
-//        for(String key: titlecollect.keySet()) {
-//            if (cnt++ % 100000 == 0) System.out.print(cnt + "\r");
-//            FreeBaseQuery.populateMidLang2Titles(key, titlecollect.get(key));
-//        }
-//        System.out.println("\tProcessing title to mid..."+titlelangcollect.size());
-//        cnt = 0;
-//        for(String key: titlelangcollect.keySet()) {
-//            if (cnt++ % 100000 == 0) System.out.print(cnt + "\r");
-//            FreeBaseQuery.populateTitleLang2Mid(key, titlelangcollect.get(key));
-//        }
+//        FreeBaseQuery.pumpMid2Types(typecollect);
+        int cnt = 0;
+        for(String key: typecollect.keySet()) {
+            if(cnt++%100000 == 0) System.out.print(cnt+"\r");
+            FreeBaseQuery.populateMid2Types(key, typecollect.get(key));
+        }
+        System.out.println("\tProcessing mid to titles..."+titlecollect.size());
+        cnt = 0;
+        for(String key: titlecollect.keySet()) {
+            if (cnt++ % 100000 == 0) System.out.print(cnt + "\r");
+            FreeBaseQuery.populateMidLang2Titles(key, titlecollect.get(key));
+        }
+        System.out.println("\tProcessing title to mid..."+titlelangcollect.size());
+        cnt = 0;
+        for(String key: titlelangcollect.keySet()) {
+            if (cnt++ % 100000 == 0) System.out.print(cnt + "\r");
+            FreeBaseQuery.populateTitleLang2Mid(key, titlelangcollect.get(key));
+        }
         typecollect = new HashMap<>();
         titlecollect = new HashMap<>();
         titlelangcollect = new HashMap<>();
 
     }
 
-    public static void TestPump(String dataFile, List<Fun.Tuple2<String,String>>inputData) {
-
-
-
-        DB db = DBMaker.newFileDB(new File("test.db"))
-                .transactionDisable()
-                .closeOnJvmShutdown()
-                .make();
-
-        Comparator<Fun.Tuple2<String, String>> comparator = new Comparator<Fun.Tuple2<String,String>>(){
-
-            @Override
-            public int compare(Fun.Tuple2<String, String> o1,
-                               Fun.Tuple2<String, String> o2) {
-                return o1.a.compareTo(o2.a);
-            }
-        };
-
-        // need to reverse sort list
-        Iterator<Fun.Tuple2<String, String>> iter = Pump.sort(inputData.iterator(),
-                true, 100000,
-                Collections.reverseOrder(comparator), //reverse  order comparator
-                db.getDefaultSerializer()
-        );
-
-
-        BTreeKeySerializer<String> keySerializer = BTreeKeySerializer.STRING;
-
-        BTreeMap<Object, Object> map = db.createTreeMap(dataFile)
-                .pumpSource(iter)
-                .pumpPresort(100000)
-                .keySerializer(keySerializer)
-                .make();
-
-
-        // close/flush db
-        db.close();
-
-        // re-connect with transactions enabled
-        db = DBMaker.newFileDB(new File("test.db"))
-                .closeOnJvmShutdown()
-                .make();
-
-        map = db.getTreeMap(dataFile);
-
-        System.out.println(map.get("a"));
-        System.out.println(map.get("c"));
-    }
+//    public static void TestPump(String dataFile, List<Fun.Tuple2<String,String>>inputData) {
+//
+//
+//
+//        DB db = DBMaker.newFileDB(new File("test.db"))
+//                .transactionDisable()
+//                .closeOnJvmShutdown()
+//                .make();
+//
+//        Comparator<Fun.Tuple2<String, String>> comparator = new Comparator<Fun.Tuple2<String,String>>(){
+//
+//            @Override
+//            public int compare(Fun.Tuple2<String, String> o1,
+//                               Fun.Tuple2<String, String> o2) {
+//                return o1.a.compareTo(o2.a);
+//            }
+//        };
+//
+//        // need to reverse sort list
+//        Iterator<Fun.Tuple2<String, String>> iter = Pump.sort(inputData.iterator(),
+//                true, 100000,
+//                Collections.reverseOrder(comparator), //reverse  order comparator
+//                db.getDefaultSerializer()
+//        );
+//
+//
+//        BTreeKeySerializer<String> keySerializer = BTreeKeySerializer.STRING;
+//
+//        BTreeMap<Object, Object> map = db.createTreeMap(dataFile)
+//                .pumpSource(iter)
+//                .pumpPresort(100000)
+//                .keySerializer(keySerializer)
+//                .make();
+//
+//
+//        // close/flush db
+//        db.close();
+//
+//        // re-connect with transactions enabled
+//        db = DBMaker.newFileDB(new File("test.db"))
+//                .closeOnJvmShutdown()
+//                .make();
+//
+//        map = db.getTreeMap(dataFile);
+//
+//        System.out.println(map.get("a"));
+//        System.out.println(map.get("c"));
+//    }
 
     public static void main(String[] args) {
 

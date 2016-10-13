@@ -1,16 +1,16 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
-import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
+import org.mapdb.Serializer;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentNavigableMap;
 
 import static java.util.stream.Collectors.*;
 
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.*;
 public class TFIDFManager {
 
     private DB db;
-    public ConcurrentNavigableMap<String, Integer> word2df;
+    public HTreeMap<String, Integer> word2df;
     private String lang;
     public TFIDFManager(){
 
@@ -28,24 +28,24 @@ public class TFIDFManager {
 
     public void loadDB(String lang, boolean read_only){
         if(read_only){
-            db = DBMaker.newFileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
-                    .mmapFileEnableIfSupported()
-                    .cacheSize(10000)
-                    .transactionDisable()
+            db = DBMaker.fileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();
+            word2df = db.hashMap("df")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.INTEGER)
+                    .open();
         }
         else {
-            db = DBMaker.newFileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
-                    .mmapFileEnableIfSupported()
-                    .cacheSize(10000)
-                    .transactionDisable()
+            db = DBMaker.fileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
                     .closeOnJvmShutdown()
                     .make();
+            word2df = db.hashMap("df")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.INTEGER)
+                    .create();
         }
-        word2df = db.createTreeMap("df")
-                .keySerializer(BTreeKeySerializer.STRING).makeOrGet();
         this.lang = lang;
     }
 
@@ -114,6 +114,8 @@ public class TFIDFManager {
         for(String w: w2d.keySet()){
             word2df.put(w, w2d.get(w));
         }
+
+        closeDB();
     }
 
     public void closeDB(){

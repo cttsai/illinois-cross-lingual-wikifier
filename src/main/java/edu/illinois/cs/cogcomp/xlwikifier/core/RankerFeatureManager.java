@@ -46,9 +46,9 @@ public class RankerFeatureManager implements Serializable {
     public void loadVectors() {
         if (lang.equals("en")) {
 //            we.setMonoVecsNew("en");
-            we.loadMultiDBNew("es", true);
+            we.loadDB("es", true);
         } else {
-            we.loadMultiDBNew(lang, true);
+            we.loadDB(lang, true);
         }
     }
 
@@ -58,7 +58,7 @@ public class RankerFeatureManager implements Serializable {
 
     public FeatureVector getTitleFV(ELMention m, WikiCand cand, QueryDocument doc) {
 
-        Map<String, Float[]> title_vec = new HashMap<>();
+        Map<String, float[]> title_vec = new HashMap<>();
 
         String flang = null;
 
@@ -141,8 +141,8 @@ public class RankerFeatureManager implements Serializable {
     }
 
 
-    public Float[] getTitleAvg(List<ELMention> pms) {
-        List<Float[]> vecs = new ArrayList<>();
+    public float[] getTitleAvg(List<ELMention> pms) {
+        List<float[]> vecs = new ArrayList<>();
         for (ELMention pm : pms) {
             if (pm.getMidVec() != null) {
                 vecs.add(pm.getMidVec());
@@ -151,7 +151,7 @@ public class RankerFeatureManager implements Serializable {
         return we.averageVectors(vecs);
     }
 
-    private void addMaxMinCosine(Float[] title_vec, List<Float[]> vecs, Map<String, Double> f, String name) {
+    private void addMaxMinCosine(float[] title_vec, List<float[]> vecs, Map<String, Double> f, String name) {
         double min_score = 0, max_score = 0;
         if (title_vec != null) {
             List<Float> cos = vecs.stream().map(x -> we.cosine(title_vec, x)).collect(toList());
@@ -167,7 +167,7 @@ public class RankerFeatureManager implements Serializable {
     }
 
 
-    private void addCosin(Float[] ne_vec, Float[] title_vec, Map<String, Double> f, String name) {
+    private void addCosin(float[] ne_vec, float[] title_vec, Map<String, Double> f, String name) {
         double score = 0.0;
         if (title_vec != null)
             score = we.cosine(ne_vec, title_vec);
@@ -199,7 +199,7 @@ public class RankerFeatureManager implements Serializable {
         }
     }
 
-    public Float[] getWeightedContextVector(ELMention m, QueryDocument doc, int window) {
+    public float[] getWeightedContextVector(ELMention m, QueryDocument doc, int window) {
 
         int start_off = m.getStartOffset();
         int end_off = m.getEndOffset();
@@ -232,19 +232,19 @@ public class RankerFeatureManager implements Serializable {
     }
 
 
-    public Float[] getWeightedVectorFromWords(List<String> words, String lang) {
+    public float[] getWeightedVectorFromWords(List<String> words, String lang) {
         Map<String, Float> w2tfidf = tfidf.getWordWeights(words, lang);
 
-        List<Float[]> vecs = new ArrayList<>();
+        List<float[]> vecs = new ArrayList<>();
         List<Float> weights = new ArrayList<>();
         for (String w : w2tfidf.keySet()) {
-            Float[] vec = we.getWordVector(w, lang);
+            float[] vec = we.getWordVector(w, lang);
             if (vec != null) {
                 vecs.add(vec);
                 weights.add(w2tfidf.get(w));
             }
         }
-        Float[] ret = we.averageVectors(vecs, weights);
+        float[] ret = we.averageVectors(vecs, weights);
         return ret;
 
     }

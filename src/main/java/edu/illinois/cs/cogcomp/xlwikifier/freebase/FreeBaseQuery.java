@@ -1,10 +1,15 @@
 package edu.illinois.cs.cogcomp.xlwikifier.freebase;
 
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import org.mapdb.*;
+import org.mapdb.Serializer;
+import org.mapdb.serializer.SerializerArray;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentNavigableMap;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -14,9 +19,9 @@ import static java.util.stream.Collectors.toSet;
  */
 public class FreeBaseQuery {
     private static DB db;
-    private static ConcurrentNavigableMap<String, String[]> mid2types;
-    public static ConcurrentNavigableMap<String, String> titlelang2mid;
-    private static ConcurrentNavigableMap<String, String[]> midlang2title;
+    public static HTreeMap<String, String[]> mid2types;
+    public static HTreeMap<String, String> titlelang2mid;
+    public static HTreeMap<String, String[]> midlang2title;
 
     public static boolean isloaded(){
         return db != null;
@@ -24,34 +29,73 @@ public class FreeBaseQuery {
 
     public static void loadDB(boolean read_only){
 
-        String db_file = "/shared/experiments/ctsai12/freebase/mapdb/db";
-//        "/shared/preprocessed/ctsai12/freebase/mapdb/db"
+        String db_file = ConfigParameters.db_path+"/freebase/mapdb";
 
         if(read_only) {
-            db = DBMaker.newFileDB(new File(db_file))
-                    .cacheSize(30000)
-                    .transactionDisable()
+            db = DBMaker.fileDB(db_file)
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();
         }
         else {
-            db = DBMaker.newFileDB(new File(db_file))
-                    .cacheSize(30000)
-                    .transactionDisable()
+            db = DBMaker.fileDB(db_file)
                     .closeOnJvmShutdown()
                     .make();
+            mid2types = db.hashMap("mid2types")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(new SerializerArray(Serializer.STRING))
+                    .create();
+            midlang2title = db.hashMap("midlang2title")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(new SerializerArray(Serializer.STRING))
+                    .create();
+            titlelang2mid = db.hashMap("titlelang2mid")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.STRING)
+                    .create();
         }
 
-        mid2types = db.createTreeMap("mid2types")
-                .keySerializer(BTreeKeySerializer.STRING)
-                .makeOrGet();
-        midlang2title = db.createTreeMap("midlang2title")
-                .keySerializer(BTreeKeySerializer.STRING)
-                .makeOrGet();
-        titlelang2mid = db.createTreeMap("titlelang2mid")
-                .keySerializer(BTreeKeySerializer.STRING)
-                .makeOrGet();
+    }
+
+    public static void importDump() throws IOException {
+
+        String file = "/shared/preprocessed/ctsai12/freebase/fb.plain.new";
+        FreeBaseQuery.loadDB(false);
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line = br.readLine();
+        String mid = "";
+        List<String> types = new ArrayList<>();
+        Map<String, List<String>> lang2titles = new HashMap<>();
+
+        int cnt = 0;
+        while(line != null){
+            if(++cnt%100000 == 0) System.out.print(cnt+"\r");
+//            if(cnt == 100000) break;
+            String[] parts = line.trim().split("\t");
+
+            // done with the previous mid, put into DB
+            if(!parts[0].equals(mid) && !mid.isEmpty()){
+                populateMid2Types(mid, types);
+                populateMidLang2Titles(mid, lang2titles);
+                types = new ArrayList<>();
+                lang2titles = new HashMap<>();
+            }
+
+            // process the current line
+            mid = parts[0];
+            if(parts.length == 2) types.add(parts[1]);
+            if(parts.length == 3 && !parts[1].contains("_id")){
+                String lang = parts[1];
+                String title = parts[2];
+                if(!lang2titles.containsKey(lang)) lang2titles.put(lang, new ArrayList<>());
+                lang2titles.get(lang).add(title);
+                populateTitleLang2Mid(title+"|"+lang, mid);
+            }
+
+            line = br.readLine();
+        }
+        FreeBaseQuery.closeDB();
     }
 
     public static void populateTitleLang2Mid(String key, String mid){
@@ -74,43 +118,43 @@ public class FreeBaseQuery {
         }
     }
 
-    public static void pumpMid2Types(Map<String, List<String>> collect){
-        System.out.println("Transforming...");
-        List<Fun.Tuple2<String, String[]>> data = new ArrayList<>();
-        for(String mid: collect.keySet()){
-            List<String> types = collect.get(mid);
-            types = types.stream().distinct().collect(toList());
-            String[] tmp = new String[types.size()];
-            tmp = types.toArray(tmp);
-            data.add(new Fun.Tuple2<>(mid, tmp));
-        }
-        Comparator<Fun.Tuple2<String, String[]>> comparator = new Comparator<Fun.Tuple2<String,String[]>>(){
-
-            @Override
-            public int compare(Fun.Tuple2<String, String[]> o1,
-                               Fun.Tuple2<String, String[]> o2) {
-                return o1.a.compareTo(o2.a);
-            }
-        };
-
-        System.out.println("Sorting...");
-        // need to reverse sort list
-        Iterator<Fun.Tuple2<String, String[]>> iter = Pump.sort(data.iterator(),
-                true, 100000,
-                Collections.reverseOrder(comparator), //reverse  order comparator
-                db.getDefaultSerializer()
-        );
-
-
-        BTreeKeySerializer<String> keySerializer = BTreeKeySerializer.STRING;
-
-        System.out.println("Pumping...");
-        BTreeMap<Object, Object> map = db.createTreeMap("mid2types")
-                .pumpSource(iter)
-                .pumpPresort(100000)
-                .keySerializer(keySerializer)
-                .make();
-    }
+//    public static void pumpMid2Types(Map<String, List<String>> collect){
+//        System.out.println("Transforming...");
+//        List<Fun.Tuple2<String, String[]>> data = new ArrayList<>();
+//        for(String mid: collect.keySet()){
+//            List<String> types = collect.get(mid);
+//            types = types.stream().distinct().collect(toList());
+//            String[] tmp = new String[types.size()];
+//            tmp = types.toArray(tmp);
+//            data.add(new Fun.Tuple2<>(mid, tmp));
+//        }
+//        Comparator<Fun.Tuple2<String, String[]>> comparator = new Comparator<Fun.Tuple2<String,String[]>>(){
+//
+//            @Override
+//            public int compare(Fun.Tuple2<String, String[]> o1,
+//                               Fun.Tuple2<String, String[]> o2) {
+//                return o1.a.compareTo(o2.a);
+//            }
+//        };
+//
+//        System.out.println("Sorting...");
+//        // need to reverse sort list
+//        Iterator<Fun.Tuple2<String, String[]>> iter = Pump.sort(data.iterator(),
+//                true, 100000,
+//                Collections.reverseOrder(comparator), //reverse  order comparator
+//                db.getDefaultSerializer()
+//        );
+//
+//
+//        BTreeKeySerializer<String> keySerializer = BTreeKeySerializer.STRING;
+//
+//        System.out.println("Pumping...");
+//        BTreeMap<Object, Object> map = db.createTreeMap("mid2types")
+//                .pumpSource(iter)
+//                .pumpPresort(100000)
+//                .keySerializer(keySerializer)
+//                .make();
+//    }
 
     public static void closeDB(){
         if(db != null && !db.isClosed())
@@ -174,10 +218,22 @@ public class FreeBaseQuery {
 
     public static void main(String[] args) {
 
-        FreeBaseQuery.loadDB(true);
-        String mid = FreeBaseQuery.getMidFromTitle("巴拉克·歐巴馬", "zh-cn");
-        System.out.println(mid);
-        System.out.println(FreeBaseQuery.getTypesFromMid(mid));
+//        DBMaker.fileDB("/shared/preprocessed/ctsai12/multilingual/mapdb-new1/freebase/testdb")
+//                .closeOnJvmShutdown()
+//                .make();
+//        System.exit(-1);
+
+//        FreeBaseQuery.loadDB(true);
+        ConfigParameters params = new ConfigParameters();
+        params.getPropValues();
+        try {
+            FreeBaseQuery.importDump();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        String mid = FreeBaseQuery.getMidFromTitle("巴拉克·歐巴馬", "zh-cn");
+//        System.out.println(mid);
+//        System.out.println(FreeBaseQuery.getTypesFromMid(mid));
 //        for(String key: titlelang2mid.keySet()){
 //            if(key.contains("|ug"))
 //                System.out.println(key);

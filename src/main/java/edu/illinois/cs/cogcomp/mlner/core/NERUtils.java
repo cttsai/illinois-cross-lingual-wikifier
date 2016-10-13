@@ -84,7 +84,7 @@ public class NERUtils {
             if(!m.getWikiTitle().startsWith("NIL")) continue;
             if(m.ner_features.size()>0) continue;
             String surface = m.getMention().toLowerCase();
-            List<WikiCand> cands = wcg.getCandsBySurface(surface, lang, false);
+            List<WikiCand> cands = wcg.getCandsBySurface(surface, lang);
             if(cands.size() == 0 && n==1 && surface.length()>0){
                 String init = m.getMention().substring(0, 1);
                 if(!init.toLowerCase().equals(init)) {
@@ -94,12 +94,12 @@ public class NERUtils {
 
             if(cands.size() == 0 && !lang.equals("en")){
                 if(n > 1){
-                    cands.addAll(en_wcg.getCandsBySurface(surface, "en", false));
+                    cands.addAll(en_wcg.getCandsBySurface(surface, "en"));
                 }
                 else if(surface.length()>0){
                     String init = m.getMention().substring(0, 1);
                     if(!init.toLowerCase().equals(init)){   // capitalized
-                        cands.addAll(en_wcg.getCandsBySurface(surface, "en", false));
+                        cands.addAll(en_wcg.getCandsBySurface(surface, "en"));
                         if(cands.size()==0)
                             cands.addAll(en_wcg.getCandidateByWord(surface, "en", 6));
                     }

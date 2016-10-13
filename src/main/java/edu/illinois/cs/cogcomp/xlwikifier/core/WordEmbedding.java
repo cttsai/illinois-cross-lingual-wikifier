@@ -1,16 +1,15 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
-import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiDocReader;
-import org.mapdb.BTreeKeySerializer;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
+import org.mapdb.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentNavigableMap;
 
 /**
  * Created by ctsai12 on 10/10/15.
@@ -19,65 +18,28 @@ public class WordEmbedding {
 
     private static Logger logger = LoggerFactory.getLogger(WordEmbedding.class);
 
-    public ConcurrentNavigableMap<String, Float[]> mono_vec;
-    public ConcurrentNavigableMap<String, Float[]> multi_vec_en;
-    public ConcurrentNavigableMap<String, Float[]> multi_vec_lang;
+    public HTreeMap<String, float[]> multi_vec_en;
+    public HTreeMap<String, float[]> multi_vec_lang;
 
-    public Map<String, ConcurrentNavigableMap<String, Float[]>> multi_vecs = new HashMap<>();
-
+    public Map<String, HTreeMap<String, float[]>> multi_vecs = new HashMap<>();
 
     public Map<String, Set<String>> stopwords = new HashMap<>();
-    private WikiDocReader dr;
 
-    public DB mono_db;
-    private DB multi_db;
+    private DB db;
     public int dim;
-    private String lang;
-    private String dr_lang;
-    private Map<String, Float[]> vec_cache = new HashMap<>();
+    private Map<String, float[]> vec_cache = new HashMap<>();
     private boolean use_mcache = true;
 
     public WordEmbedding() {
-        loadStopWords("en");
-
-    }
-    public void loadStopWords(String lang){
-        stopwords.put(lang, StopWord.getStopWords(lang));
+        stopwords.put("en", StopWord.getStopWords("en"));
     }
 
     public void closeDB() {
-        if (multi_db != null && !multi_db.isClosed()) {
-            multi_db.commit();
-            multi_db.close();
-        }
-        if (mono_db != null && !mono_db.isClosed()) {
-            mono_db.commit();
-            mono_db.close();
+        if (db != null && !db.isClosed()) {
+            db.commit();
+            db.close();
         }
     }
-
-
-//    public void loadMonoDBNew(String lang) {
-//        logger.info("Loading mono vectores "+lang);
-////        if(mono_db != null && !mono_db.isClosed())
-////            mono_db.close();
-//        mono_db = DBMaker.newFileDB(new File(ConfigParameters.db_path+"/mono-embeddings", lang))
-//                .cacheSize(100000)
-//                .transactionDisable()
-//                .closeOnJvmShutdown()
-//                .make();
-//        mono_vec = mono_db.createTreeMap(lang)
-//                .keySerializer(BTreeKeySerializer.STRING)
-//                .makeOrGet();
-//        loadStopWords(lang);
-//
-//        multi_vecs.put(lang, mono_vec);  // because it gets vector from multi_vecs always
-//        if(multi_vecs.get(lang).containsKey("obama"))
-//            dim = multi_vecs.get(lang).get("obama").length;
-//        else
-//            logger.info("no vec for obama");
-//    }
-
 
     public void createMultiVec(String lang) {
 
@@ -86,72 +48,78 @@ public class WordEmbedding {
 
         logger.info("Creating dictionary: "+path);
         dir.mkdir();
-        loadMultiDBNew(lang, false);
-        if(multi_vec_lang.size()!=0 || multi_vec_en.size()!=0){
-            System.out.println("map is not empty");
-            System.exit(-1);
-        }
+        loadDB(lang, false);
     }
 
 
-    public void loadMultiDBNew(String lang, boolean read_only) {
+    public void loadDB(String lang, boolean read_only) {
         logger.info("Loading "+lang+" multi vectors...");
         File f = new File(ConfigParameters.db_path, "multi-embeddings/"+lang+"/"+lang);
 
         if(read_only){
-            multi_db = DBMaker.newFileDB(f)
-                    .cacheSize(100000)
-                    .transactionDisable()
+            db = DBMaker.fileDB(f)
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();
+            multi_vec_en = db.hashMap("en")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.FLOAT_ARRAY)
+                    .open();
+
+            multi_vec_lang = db.hashMap("lang")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.FLOAT_ARRAY)
+                    .open();
         }
         else {
-            multi_db = DBMaker.newFileDB(f)
-                    .cacheSize(100000)
-                    .transactionDisable()
+            db = DBMaker.fileDB(f)
                     .closeOnJvmShutdown()
                     .make();
+
+            multi_vec_en = db.hashMap("en")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.FLOAT_ARRAY)
+                    .create();
+
+            multi_vec_lang = db.hashMap("lang")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.FLOAT_ARRAY)
+                    .create();
         }
-        multi_vec_en = multi_db.createTreeMap("en")
-                .keySerializer(BTreeKeySerializer.STRING)
-                .makeOrGet();
-        multi_vec_lang = multi_db.createTreeMap("lang")
-                .keySerializer(BTreeKeySerializer.STRING)
-                .makeOrGet();
+
         multi_vecs.put("en", multi_vec_en);
         multi_vecs.put(lang, multi_vec_lang);
         if(multi_vec_en.containsKey("obama"))
             dim = multi_vec_en.get("obama").length;
-        this.lang = lang;
-        loadStopWords(lang);
+
+        stopwords.put(lang, StopWord.getStopWords(lang));
     }
 
-    public Float[] getVectorFromWords(List<String> words, String lang){
-        List<Float[]> vecs = new ArrayList<>();
+    public float[] getVectorFromWords(List<String> words, String lang){
+        List<float[]> vecs = new ArrayList<>();
         for(String word: words){
-            Float[] vec = getWordVector(word, lang);
+            float[] vec = getWordVector(word, lang);
             if(vec != null)
                 vecs.add(vec);
         }
         return averageVectors(vecs);
     }
 
-    public Float[] getVectorFromWords(String[] words, String lang){
+    public float[] getVectorFromWords(String[] words, String lang){
         return getVectorFromWords(Arrays.asList(words), lang);
     }
 
-    public Float[] zeroVec(){
-        Float[] ret = new Float[dim];
+    public float[] zeroVec(){
+        float[] ret = new float[dim];
         Arrays.fill(ret, (float) 0.0);
         return ret;
     }
 
-    public Float[] averageVectors(List<Float[]> vecs){
-        Float[] ret = zeroVec();
+    public float[] averageVectors(List<float[]> vecs){
+        float[] ret = zeroVec();
 
         int n = 0;
-        for(Float[] v: vecs){
+        for(float[] v: vecs){
             if(v == null) continue;
             for(int i = 0; i < v.length; i++)
                 ret[i] += v[i];
@@ -163,8 +131,8 @@ public class WordEmbedding {
         return ret;
     }
 
-    public Float[] averageVectors(List<Float[]> vecs, List<Float> weights){
-        Float[] ret = zeroVec();
+    public float[] averageVectors(List<float[]> vecs, List<Float> weights){
+        float[] ret = zeroVec();
 
         float sum = 0;
         for(int i = 0; i < vecs.size(); i++){
@@ -181,7 +149,7 @@ public class WordEmbedding {
     }
 
 
-    public void loadEmbeddingToDB(String file, ConcurrentNavigableMap<String, Float[]> map) {
+    public void loadEmbeddingToDB(String file, HTreeMap<String, float[]> map) {
 
         System.out.println("Loading word embeddings from " + file);
         try {
@@ -191,7 +159,7 @@ public class WordEmbedding {
             while (line != null) {
                 if (j++ % 10000 == 0) System.out.print(j + "\r");
                 String[] tokens = line.trim().split("\\s+");
-                Float[] vec = new Float[tokens.length - 1];
+                float[] vec = new float[tokens.length - 1];
                 dim = tokens.length - 1;
                 for (int i = 1; i < tokens.length; i++)
                     vec[i - 1] = Float.parseFloat(tokens[i]);
@@ -210,7 +178,7 @@ public class WordEmbedding {
 
 
     // TODO: fix the cache
-    public Float[] getVector(String query, String lang){
+    public float[] getVector(String query, String lang){
         if(use_mcache && vec_cache.containsKey(query))
             return vec_cache.get(query);
 
@@ -220,7 +188,7 @@ public class WordEmbedding {
             return null;
         }
 
-        Float[] vec = multi_vecs.get(lang).get(query);
+        float[] vec = multi_vecs.get(lang).get(query);
         if(use_mcache) vec_cache.put(query, vec);
         return vec;
     }
@@ -231,7 +199,7 @@ public class WordEmbedding {
      * @param lang
      * @return
      */
-    public Float[] getWordVector(String word, String lang){
+    public float[] getWordVector(String word, String lang){
         if(!multi_vecs.containsKey(lang)){
             System.err.println("Couldn't find word embeddings for "+lang);
             System.exit(-1);
@@ -246,7 +214,7 @@ public class WordEmbedding {
      * @param lang
      * @return
      */
-    public Float[] getTitleVector(String title, String lang){
+    public float[] getTitleVector(String title, String lang){
         if(title == null || title.startsWith("NIL")) {
             return null;
         }
@@ -255,7 +223,7 @@ public class WordEmbedding {
         return getVector(title, lang);
     }
 
-    public float cosine(Float[] v1, Float[] v2) {
+    public float cosine(float[] v1, float[] v2) {
         if (v1.length != v2.length) {
             System.out.println("Array size don't match");
             System.exit(-1);

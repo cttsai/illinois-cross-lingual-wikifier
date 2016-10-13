@@ -54,7 +54,7 @@ public class Importer {
         redirectfile = dumpdir+"/"+lang+"wiki-"+date+"-redirect.sql.gz";
         docdir = dumpdir+"/docs/";
         candfile = dumpdir+"/links";
-        textfile = dumpdir+"sg.withtitle";
+        textfile = dumpdir+"/sg.withtitle";
 
 //        if(new File(textfile).exists()){
 //            logger.warn(textfile+" exists!");
@@ -224,7 +224,7 @@ public class Importer {
 //            importer.parseWikiDump();
 //            importer.importLangLinks();
             importer.importCandidates();
-//            importer.importTFIDF();
+            importer.importTFIDF();
         } catch (Exception e) {
             e.printStackTrace();
         }

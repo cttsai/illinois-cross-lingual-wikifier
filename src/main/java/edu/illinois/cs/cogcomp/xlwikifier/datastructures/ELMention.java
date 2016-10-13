@@ -34,15 +34,15 @@ public class ELMention {
     public Map<String, Double> ner_features = new HashMap<>();
 
     // for ranker features
-    private transient Float[] mid_vec;
-    public transient Float[] context30;
-    public transient Float[] context100;
-    public transient Float[] context200;
-    public transient Float[] other_ne;
-    public transient Float[] pre_title;
-    public transient List<Float[]> pre_title_vecs;
-    public transient List<Float[]> other_ne_vecs;
-    public transient Float[] mention_vec;
+    private transient float[] mid_vec;
+    public transient float[] context30;
+    public transient float[] context100;
+    public transient float[] context200;
+    public transient float[] other_ne;
+    public transient float[] pre_title;
+    public transient List<float[]> pre_title_vecs;
+    public transient List<float[]> other_ne_vecs;
+    public transient float[] mention_vec;
 
     // for tac exp
     private String mid = "NIL";
@@ -74,8 +74,8 @@ public class ELMention {
     public void setWikiTitle(String t){ this.wiki_title = t; }
     public void setNounType(String t){ this.noun_type = t; }
     public String getNounType(){ return this.noun_type; }
-    public void setMidVec(Float[] vec){ this.mid_vec = vec; }
-    public Float[] getMidVec(){ return this.mid_vec; }
+    public void setMidVec(float[] vec){ this.mid_vec = vec; }
+    public float[] getMidVec(){ return this.mid_vec; }
 
     public String getID(){ return this.id; }
     public String getMention(){ return this.mention; }
