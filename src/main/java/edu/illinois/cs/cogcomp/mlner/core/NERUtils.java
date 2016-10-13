@@ -59,6 +59,7 @@ public class NERUtils {
                 else
                     surface += " " + token;
             }
+            if(surface.trim().isEmpty()) continue;
             m.setMention(surface);
             m.ngram = n;
             m.is_stop = false;
