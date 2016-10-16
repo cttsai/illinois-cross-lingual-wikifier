@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class GoldDocument {
     public ArrayList<GoldMention> goldMentions = new ArrayList<GoldMention>();
     public String plain_text;
+    public String id;
 
     public GoldDocument(File documentFile) throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -23,7 +24,7 @@ public class GoldDocument {
         Document document = db.parse(documentFile);
         document.getDocumentElement().normalize();
         this.plain_text = ((Element) document.getElementsByTagName("text").item(0)).getTextContent();
-
+        this.id = ((Element) document.getElementsByTagName("id").item(0)).getTextContent();
         NodeList nList = document.getElementsByTagName("reference");
         for (int temp = 0; temp < nList.getLength(); temp++) {
             Node node = nList.item(temp);
@@ -36,4 +37,5 @@ public class GoldDocument {
             goldMentions.add(new GoldMention(surface, charStart, charEnd, annotation));
         }
     }
+
 }

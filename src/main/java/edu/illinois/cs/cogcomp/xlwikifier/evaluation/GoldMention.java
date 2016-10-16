@@ -6,8 +6,8 @@ import org.w3c.dom.Node;
  * Created by lchen112 on 10/15/16.
  */
 public class GoldMention {
-    private int start_offset;
-    private int end_offset;
+    public int start_offset;
+    public int end_offset;
     private String wiki_title;
     private String mention;
     public GoldMention(String surface, int charStart, int charEnd, String annotation){

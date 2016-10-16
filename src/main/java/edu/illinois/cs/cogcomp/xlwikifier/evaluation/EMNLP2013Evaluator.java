@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
+import edu.illinois.cs.cogcomp.LbjNer.ClassifiersAndUtils.Document;
 import edu.illinois.cs.cogcomp.mlner.CrossLingualNER;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
@@ -65,12 +66,58 @@ public class EMNLP2013Evaluator {
         double f1 = 2.0*precision*recall/ (precision+ recall);
         System.out.printf("(EndSystem) F1 = %f, Precision = %f, Recall = %f\n", f1, precision, recall);
     }
-    public static void main(String[] args) throws Exception {
+    public static void evaluateAccuracy(ArrayList<GoldDocument> goldDocuments, ArrayList<QueryDocument> queryDocuments){
+        double hit = 0.0;
+        double total = 0.0;
+        for(int i = 0; i < goldDocuments.size(); i++){
+            System.out.println("Document: " + queryDocuments.get(i).getDocID());
+            for(int j = 0; j < goldDocuments.get(i).goldMentions.size(); j++) {
+                GoldMention gm = goldDocuments.get(i).goldMentions.get(j);
+                ELMention pm = queryDocuments.get(i).mentions.get(j);
+                System.out.printf("(%s, %s), ", pm.getWikiTitle(),  gm.getWikititle());
+                if(!gm.getWikititle().equals("*null*")) {
+                    if (pm.getWikiTitle().equals(gm.getWikititle()))
+                        hit += 1;
+                    total += 1;
+                }
+            }
+            System.out.println("");
+        }
+        System.out.printf("Accuracy = %f\n", hit/total);
 
+    }
+    public static void main(String[] args) throws Exception {
         String dataPrefix = "/shared/bronte/mssammon/WikifierResources/eval/ACL2010DataNewFormat/";
         CrossLingualNER.init("en", false);
         CrossLingualWikifier.init("en");
 
+        for (String dataset : datasets) {
+            System.out.printf("===========Evaluate Dataset %s ==========\n", dataset);
+            String dataFolder = dataPrefix + dataset + "/";
+            ArrayList<QueryDocument> queryDocuments = new ArrayList<QueryDocument>();
+            ArrayList<GoldDocument> goldDocuments = new ArrayList<GoldDocument>();
+            File folder = new File(dataFolder);
+            for (File file : folder.listFiles()) {
+                GoldDocument gdoc = new GoldDocument(file);
+                goldDocuments.add(gdoc);
+            }
+            for (GoldDocument gd : goldDocuments) {
+                QueryDocument qdoc = new QueryDocument(gd.id);
+                qdoc.plain_text = gd.plain_text;
+                List<ELMention> mentions= new ArrayList();
+                for(GoldMention m : gd.goldMentions){
+                    ELMention elm = new ELMention(gd.id, m.start_offset, m.end_offset);
+                    elm.setMention(m.getMention());
+                    mentions.add(elm);
+                }
+                qdoc.mentions = mentions;
+                CrossLingualWikifier.wikify(qdoc);
+                queryDocuments.add(qdoc);
+            }
+            evaluateEndSystem(goldDocuments, queryDocuments);
+            evaluateAccuracy(goldDocuments, queryDocuments);
+        }
+        /*
         for (String dataset : datasets) {
             System.out.printf("===========Evaluate Dataset %s ==========\n", dataset);
             String dataFolder = dataPrefix + dataset + "/";
@@ -89,5 +136,6 @@ public class EMNLP2013Evaluator {
             evaluateMention(goldDocuments, queryDocuments);
             evaluateEndSystem(goldDocuments, queryDocuments);
         }
+        */
     }
 }
