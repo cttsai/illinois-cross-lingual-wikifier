@@ -1,6 +1,5 @@
 package edu.illinois.cs.cogcomp.mlner.core;
 
-import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
 import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;

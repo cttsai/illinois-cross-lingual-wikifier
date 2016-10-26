@@ -243,7 +243,7 @@ public class WordEmbedding {
     }
 
     public static void main(String[] args) {
-        ConfigParameters.getPropValues();
+        ConfigParameters.setPropValues();
 
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";
@@ -252,8 +252,9 @@ public class WordEmbedding {
         we.createMultiVec(name);
 //        we.loadEmbeddingToDB(dir + name+"/en"+name+"_orig1_projected.txt", we.multi_vec_en);
 //        we.loadEmbeddingToDB(dir + name+"/en"+name+"_orig2_projected.txt", we.multi_vec_lang);
-        we.loadEmbeddingToDB(dir + name+"/en.txt", we.multi_vec_en);
-        we.loadEmbeddingToDB(dir + name+"/"+name+".txt", we.multi_vec_lang);
+        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
+//        we.loadEmbeddingToDB(dir + name+"/en.txt", we.multi_vec_en);
+//        we.loadEmbeddingToDB(dir + name+"/"+name+".txt", we.multi_vec_lang);
 
         we.closeDB();
     }

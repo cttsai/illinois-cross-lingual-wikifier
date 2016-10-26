@@ -1,7 +1,6 @@
 package edu.illinois.cs.cogcomp.mlner.core;
 
-import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
@@ -12,6 +11,10 @@ import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -21,19 +24,75 @@ import static java.util.stream.Collectors.toList;
  */
 public class NERUtils {
 
-    public Tokenizer tokenizer;
+    private final Logger logger = LoggerFactory.getLogger(NERUtils.class);
     public Set<String> stops;
     public String lang;
     private LangLinker ll = new LangLinker();
     private WikiCandidateGenerator en_wcg = new WikiCandidateGenerator(true);
+    private WikiCandidateGenerator wcg;
+    private NERFeatureManager fm;
+    private Ranker ranker;
 
     public NERUtils(){
     }
 
+    public NERUtils(String lang){
+        setLang(lang);
+        wcg = new WikiCandidateGenerator(true);
+        ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/ner/" + lang+"/ranker.model");
+        ranker.fm.ner_mode = true;
+    }
+
     public void setLang(String lang){
         this.lang = lang;
-        tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         stops = StopWord.getStopWords(lang);
+        fm = new NERFeatureManager(lang);
+    }
+
+    /**
+     * Wikify n-grams and generate NER features
+     * The main logic of Tsai et al., CoNLL 2016
+     * @param doc
+     */
+    public void wikifyNgrams(QueryDocument doc){
+        logger.info("Wikifying n-grams...");
+
+        List<ELMention> prevm = new ArrayList<>();
+        for(int n = 4; n >0; n--) {
+            doc.mentions = getNgramMentions(doc, n);
+            propFeatures(doc, prevm);
+            wikifyMentions(doc, n);
+            extractNERFeatures(doc);
+            prevm = doc.mentions;
+        }
+    }
+
+    public void extractNERFeatures(QueryDocument doc){
+        for(int j = 0; j < doc.mentions.size(); j++){
+            ELMention m = doc.mentions.get(j);
+            if(m.ner_features.size() > 0)
+                continue;
+            if(NumberUtils.isNumber(m.getMention().trim()))
+                continue;
+            Map<String, Double> map = getFeatureMap(doc.mentions, j, true);
+            for(String key: map.keySet()){
+                m.ner_features.put(key, map.get(key));
+            }
+        }
+    }
+
+    private Map<String, Double> getFeatureMap(List<ELMention> mentions, int idx, boolean train){
+        int window = 3;
+        List<ELMention> before_mentions = new ArrayList<>();
+        List<ELMention> after_mentions = new ArrayList<>();
+        ELMention m = mentions.get(idx);
+        for(int i = idx - 1; i >=0 && before_mentions.size() < window; i --) {
+            before_mentions.add(mentions.get(i));
+        }
+        for(int i = idx+1; i < mentions.size() && after_mentions.size() < window; i++) {
+            after_mentions.add(mentions.get(i));
+        }
+        return fm.getFeatureMap(m, before_mentions, after_mentions, train);
     }
 
     public List<ELMention> getNgramMentions(QueryDocument doc, int n){
@@ -79,7 +138,7 @@ public class NERUtils {
         return mentions;
     }
 
-    public void wikifyMentions(QueryDocument doc, int n, WikiCandidateGenerator wcg, Ranker ranker){
+    public void wikifyMentions(QueryDocument doc, int n){
         for(ELMention m: doc.mentions){
             if(!m.getWikiTitle().startsWith("NIL")) continue;
             if(m.ner_features.size()>0) continue;

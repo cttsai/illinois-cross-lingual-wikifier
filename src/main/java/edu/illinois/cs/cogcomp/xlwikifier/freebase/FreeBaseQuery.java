@@ -6,7 +6,6 @@ import org.mapdb.Serializer;
 import org.mapdb.serializer.SerializerArray;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -30,12 +29,21 @@ public class FreeBaseQuery {
     public static void loadDB(boolean read_only){
 
         String db_file = ConfigParameters.db_path+"/freebase/mapdb";
+//        String db_file = "/shared/bronte/ctsai12/freebase/mapdb-tmp";
 
         if(read_only) {
             db = DBMaker.fileDB(db_file)
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();
+            mid2types = db.hashMap("mid2types")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(new SerializerArray(Serializer.STRING))
+                    .open();
+            titlelang2mid = db.hashMap("titlelang2mid")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(Serializer.STRING)
+                    .open();
         }
         else {
             db = DBMaker.fileDB(db_file)
@@ -44,15 +52,15 @@ public class FreeBaseQuery {
             mid2types = db.hashMap("mid2types")
                     .keySerializer(Serializer.STRING)
                     .valueSerializer(new SerializerArray(Serializer.STRING))
-                    .create();
+                    .createOrOpen();
             midlang2title = db.hashMap("midlang2title")
                     .keySerializer(Serializer.STRING)
                     .valueSerializer(new SerializerArray(Serializer.STRING))
-                    .create();
+                    .createOrOpen();
             titlelang2mid = db.hashMap("titlelang2mid")
                     .keySerializer(Serializer.STRING)
                     .valueSerializer(Serializer.STRING)
-                    .create();
+                    .createOrOpen();
         }
 
     }
@@ -62,6 +70,16 @@ public class FreeBaseQuery {
         String file = "/shared/preprocessed/ctsai12/freebase/fb.plain.new";
         FreeBaseQuery.loadDB(false);
 
+//        DB.TreeMapSink<String,String[]> m2tsink = db
+//                .treeMap("mid2types", Serializer.STRING, new SerializerArray<>(Serializer.STRING))
+//                .createFromSink();
+//        DB.TreeMapSink<String,String> tl2msink = db
+//                .treeMap("mid2types", Serializer.STRING, Serializer.STRING)
+//                .createFromSink();
+//        DB.TreeMapSink<String,String[]> ml2tsink = db
+//                .treeMap("mid2types", Serializer.STRING, new SerializerArray<>(Serializer.STRING))
+//                .createFromSink();
+
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         String mid = "";
@@ -70,31 +88,39 @@ public class FreeBaseQuery {
 
         int cnt = 0;
         while(line != null){
-            if(++cnt%100000 == 0) System.out.print(cnt+"\r");
+            if(++cnt%100000 == 0){
+                System.out.print(cnt+"\r");
+            }
 //            if(cnt == 100000) break;
             String[] parts = line.trim().split("\t");
 
             // done with the previous mid, put into DB
-            if(!parts[0].equals(mid) && !mid.isEmpty()){
-                populateMid2Types(mid, types);
-                populateMidLang2Titles(mid, lang2titles);
-                types = new ArrayList<>();
-                lang2titles = new HashMap<>();
-            }
+//            if(!parts[0].equals(mid) && !mid.isEmpty()){
+//
+//                populateMid2Types(mid, types);
+//
+//                types = new ArrayList<>();
+//                lang2titles = new HashMap<>();
+//            }
 
             // process the current line
             mid = parts[0];
-            if(parts.length == 2) types.add(parts[1]);
+//            if(parts.length == 2) types.add(parts[1]);
             if(parts.length == 3 && !parts[1].contains("_id")){
                 String lang = parts[1];
                 String title = parts[2];
-                if(!lang2titles.containsKey(lang)) lang2titles.put(lang, new ArrayList<>());
-                lang2titles.get(lang).add(title);
+//                if(!lang2titles.containsKey(lang)) lang2titles.put(lang, new ArrayList<>());
+//                lang2titles.get(lang).add(title);
+//                tl2msink.put(title+"|"+lang, mid);
                 populateTitleLang2Mid(title+"|"+lang, mid);
             }
 
             line = br.readLine();
         }
+//        titlelang2mid = tl2msink.create();
+//        midlang2title = ml2tsink.create();
+//        mid2types = m2tsink.create();
+
         FreeBaseQuery.closeDB();
     }
 
@@ -225,7 +251,7 @@ public class FreeBaseQuery {
 
 //        FreeBaseQuery.loadDB(true);
         ConfigParameters params = new ConfigParameters();
-        params.getPropValues();
+        params.setPropValues();
         try {
             FreeBaseQuery.importDump();
         } catch (IOException e) {

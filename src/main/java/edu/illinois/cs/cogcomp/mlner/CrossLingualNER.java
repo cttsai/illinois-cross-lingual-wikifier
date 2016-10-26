@@ -10,8 +10,8 @@ import edu.illinois.cs.cogcomp.LbjNer.ParsingProcessingData.TaggedDataReader;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.lbjava.nlp.Word;
 import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
-import edu.illinois.cs.cogcomp.mlner.core.NERClassifier;
 import edu.illinois.cs.cogcomp.mlner.core.NERUtils;
+import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
@@ -34,18 +34,16 @@ public class CrossLingualNER {
     private static String lang;
     public static Tokenizer tokenizer;
     private static NERUtils utils;
-    private static WikiCandidateGenerator wcg;
-    private static Ranker ranker;
-    private static NERClassifier nc;
-    private static String configpath = "config/ner/";
     public static boolean transfer = true;
+
+    private static NETaggerLevel1 taggerLevel1;
+    private static NETaggerLevel2 taggerLevel2;
 
     private static Logger logger = LoggerFactory.getLogger(CrossLingualNER.class);
 
     public static void init(String l, boolean trans){
         if(!l.equals(lang) || trans != transfer) {
-            ConfigParameters param = new ConfigParameters();
-            param.getPropValues();
+            ConfigParameters.setPropValues();
 
             if(!FreeBaseQuery.isloaded())
                 FreeBaseQuery.loadDB(true);
@@ -53,44 +51,24 @@ public class CrossLingualNER {
             transfer = trans;
             lang = l;
             logger.info("Setting lang in xlner: " + lang);
-            tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-            utils = new NERUtils();
-            utils.setLang(lang);
-            wcg = new WikiCandidateGenerator(true);
-//            if(ranker != null) ranker.closeDBs();
-            ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/ner/" + lang+"/ranker.model");
-            ranker.fm.ner_mode = true;
-            nc = new NERClassifier(lang);
+
+            if(lang.equals("zh"))
+                tokenizer = new CharacterTokenizer();
+            else
+                tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+
+            utils = new NERUtils(lang);
             try {
-                if(!transfer || lang.equals("en"))
-                    Parameters.readConfigAndLoadExternalData(configpath+"mono/"+lang+".config", false);
+                if(ConfigParameters.ner_models.containsKey(lang))
+                    Parameters.readConfigAndLoadExternalData(ConfigParameters.ner_models.get(lang), false);
                 else
-                    Parameters.readConfigAndLoadExternalData(configpath+"transfer/"+lang+".config", false);
+                    logger.error("No NER model set for "+lang);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
 
-    /**
-     * Wikify n-grams and generate NER features
-     * @param doc
-     */
-    public static void wikifyNgrams(QueryDocument doc){
-        logger.info("Wikifying n-grams...");
-
-
-        List<ELMention> golds = doc.mentions;
-
-        List<ELMention> prevm = new ArrayList<>();
-        for(int n = 4; n >0; n--) {
-            doc.mentions = utils.getNgramMentions(doc, n);
-            utils.propFeatures(doc, prevm);
-//            if(golds.size() > 0)
-//                setWikiTitleByGolds(doc, surface2m);
-            utils.wikifyMentions(doc, n, wcg, ranker);
-            nc.extractNERFeatures(doc);
-            prevm = doc.mentions;
+            taggerLevel1 = new NETaggerLevel1(ParametersForLbjCode.currentParameters.pathToModelFile + ".level1", ParametersForLbjCode.currentParameters.pathToModelFile + ".level1.lex");
+            taggerLevel2 = new NETaggerLevel2(ParametersForLbjCode.currentParameters.pathToModelFile + ".level2", ParametersForLbjCode.currentParameters.pathToModelFile + ".level2.lex");
         }
     }
 
@@ -168,8 +146,10 @@ public class CrossLingualNER {
     }
 
     public static NERDocument annotate(QueryDocument doc){
+
+        // doc.mentions stores tokens
         if(ParametersForLbjCode.currentParameters.featuresToUse.containsKey("Wikifier"))
-            wikifyNgrams(doc);
+            utils.wikifyNgrams(doc);
         else{
             doc.mentions = utils.getNgramMentions(doc, 1);
         }
@@ -188,9 +168,6 @@ public class CrossLingualNER {
             data.elementAt(0).setLabelsToIgnore(ParametersForLbjCode.currentParameters.labelsToIgnoreInEvaluation);
         if (ParametersForLbjCode.currentParameters.labelsToAnonymizeInEvaluation != null)
             data.elementAt(0).setLabelsToAnonymize(ParametersForLbjCode.currentParameters.labelsToAnonymizeInEvaluation);
-
-        NETaggerLevel1 taggerLevel1 = new NETaggerLevel1(ParametersForLbjCode.currentParameters.pathToModelFile + ".level1", ParametersForLbjCode.currentParameters.pathToModelFile + ".level1.lex");
-        NETaggerLevel2 taggerLevel2 = new NETaggerLevel2(ParametersForLbjCode.currentParameters.pathToModelFile + ".level2", ParametersForLbjCode.currentParameters.pathToModelFile + ".level2.lex");
 
         try {
             Decoder.annotateDataBIO(data.elementAt(0), taggerLevel1, taggerLevel2);
@@ -214,17 +191,15 @@ public class CrossLingualNER {
         doc.setTextAnnotation(ta);
         NERDocument nerdoc = annotate(doc);
         List<ELMention> mentions = extractPredictions(nerdoc, doc.plain_text);
-//        mentions.forEach(x -> System.out.println(x+" "+x.getType()));
         doc.mentions = mentions;
         return doc;
     }
 
     public static void main(String[] args) {
-        CrossLingualNER.init("es", false);
-        QueryDocument doc = CrossLingualNER.annotate("Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu ."); // from DF_FTR_TUR_0514802_20140900
-//        CrossLingualWikifier.setLang("tr");
-//        CrossLingualWikifier.wikify(doc);
-//        doc.mentions.forEach(x -> System.out.println(x.getMention()+" "+x.getWikiTitle()));
-
+        CrossLingualNER.init("zh", false);
+//        String text = "Barack Hussein Obama II3 es el cuadragésimo cuarto y actual presidente de los Estados Unidos de América. Fue senador por el estado de Illinois desde el 3 de enero de 2005 hasta su renuncia el 16 de noviembre de 2008. Además, es el quinto legislador afroamericano en el Senado de los Estados Unidos, tercero desde la era de reconstrucción. También fue el primer candidato afroamericano nominado a la presidencia por el Partido Demócrata y es el primero en ejercer el cargo presidencial.";
+        String text = "巴拉克·歐巴馬是美國民主黨籍政治家，也是第44任美國總統，於2008年初次當選，並於2012年成功連任。歐巴馬是第一位非裔美國總統。他1961年出生於美國夏威夷州檀香山，童年和青少年時期分別在印尼和夏威夷度過。1991年，歐巴馬以優等生榮譽從哈佛法學院畢業。1996年開始參選公職，在補選中，當選伊利諾州參議員。";
+        QueryDocument doc = CrossLingualNER.annotate(text); // from DF_FTR_TUR_0514802_20140900
+        doc.mentions.forEach(x -> System.out.println(x.getMention()+" "+x.getType()));
     }
 }

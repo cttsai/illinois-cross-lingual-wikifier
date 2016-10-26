@@ -215,15 +215,14 @@ public class Importer {
 
 
     public static void main(String[] args) {
-        ConfigParameters params = new ConfigParameters();
-        params.getPropValues();
+        ConfigParameters.setPropValues();
 
         Importer importer = new Importer(args[0], args[1]);
         try {
 //            importer.downloadDump();
 //            importer.parseWikiDump();
             importer.importLangLinks();
-//            importer.importCandidates();
+            importer.importCandidates();
             importer.importTFIDF();
         } catch (Exception e) {
             e.printStackTrace();

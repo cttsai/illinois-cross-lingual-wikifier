@@ -9,11 +9,9 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.core.algorithms.LevensteinDistance;
 import org.apache.commons.io.FileUtils;
-import org.mapdb.BTreeMap;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.Serializer;
+import org.mapdb.*;
 import org.mapdb.serializer.SerializerArray;
+import org.mapdb.serializer.SerializerArrayDelta;
 import org.mapdb.serializer.SerializerArrayTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +35,6 @@ public class WikiCandidateGenerator {
     public BTreeMap<Object[], Float> w2t2prob;
     public BTreeMap<Object[], Float> t2w2prob;
 
-
-//    public ConcurrentNavigableMap<String, String[]> fourgramidx;
-//    public ConcurrentNavigableMap<String, String[]> trigramidx;
     private String lang;
     private Map<String, String> title2id, id2redirect;
     private Map<String, List<WikiCand>> cand_cache = new HashMap<>();
@@ -173,10 +168,10 @@ public class WikiCandidateGenerator {
         }
         surface = surface.toLowerCase();
         List<WikiCand> cands = new ArrayList<>();
-        NavigableMap<Object[], Float> ctitles = p2t2prob.prefixSubMap(new Object[]{surface});
+        NavigableMap<Object[], Float> ctitles = p2t2prob.subMap(new Object[]{surface}, new Object[]{surface, null});
 
         List<Map.Entry<Object[], Float>> sorted_cands = ctitles.entrySet().stream().sorted((x1, x2) -> Float.compare(x2.getValue(), x1.getValue()))
-                .collect(Collectors.toList()).subList(0, top);
+                .collect(Collectors.toList()).subList(0, Math.min(ctitles.size(), top));
 
         for(Map.Entry<Object[], Float> c: sorted_cands){
             String title = (String) c.getKey()[1];
@@ -225,10 +220,10 @@ public class WikiCandidateGenerator {
         int each_word_top = max_cand/tokens.length;
         for(String t: tokens) {
 
-            NavigableMap<Object[], Float> ctitles = w2t2prob.prefixSubMap(new Object[]{t});
+            NavigableMap<Object[], Float> ctitles = w2t2prob.subMap(new Object[]{t}, new Object[]{t, null});
 
             List<Map.Entry<Object[], Float>> sorted_cands = ctitles.entrySet().stream().sorted((x1, x2) -> Float.compare(x2.getValue(), x1.getValue()))
-                    .collect(Collectors.toList()).subList(0, each_word_top);
+                    .collect(Collectors.toList()).subList(0, Math.min(ctitles.size(), each_word_top));
 
             for(Map.Entry<Object[], Float> c: sorted_cands){
                 String title = (String) c.getKey()[1];
@@ -573,8 +568,7 @@ public class WikiCandidateGenerator {
     }
 
     public static void main(String[] args) {
-        ConfigParameters params = new ConfigParameters();
-        params.getPropValues();
+        ConfigParameters.setPropValues();
         WikiCandidateGenerator g = new WikiCandidateGenerator();
         g.tac = true;
         g.loadDB(args[0], true);

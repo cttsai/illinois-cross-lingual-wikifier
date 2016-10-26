@@ -259,7 +259,7 @@ public class Ranker {
     public static void main(String[] args) {
 
         ConfigParameters param = new ConfigParameters();
-        param.getPropValues();
+        param.setPropValues();
 
         String lang = args[0];
 

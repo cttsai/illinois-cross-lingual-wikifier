@@ -34,8 +34,7 @@ public class CrossLingualWikifier {
 
         if(!l.equals(lang)) {
             if(ConfigParameters.db_path == null){
-                ConfigParameters param = new ConfigParameters();
-                param.getPropValues();
+                ConfigParameters.setPropValues();
             }
 
             if(!FreeBaseQuery.isloaded())
@@ -98,9 +97,10 @@ public class CrossLingualWikifier {
     }
 
     public static void main(String[] args) {
-        CrossLingualNER.init("tr", false);
-        QueryDocument doc = CrossLingualNER.annotate("Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu ."); // from DF_FTR_TUR_0514802_20140900
-        CrossLingualWikifier.init("tr");
+        CrossLingualNER.init("es", false);
+        String text = "Barack Hussein Obama II3 es el cuadragésimo cuarto y actual presidente de los Estados Unidos de América. Fue senador por el estado de Illinois desde el 3 de enero de 2005 hasta su renuncia el 16 de noviembre de 2008. Además, es el quinto legislador afroamericano en el Senado de los Estados Unidos, tercero desde la era de reconstrucción. También fue el primer candidato afroamericano nominado a la presidencia por el Partido Demócrata y es el primero en ejercer el cargo presidencial.";
+        QueryDocument doc = CrossLingualNER.annotate(text); // from DF_FTR_TUR_0514802_20140900
+        CrossLingualWikifier.init("es");
         CrossLingualWikifier.wikify(doc);
         doc.mentions.forEach(x -> System.out.println(x.getMention()+" "+x.getWikiTitle()));
 
