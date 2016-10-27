@@ -15,25 +15,31 @@ public class QueryDocument {
     public String plain_text;
     public List<ELMention> tokens = new ArrayList<>();
 
-    public QueryDocument(String id){
+    public QueryDocument(String id) {
         this.id = id;
     }
 
-    public String getDocID(){ return id; }
-    public void setTextAnnotation(TextAnnotation ta){
+    public String getDocID() {
+        return id;
+    }
+
+    public void setTextAnnotation(TextAnnotation ta) {
         this.ta = ta;
     }
-    public TextAnnotation getTextAnnotation(){ return this.ta; }
+
+    public TextAnnotation getTextAnnotation() {
+        return this.ta;
+    }
 
 
-    public void prepareFeatures(RankerFeatureManager fm){
+    public void prepareFeatures(RankerFeatureManager fm) {
 
         // compute vectors to represent mentions
-        if(!fm.ner_mode) {
+        if (!fm.ner_mode) {
             if (fm.context_lang.equals("zh"))
-                mentions.forEach(x -> x.mention_vec = fm.we.getVectorFromWords(x.getMention().split("·"), fm.context_lang));
+                mentions.forEach(x -> x.mention_vec = fm.we.getVectorFromWords(x.getSurface().split("·"), fm.context_lang));
             else
-                mentions.forEach(x -> x.mention_vec = fm.we.getVectorFromWords(x.getMention().split("\\s+"), fm.context_lang));
+                mentions.forEach(x -> x.mention_vec = fm.we.getVectorFromWords(x.getSurface().split("\\s+"), fm.context_lang));
         }
     }
 

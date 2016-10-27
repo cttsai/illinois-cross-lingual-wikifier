@@ -1,4 +1,4 @@
-package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
+package edu.illinois.cs.cogcomp.xlwikifier.core;
 
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
@@ -8,11 +8,9 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.core.algorithms.LevensteinDistance;
-import org.apache.commons.io.FileUtils;
+import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.DumpReader;
 import org.mapdb.*;
 import org.mapdb.serializer.SerializerArray;
-import org.mapdb.serializer.SerializerArrayDelta;
-import org.mapdb.serializer.SerializerArrayTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,33 +38,34 @@ public class WikiCandidateGenerator {
     private Map<String, List<WikiCand>> cand_cache = new HashMap<>();
     private boolean use_cache = false;
     private int top = 10;
-    public boolean tac = false;
+    public boolean en_search = false;
+    public boolean word_search = false;
     private Tokenizer tokenizer;
+    private WikiCandidateGenerator en_generator;
     private static Logger logger = LoggerFactory.getLogger(WikiCandidateGenerator.class);
 
-    public WikiCandidateGenerator(){
-
+    public WikiCandidateGenerator(String lang, boolean read_only) {
+        loadDB(lang, read_only);
+        tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+        if (!lang.equals("en"))
+            en_generator = new WikiCandidateGenerator("en", true);
     }
 
-    public WikiCandidateGenerator(boolean tac){
-        this.tac = tac;
-    }
-
-    public void setId2Redirect(Map<String, String> map){
+    public void setId2Redirect(Map<String, String> map) {
         this.id2redirect = map;
     }
 
-    public void setTitle2Id(Map<String, String> map){
+    public void setTitle2Id(Map<String, String> map) {
         this.title2id = map;
     }
 
-    public void loadDB(String lang, boolean read_only){
+    public void loadDB(String lang, boolean read_only) {
         this.lang = lang;
-        if(db_pool.containsKey(lang)) db = db_pool.get(lang);
+        if (db_pool.containsKey(lang)) db = db_pool.get(lang);
         else {
-            String dbfile = ConfigParameters.db_path+"/candidates/"+lang;
+            String dbfile = ConfigParameters.db_path + "/candidates/" + lang;
 //            String dbfile = "/shared/preprocessed/ctsai12/multilingual/mapdb/candidates/"+lang+"_candidates";
-            if(read_only) {
+            if (read_only) {
                 db = DBMaker.fileDB(new File(dbfile))
                         .closeOnJvmShutdown()
                         .readOnly()
@@ -79,8 +78,7 @@ public class WikiCandidateGenerator {
                         .open();
                 t2w2prob = db.treeMap("t2w", new SerializerArray(Serializer.STRING), Serializer.FLOAT)
                         .open();
-            }
-            else {
+            } else {
                 db = DBMaker.fileDB(new File(dbfile))
                         .closeOnJvmShutdown()
                         .make();
@@ -99,8 +97,8 @@ public class WikiCandidateGenerator {
 
     }
 
-    public void closeDB(){
-        if(db!=null && !db.isClosed()) {
+    public void closeDB() {
+        if (db != null && !db.isClosed()) {
             db.commit();
             db.close();
         }
@@ -108,12 +106,12 @@ public class WikiCandidateGenerator {
     }
 
 
-    public String getFinalTitle(String title){
+    public String getFinalTitle(String title) {
         title = title.toLowerCase().replaceAll(" ", "_");
 
-        if(title2id.containsKey(title)){
+        if (title2id.containsKey(title)) {
             String id = title2id.get(title);
-            if(id2redirect.containsKey(id)) {
+            if (id2redirect.containsKey(id)) {
                 return id2redirect.get(id);
             }
         }
@@ -121,14 +119,19 @@ public class WikiCandidateGenerator {
     }
 
 
-    public void setCandidates(QueryDocument doc, String lang){
+    public void genCandidates(List<QueryDocument> docs) {
+        logger.info("Generating candidates...");
+        for (QueryDocument doc : docs) {
+            genCandidates(doc);
+        }
+    }
 
+    public void genCandidates(QueryDocument doc) {
 
-        for(ELMention m: doc.mentions){
-            if(m.is_ne) continue;
+        for (ELMention m : doc.mentions) {
 
-            if(m.getCandidates().size()==0) {
-                List<WikiCand> cands = getCandidate(m.getMention(), lang);
+            if (m.getCandidates().size() == 0) {
+                List<WikiCand> cands = genCandidate(m.getSurface());
 
                 cands = cands.subList(0, Math.min(top, cands.size()));
                 m.getCandidates().addAll(cands);
@@ -136,48 +139,40 @@ public class WikiCandidateGenerator {
         }
     }
 
-    /**
-     * The old one for the NAACL submission
-     * @param surface
-     * @param lang
-     * @return
-     */
-    public List<WikiCand> getCandidate(String surface, String lang){
-        if(this.lang == null || !this.lang.equals(lang)) {
-            loadDB(lang, true);
-            this.lang = lang;
-        }
+    public List<WikiCand> genCandidate(String surface) {
         surface = surface.toLowerCase().trim();
 
-        List<WikiCand> cands = getCandsBySurface(surface, lang);
-        if (cands.size() == 0 && !tac)
-            cands = getCandidateByWord(surface, lang, 6);
-        if(tac && cands.size() == 0) {  // NAACL
-            cands = getCandsBySurface(surface, "en");
+        List<WikiCand> cands = getCandsBySurface(surface);
+        if (cands.size() == 0) {
+            if (word_search)
+                cands = getCandidateByWord(surface, 6);
+            if (en_search)
+                cands = en_generator.getCandsBySurface(surface);
         }
 
         return cands;
     }
 
 
-    public List<WikiCand> getCandsBySurface(String surface, String lang){
-        if(this.lang == null || !this.lang.equals(lang)) {
-            tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-            loadDB(lang, true);
-            this.lang = lang;
-        }
-        surface = surface.toLowerCase();
+    /**
+     * surface must be lowercased
+     *
+     * @param surface
+     * @return
+     */
+    public List<WikiCand> getCandsBySurface(String surface) {
+
         List<WikiCand> cands = new ArrayList<>();
         NavigableMap<Object[], Float> ctitles = p2t2prob.subMap(new Object[]{surface}, new Object[]{surface, null});
 
         List<Map.Entry<Object[], Float>> sorted_cands = ctitles.entrySet().stream().sorted((x1, x2) -> Float.compare(x2.getValue(), x1.getValue()))
                 .collect(Collectors.toList()).subList(0, Math.min(ctitles.size(), top));
 
-        for(Map.Entry<Object[], Float> c: sorted_cands){
+        for (Map.Entry<Object[], Float> c : sorted_cands) {
             String title = (String) c.getKey()[1];
             int dist = getEditDistance(title, surface);
             double s = 1;
-            if(dist != 0) s = 1.0/dist;
+            if (dist != 0) s = 1.0 / dist;
             WikiCand cand = new WikiCand(title, s);
             cand.psgivent = c.getValue();
             cand.ptgivens = t2p2prob.get(new Object[]{title, surface});
@@ -190,46 +185,41 @@ public class WikiCandidateGenerator {
         return cands;
     }
 
-    private int getEditDistance(String title, String surface){
+    private int getEditDistance(String title, String surface) {
         title = title.replaceAll("_", " ");
         int idx = title.indexOf("(");
-        if(idx>0)
+        if (idx > 0)
             title = title.substring(0, idx).trim();
         int st = surface.split("\\s+").length;
         String[] tt = surface.split("\\s+");
-        if(tt.length == 3 && st == 2 && tt[1].endsWith("."))
-            title = tt[0]+" "+tt[2];
+        if (tt.length == 3 && st == 2 && tt[1].endsWith("."))
+            title = tt[0] + " " + tt[2];
         int dist = LevensteinDistance.getLevensteinDistance(surface, title);
         return dist;
     }
 
 
-    public List<WikiCand> getCandidateByWord(String surface, String lang, int max_cand){
-        if(this.lang == null || !this.lang.equals(lang)) {
-            loadDB(lang, true);
-            tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-            this.lang = lang;
-        }
+    public List<WikiCand> getCandidateByWord(String surface, int max_cand) {
         List<WikiCand> cands = new ArrayList<>();
         String[] tokens = null;
-        if(lang.equals("zh"))
+        if (lang.equals("zh"))
             tokens = surface.split("·");
         else
             tokens = tokenizer.getTextAnnotation(surface).getTokens();
 //            tokens = surface.split("\\s+");
-        int each_word_top = max_cand/tokens.length;
-        for(String t: tokens) {
+        int each_word_top = max_cand / tokens.length;
+        for (String t : tokens) {
 
             NavigableMap<Object[], Float> ctitles = w2t2prob.subMap(new Object[]{t}, new Object[]{t, null});
 
             List<Map.Entry<Object[], Float>> sorted_cands = ctitles.entrySet().stream().sorted((x1, x2) -> Float.compare(x2.getValue(), x1.getValue()))
                     .collect(Collectors.toList()).subList(0, Math.min(ctitles.size(), each_word_top));
 
-            for(Map.Entry<Object[], Float> c: sorted_cands){
+            for (Map.Entry<Object[], Float> c : sorted_cands) {
                 String title = (String) c.getKey()[1];
                 int dist = getEditDistance(title, surface);
                 double s = 1;
-                if(dist != 0) s = 1.0/dist;
+                if (dist != 0) s = 1.0 / dist;
                 WikiCand cand = new WikiCand(title, s);
                 cand.psgivent = c.getValue();
                 cand.ptgivens = t2w2prob.get(new Object[]{title, t});
@@ -240,10 +230,9 @@ public class WikiCandidateGenerator {
 
             }
         }
-        // TODO: the way of sorting is changed from the NAACL submission
 //        word_cands = word_cands.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(toList());
         cands = cands.stream().sorted((x1, x2) -> Double.compare(x2.ptgivens, x1.ptgivens)).collect(toList());
-        return cands.subList(0,Math.min(cands.size(), max_cand));
+        return cands.subList(0, Math.min(cands.size(), max_cand));
     }
 
 //    private List<WikiCand> getCandidatesByNgram(String surface){
@@ -280,9 +269,9 @@ public class WikiCandidateGenerator {
 //        return ret;
 //    }
 
-    private void populateWord2Title(String file, String lang){
-        logger.info("Populating "+lang+" candidate database from "+file);
-        if(db==null)
+    private void populateWord2Title(String file, String lang) {
+        logger.info("Populating " + lang + " candidate database from " + file);
+        if (db == null)
             loadDB(lang, false);
 
         w2t2prob.clear();
@@ -292,43 +281,43 @@ public class WikiCandidateGenerator {
         Map<String, List<String>> t2s = new HashMap<>();
 
         try {
-            for(String line: LineIO.read(file)){
+            for (String line : LineIO.read(file)) {
 
                 String[] sp = line.split("\t");
-                if(sp.length<2) continue;
-                    String s = sp[0].toLowerCase().trim();
-                    String t = getFinalTitle(sp[1]);
+                if (sp.length < 2) continue;
+                String s = sp[0].toLowerCase().trim();
+                String t = getFinalTitle(sp[1]);
 
-                    String[] tokens;
-                    if (lang.equals("zh"))
-                        tokens = s.split("·");
-                    else
-                        tokens = tokenizer.getTextAnnotation(s).getTokens();
+                String[] tokens;
+                if (lang.equals("zh"))
+                    tokens = s.split("·");
+                else
+                    tokens = tokenizer.getTextAnnotation(s).getTokens();
 
-                    for (String ss : tokens) {
-                        if (!s2t.containsKey(ss))
-                            s2t.put(ss, new ArrayList<>());
-                        s2t.get(ss).add(t);
-                        if (!t2s.containsKey(t))
-                            t2s.put(t, new ArrayList<>());
-                        t2s.get(t).add(ss);
-                    }
+                for (String ss : tokens) {
+                    if (!s2t.containsKey(ss))
+                        s2t.put(ss, new ArrayList<>());
+                    s2t.get(ss).add(t);
+                    if (!t2s.containsKey(t))
+                        t2s.put(t, new ArrayList<>());
+                    t2s.get(t).add(ss);
+                }
 //                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        logger.info("s2t size "+s2t.size());
-        logger.info("t2s size "+t2s.size());
+        logger.info("s2t size " + s2t.size());
+        logger.info("t2s size " + t2s.size());
 
-        for(String title: t2s.keySet()){
+        for (String title : t2s.keySet()) {
             String[] title_tokens = null;
-            if(lang.equals("zh"))
+            if (lang.equals("zh"))
                 title_tokens = title.toLowerCase().split("·");
             else
                 title_tokens = title.toLowerCase().split("_");
 
-            for(String token: title_tokens){
+            for (String token : title_tokens) {
                 if (!s2t.containsKey(token))
                     s2t.put(token, new ArrayList<>());
                 s2t.get(token).add(title);
@@ -338,29 +327,29 @@ public class WikiCandidateGenerator {
 
         logger.info("Calculating p(title | word)...");
         int cnt = 0;
-        for(String surface: s2t.keySet()){
-            cnt ++;
-            if(cnt % 10000 == 0)
-                System.out.print(cnt*100.0/s2t.size()+"\r");
+        for (String surface : s2t.keySet()) {
+            cnt++;
+            if (cnt % 10000 == 0)
+                System.out.print(cnt * 100.0 / s2t.size() + "\r");
             Map<String, Long> t2cnt = s2t.get(surface).stream().collect(groupingBy(x -> x, counting()));
             float sum = 0;
-            for(String title: t2cnt.keySet()){
-                sum+=t2cnt.get(title);
+            for (String title : t2cnt.keySet()) {
+                sum += t2cnt.get(title);
             }
-            for(String title: t2cnt.keySet()){
-                w2t2prob.put(new Object[]{surface, title}, t2cnt.get(title)/sum);
+            for (String title : t2cnt.keySet()) {
+                w2t2prob.put(new Object[]{surface, title}, t2cnt.get(title) / sum);
             }
         }
 
         logger.info("Calculating p(word | title)...");
-        for(String title: t2s.keySet()){
+        for (String title : t2s.keySet()) {
             Map<String, Long> s2cnt = t2s.get(title).stream().collect(groupingBy(x -> x, counting()));
             float sum = 0;
-            for(String surface: s2cnt.keySet()){
-                sum+=s2cnt.get(surface);
+            for (String surface : s2cnt.keySet()) {
+                sum += s2cnt.get(surface);
             }
-            for(String surface: s2cnt.keySet()){
-                t2w2prob.put(new Object[]{title, surface}, s2cnt.get(surface)/sum);
+            for (String surface : s2cnt.keySet()) {
+                t2w2prob.put(new Object[]{title, surface}, s2cnt.get(surface) / sum);
             }
         }
 
@@ -368,12 +357,13 @@ public class WikiCandidateGenerator {
 
     /**
      * Import the candidate generation DB
+     *
      * @param lang
      * @param redirect_file
      * @param page_file
      * @param cand_file
      */
-    public void populateDB(String lang, String redirect_file, String page_file, String cand_file){
+    public void populateDB(String lang, String redirect_file, String page_file, String cand_file) {
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         DumpReader dr = new DumpReader();
         dr.readRedirects(redirect_file);
@@ -431,38 +421,10 @@ public class WikiCandidateGenerator {
 //        }
 //    }
 
-    private Map<String, String> getSurface2Title(String title, String lang){
 
-        Map<String, String> ret = new HashMap<>();
-
-        try {
-
-            String plain = FileUtils.readFileToString(new File(ConfigParameters.dump_path+lang+"/"+lang+"_wiki_view/plain/"+title), "UTF-8");
-            for(String line: LineIO.read(ConfigParameters.dump_path+lang+"/"+lang+"_wiki_view/annotation/"+title)){
-
-                if(line.startsWith("#")){
-
-                    String[] sp = line.substring(1).split("\t");
-                    if(sp.length < 3) continue;
-                    int start = Integer.parseInt(sp[1]);
-                    int end = Integer.parseInt(sp[2]);
-
-                    ret.put(plain.substring(start, end), sp[0]);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return ret;
-
-    }
-
-    private void populateMentionDB(String file, String lang){
-        logger.info("Populating "+lang+" candidate database from "+file);
-        if(db == null)
+    private void populateMentionDB(String file, String lang) {
+        logger.info("Populating " + lang + " candidate database from " + file);
+        if (db == null)
             loadDB(lang, false);
 
         p2t2prob.clear();
@@ -472,29 +434,29 @@ public class WikiCandidateGenerator {
         Map<String, List<String>> t2s = new HashMap<>();
 
         try {
-            for(String line: LineIO.read(file)){
+            for (String line : LineIO.read(file)) {
 
                 String[] sp = line.split("\t");
 
-                if(sp.length<2) continue;
+                if (sp.length < 2) continue;
 
-                    String s = sp[0].toLowerCase().trim();
-                    String t = getFinalTitle(sp[1]);
-                    if (!s2t.containsKey(s))
-                        s2t.put(s, new ArrayList<>());
-                    s2t.get(s).add(t);
-                    if (!t2s.containsKey(t))
-                        t2s.put(t, new ArrayList<>());
-                    t2s.get(t).add(s);
+                String s = sp[0].toLowerCase().trim();
+                String t = getFinalTitle(sp[1]);
+                if (!s2t.containsKey(s))
+                    s2t.put(s, new ArrayList<>());
+                s2t.get(s).add(t);
+                if (!t2s.containsKey(t))
+                    t2s.put(t, new ArrayList<>());
+                t2s.get(t).add(s);
 //                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        for(String title: t2s.keySet()){
+        for (String title : t2s.keySet()) {
             String title_surface = title.replaceAll("_", " ").toLowerCase().trim();
-            if(!s2t.containsKey(title_surface))
+            if (!s2t.containsKey(title_surface))
                 s2t.put(title_surface, new ArrayList<>());
             s2t.get(title_surface).add(title);
             t2s.get(title).add(title_surface);
@@ -502,86 +464,66 @@ public class WikiCandidateGenerator {
 
         logger.info("Calculating p(title | phrase)...");
         int cnt = 0;
-        for(String surface: s2t.keySet()){
+        for (String surface : s2t.keySet()) {
             cnt++;
-            if(cnt % 10000 == 0)
-                System.out.print(cnt*100.0/s2t.size()+"\r");
+            if (cnt % 10000 == 0)
+                System.out.print(cnt * 100.0 / s2t.size() + "\r");
             Map<String, Long> t2cnt = s2t.get(surface).stream().collect(groupingBy(x -> x, counting()));
             float sum = 0;
-            for(String title: t2cnt.keySet()){
-                sum+=t2cnt.get(title);
+            for (String title : t2cnt.keySet()) {
+                sum += t2cnt.get(title);
             }
-            for(String title: t2cnt.keySet()){
-                p2t2prob.put(new Object[]{surface, title}, t2cnt.get(title)/sum);
+            for (String title : t2cnt.keySet()) {
+                p2t2prob.put(new Object[]{surface, title}, t2cnt.get(title) / sum);
             }
         }
 
         logger.info("Calculating p(phrase | title)...");
-        for(String title: t2s.keySet()){
+        for (String title : t2s.keySet()) {
             Map<String, Long> s2cnt = t2s.get(title).stream().collect(groupingBy(x -> x, counting()));
             float sum = 0;
-            for(String surface: s2cnt.keySet()){
-                sum+=s2cnt.get(surface);
+            for (String surface : s2cnt.keySet()) {
+                sum += s2cnt.get(surface);
             }
-            for(String surface: s2cnt.keySet()){
-                t2p2prob.put(new Object[]{title, surface}, s2cnt.get(surface)/sum);
+            for (String surface : s2cnt.keySet()) {
+                t2p2prob.put(new Object[]{title, surface}, s2cnt.get(surface) / sum);
             }
         }
     }
 
-    public void genCandidates(List<QueryDocument> docs, String lang){
-        logger.info("Generating candidates...");
-        tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-        if(db == null || db.isClosed() || this.lang != lang)
-            loadDB(lang, true);
-        for(QueryDocument doc: docs) {
-            setCandidates(doc, lang);
-        }
-    }
-
-    public void selectMentions(List<QueryDocument> docs, double p){
-        System.out.println("#mentions before selection: "+docs.stream().flatMap(x -> x.mentions.stream()).count());
+    public void selectMentions(List<QueryDocument> docs, double p) {
+        System.out.println("#mentions before selection: " + docs.stream().flatMap(x -> x.mentions.stream()).count());
         List<ELMention> easy_all = new ArrayList<>();
         List<ELMention> hard_all = new ArrayList<>();
-        for(QueryDocument doc: docs) {
-            List<ELMention> hard = doc.mentions.stream().filter(x -> x.getCandidates().size()==0
+        for (QueryDocument doc : docs) {
+            List<ELMention> hard = doc.mentions.stream().filter(x -> x.getCandidates().size() == 0
                     || !x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
                     .collect(toList());
             hard.forEach(x -> x.eazy = false);
             hard_all.addAll(hard);
-            List<ELMention> easy = doc.mentions.stream().filter(x -> x.getCandidates().size()>0
+            List<ELMention> easy = doc.mentions.stream().filter(x -> x.getCandidates().size() > 0
                     && x.getCandidates().get(0).getTitle().toLowerCase().equals(x.gold_wiki_title.toLowerCase()))
                     .collect(toList());
             easy.forEach(x -> x.eazy = true);
             easy_all.addAll(easy);
 
         }
-        System.out.println("#hard "+hard_all.size()+" #easy "+easy_all.size());
+        System.out.println("#hard " + hard_all.size() + " #easy " + easy_all.size());
         Collections.shuffle(easy_all, new Random(0));
-        hard_all.addAll(easy_all.subList(0, (int) Math.min(easy_all.size(), hard_all.size()*p)));
-        for(QueryDocument doc: docs){
+        hard_all.addAll(easy_all.subList(0, (int) Math.min(easy_all.size(), hard_all.size() * p)));
+        for (QueryDocument doc : docs) {
             doc.mentions = hard_all.stream().filter(x -> x.getDocID().equals(doc.getDocID()))
                     .sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
                     .collect(toList());
         }
-        logger.info("#mentions after selection: "+docs.stream().flatMap(x -> x.mentions.stream()).count());
+        logger.info("#mentions after selection: " + docs.stream().flatMap(x -> x.mentions.stream()).count());
     }
 
     public static void main(String[] args) {
         ConfigParameters.setPropValues();
-        WikiCandidateGenerator g = new WikiCandidateGenerator();
-        g.tac = true;
-        g.loadDB(args[0], true);
+        WikiCandidateGenerator g = new WikiCandidateGenerator(args[0], true);
 //        System.out.println(g.getCandsBySurface("Michael Pettis", "en"));
         System.exit(-1);
-
-        String lang = "en";
-        String redirect = "/shared/bronte/ctsai12/multilingual/wikidump/en/enwiki-20151002-redirect.sql.gz";
-        String page = "/shared/bronte/ctsai12/multilingual/wikidump/en/enwiki-20151002-page.sql.gz";
-//        String redirect = "/shared/bronte/ctsai12/multilingual/wikidump/en-old/enwiki-20080103-redirect.sql";
-//        String page = "/shared/bronte/ctsai12/multilingual/wikidump/en-old/enwiki-20080103-page.sql";
-//        String redirect = "/shared/bronte/ctsai12/multilingual/wikidump/"+lang+"/"+lang+"wikipedia-20151123-redirect.sql";
-//        String page = "/shared/bronte/ctsai12/multilingual/wikidump/"+lang+"/"+lang+"wikipedia-20151123-page.sql";
 
         g.closeDB();
     }

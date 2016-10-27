@@ -14,18 +14,17 @@ import static java.util.stream.Collectors.toSet;
  */
 public class StopWord {
 
-    public static Set<String> getStopWords(String lang){
+    public static Set<String> getStopWords(String lang) {
         Set<String> ret = new HashSet<>();
         try {
-            File f = new File(ConfigParameters.stopword_path, "stopwords."+lang);
-            if(f.exists()) {
+            File f = new File(ConfigParameters.stopword_path, "stopwords." + lang);
+            if (f.exists()) {
                 ret.addAll(LineIO.read(f.getAbsolutePath()).stream()
                         .map(x -> x.trim().toLowerCase()).collect(toSet()));
-            }
-            else
-                System.out.println("No stopwords for "+lang);
+            } else
+                System.out.println("No stopwords for " + lang);
 
-            ret.addAll(LineIO.read(ConfigParameters.stopword_path+"/puncs").stream().collect(toSet()));
+            ret.addAll(LineIO.read(ConfigParameters.stopword_path + "/puncs").stream().collect(toSet()));
         } catch (Exception e) {
             e.printStackTrace();
         }

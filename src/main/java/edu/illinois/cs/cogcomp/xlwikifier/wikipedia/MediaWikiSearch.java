@@ -23,30 +23,31 @@ public class MediaWikiSearch {
     private String title_cache = "/shared/bronte/tac2015/mediawiki_cache/title_category";
     private String search_cache = "/shared/bronte/tac2015/mediawiki_cache/search";
     private String search_cache1 = "/shared/bronte/tac2015/mediawiki_cache/search1";
-    public MediaWikiSearch(){}
 
-    public List<String> search1(String query, String lang, String mode){
+    public MediaWikiSearch() {
+    }
 
-        String cache_file = search_cache1+"/"+lang+"/"+mode+"/"+query;
+    public List<String> search1(String query, String lang, String mode) {
+
+        String cache_file = search_cache1 + "/" + lang + "/" + mode + "/" + query;
         String json = null;
-        if(IOUtils.exists(cache_file)){
+        if (IOUtils.exists(cache_file)) {
             try {
                 json = FileUtils.readFileToString(new File(cache_file), "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
 
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
-            GenericUrl url = new GenericUrl("https://"+lang+".wikipedia.org/w/api.php");
+            GenericUrl url = new GenericUrl("https://" + lang + ".wikipedia.org/w/api.php");
             url.put("action", "opensearch");
             url.put("search", query);
             url.put("profile", mode);
             url.put("redirect", "resolve");
             url.put("format", "json");
-            url.put("utf8","");
+            url.put("utf8", "");
             try {
                 HttpRequest request = requestFactory.buildGetRequest(url);
                 HttpResponse httpResponse = request.execute();
@@ -62,9 +63,9 @@ public class MediaWikiSearch {
         try {
             JSONParser parser = new JSONParser();
             JSONArray response = null;
-            response = (JSONArray)parser.parse(json);
+            response = (JSONArray) parser.parse(json);
             JSONArray urls = (JSONArray) response.get(1);
-            for(Object url: urls){
+            for (Object url : urls) {
                 ret.add(url.toString().replaceAll(" ", "_"));
             }
 //            System.out.println(response.get(3));
@@ -73,29 +74,29 @@ public class MediaWikiSearch {
         }
         return ret;
     }
-    public List<String> search(String query, String lang){
 
-        String cache_file = search_cache+"/"+lang+"/"+query;
+    public List<String> search(String query, String lang) {
+
+        String cache_file = search_cache + "/" + lang + "/" + query;
         String json = null;
-        if(IOUtils.exists(cache_file)){
+        if (IOUtils.exists(cache_file)) {
             try {
                 json = FileUtils.readFileToString(new File(cache_file), "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
 
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
-            GenericUrl url = new GenericUrl("https://"+lang+".wikipedia.org/w/api.php");
+            GenericUrl url = new GenericUrl("https://" + lang + ".wikipedia.org/w/api.php");
             url.put("action", "query");
             url.put("list", "search");
             url.put("srsearch", query);
             url.put("srlimit", 20);
             url.put("srprop", "size|score");
             url.put("format", "json");
-            url.put("utf8","");
+            url.put("utf8", "");
             try {
                 HttpRequest request = requestFactory.buildGetRequest(url);
                 HttpResponse httpResponse = request.execute();
@@ -112,10 +113,10 @@ public class MediaWikiSearch {
         try {
             JSONParser parser = new JSONParser();
             JSONObject response = null;
-            response = (JSONObject)parser.parse(json);
+            response = (JSONObject) parser.parse(json);
             JSONObject q = (JSONObject) response.get("query");
             JSONArray pages = (JSONArray) q.get("search");
-            for(Object page: pages){
+            for (Object page : pages) {
                 ret.add(((JSONObject) page).get("title").toString());
             }
         } catch (Exception e) {
@@ -124,30 +125,29 @@ public class MediaWikiSearch {
         return ret;
     }
 
-    public List<String> getCategories(String title, String lang){
+    public List<String> getCategories(String title, String lang) {
 
         String title_ = title.replaceAll("/", "||");
         String cache_file;
-        if(lang.equals("en"))
-            cache_file = title_cache+"/"+title_;
+        if (lang.equals("en"))
+            cache_file = title_cache + "/" + title_;
         else
-            cache_file = title_cache+"/"+lang+"/"+title_;
+            cache_file = title_cache + "/" + lang + "/" + title_;
 
         List<String> ret = new ArrayList<>();
-        if(cache_file.length()>200 || cache_file.endsWith("..")) return ret;
+        if (cache_file.length() > 200 || cache_file.endsWith("..")) return ret;
         String json = null;
-        if(IOUtils.exists(cache_file)){
+        if (IOUtils.exists(cache_file)) {
             try {
                 json = FileUtils.readFileToString(new File(cache_file), "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
 
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
-            GenericUrl url = new GenericUrl("https://"+lang+".wikipedia.org/w/api.php");
+            GenericUrl url = new GenericUrl("https://" + lang + ".wikipedia.org/w/api.php");
             url.put("action", "query");
             url.put("titles", title);
             url.put("prop", "categories");
@@ -168,19 +168,19 @@ public class MediaWikiSearch {
         try {
             JSONParser parser = new JSONParser();
             JSONObject response = null;
-            response = (JSONObject)parser.parse(json);
+            response = (JSONObject) parser.parse(json);
             JSONObject q = (JSONObject) response.get("query");
             JSONObject pages = (JSONObject) q.get("pages");
-            if(pages == null) return ret;
-            for(Object key: pages.keySet()){
-                if(key.toString().equals(-1))
+            if (pages == null) return ret;
+            for (Object key : pages.keySet()) {
+                if (key.toString().equals(-1))
                     return ret;
                 JSONObject page = (JSONObject) pages.get(key);
-                if(!page.containsKey("categories"))
+                if (!page.containsKey("categories"))
                     return ret;
                 JSONArray cats = (JSONArray) page.get("categories");
-                for(Object cat: cats){
-                    ret.add(((JSONObject)cat).get("title").toString());
+                for (Object cat : cats) {
+                    ret.add(((JSONObject) cat).get("title").toString());
                 }
             }
         } catch (Exception e) {
@@ -190,18 +190,17 @@ public class MediaWikiSearch {
         return ret;
     }
 
-    public String searchTitle(String title){
+    public String searchTitle(String title) {
 
-        String cache_file = title_cache+"/"+title;
+        String cache_file = title_cache + "/" + title;
         String json = null;
-        if(IOUtils.exists(cache_file)){
+        if (IOUtils.exists(cache_file)) {
             try {
                 json = FileUtils.readFileToString(new File(cache_file), "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
 
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
@@ -225,11 +224,11 @@ public class MediaWikiSearch {
         try {
             JSONParser parser = new JSONParser();
             JSONObject response = null;
-            response = (JSONObject)parser.parse(json);
+            response = (JSONObject) parser.parse(json);
             JSONObject q = (JSONObject) response.get("query");
             JSONObject pages = (JSONObject) q.get("pages");
-            for(Object key: pages.keySet()){
-                if(key.toString().equals(-1))
+            for (Object key : pages.keySet()) {
+                if (key.toString().equals(-1))
                     return null;
                 JSONObject page = (JSONObject) pages.get(key);
                 return page.get("title").toString();
@@ -240,23 +239,22 @@ public class MediaWikiSearch {
         return null;
     }
 
-    public List<String> getRedirectsTo(String title, String lang){
+    public List<String> getRedirectsTo(String title, String lang) {
 
-        String cache_file = redirect_cache+"/"+lang+"/"+title;
+        String cache_file = redirect_cache + "/" + lang + "/" + title;
         String json = null;
         List<String> redirects = new ArrayList<>();
-        if(IOUtils.exists(cache_file)){
+        if (IOUtils.exists(cache_file)) {
             try {
                 json = FileUtils.readFileToString(new File(cache_file), "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
 
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
-            GenericUrl url = new GenericUrl("https://"+lang+".wikipedia.org/w/api.php");
+            GenericUrl url = new GenericUrl("https://" + lang + ".wikipedia.org/w/api.php");
             url.put("action", "query");
             url.put("titles", title);
             url.put("prop", "redirects");
@@ -277,16 +275,16 @@ public class MediaWikiSearch {
         try {
             JSONParser parser = new JSONParser();
             JSONObject response = null;
-            response = (JSONObject)parser.parse(json);
+            response = (JSONObject) parser.parse(json);
             JSONObject q = (JSONObject) response.get("query");
             JSONObject pages = (JSONObject) q.get("pages");
-            for(Object key: pages.keySet()){
+            for (Object key : pages.keySet()) {
                 JSONObject page = (JSONObject) pages.get(key);
-                if(!page.containsKey("redirects"))
+                if (!page.containsKey("redirects"))
                     break;
                 JSONArray res = (JSONArray) page.get("redirects");
-                for(Object redirect: res){
-                    Object t = ((JSONObject)redirect).get("title");
+                for (Object redirect : res) {
+                    Object t = ((JSONObject) redirect).get("title");
                     redirects.add(t.toString());
                 }
             }
@@ -296,16 +294,16 @@ public class MediaWikiSearch {
         return redirects;
     }
 
-    public String formatTitle(String title){
+    public String formatTitle(String title) {
         String tmp = "";
-        for(String token: title.split("_")){
-            if(token.length()==0) continue;
-            tmp+=token.substring(0,1).toUpperCase();
-            if(token.length()>1)
-                tmp+=token.substring(1,token.length());
-            tmp+="_";
+        for (String token : title.split("_")) {
+            if (token.length() == 0) continue;
+            tmp += token.substring(0, 1).toUpperCase();
+            if (token.length() > 1)
+                tmp += token.substring(1, token.length());
+            tmp += "_";
         }
-        return tmp.substring(0, tmp.length()-1);
+        return tmp.substring(0, tmp.length() - 1);
     }
 
     public static void main(String[] args) {

@@ -1,87 +1,131 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
-import edu.illinois.cs.cogcomp.mlner.CrossLingualNER;
+import edu.illinois.cs.cogcomp.annotation.Annotator;
+import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
+import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
+import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
+import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
+import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
-import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiCandidateGenerator;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
+import edu.illinois.cs.cogcomp.xlwikifier.core.WikiCandidateGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 /**
- * Created by ctsai12 on 1/17/16.
+ * Created by ctsai12 on 10/26/16.
  */
-public class CrossLingualWikifier {
+public class CrossLingualWikifier extends Annotator {
 
-    private static WikiCandidateGenerator wcg;
-    private static Ranker ranker;
-    private static Logger logger = LoggerFactory.getLogger(CrossLingualWikifier.class);
-    private static String lang;
-    private static LangLinker ll;
+    private final Logger logger = LoggerFactory.getLogger(CrossLingualWikifier.class);
+    private Language language;
+    private WikiCandidateGenerator wcg;
+    private Ranker ranker;
+    private LangLinker ll;
+    public QueryDocument result; // saving results in this datastructure for the demo
 
+    public CrossLingualWikifier(Language lang, String configFile) throws IOException {
 
-    public CrossLingualWikifier(String lang, WikiCandidateGenerator wcg){
-        this.lang = lang;
-        setCandidateGenerator(wcg);
+        super(lang.getWikifierViewName(), new String[]{}, true, new ResourceManager(configFile));
+
+        this.language = lang;
+
+        doInitialize();
     }
 
-    public static void init(String l){
+    @Override
+    public void initialize(ResourceManager resourceManager) {
+        String lang = this.language.toString().toLowerCase();
 
-        if(!l.equals(lang)) {
-            if(ConfigParameters.db_path == null){
-                ConfigParameters.setPropValues();
+        if (!FreeBaseQuery.isloaded())
+            FreeBaseQuery.loadDB(true);
+
+        wcg = new WikiCandidateGenerator(lang, true);
+        ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path + "/ranker/default/" + lang + "/ranker.model");
+        ranker.setNERMode(false);
+        ll = new LangLinker();
+
+    }
+
+    @Override
+    public void addView(TextAnnotation textAnnotation) {
+
+        if (!textAnnotation.hasView(language.getNERViewName())) {
+            logger.error(language.getNERViewName() + " is required");
+        }
+
+        QueryDocument doc = ta2QueryDoc(textAnnotation);
+
+        annotate(doc);
+
+        CoreferenceView corefview = new CoreferenceView(getViewName(), textAnnotation);
+
+        // cluster mentions by the English Wikipedia title
+        Map<String, List<ELMention>> title2mentions = doc.mentions.stream()
+                .collect(groupingBy(x -> x.en_wiki_title));
+
+        for (String title : title2mentions.keySet()) {
+
+            // sort mentions in a cluster by the length of surface forms
+            List<ELMention> len_sort = title2mentions.get(title).stream()
+                    .sorted((x1, x2) -> Integer.compare(x2.getSurface().length(), x1.getSurface().length()))
+                    .collect(Collectors.toList());
+
+            List<Constituent> cons = new ArrayList<>();
+            for (ELMention m : len_sort) {
+                int start = textAnnotation.getTokenIdFromCharacterOffset(m.getStartOffset());
+                int end = textAnnotation.getTokenIdFromCharacterOffset(m.getEndOffset() - 1) + 1;
+                Constituent c = new Constituent(title, getViewName(), textAnnotation, start, end);
+                cons.add(c);
             }
 
-            if(!FreeBaseQuery.isloaded())
-                FreeBaseQuery.loadDB(true);
-
-            logger.info("Setting up xlwikifier for language: "+l);
-            lang = l;
-            wcg = new WikiCandidateGenerator();
-//            if(ranker != null) ranker.closeDBs();
-            ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path+"/ranker/default/"+lang+"/ranker.model");
-            ranker.fm.ner_mode = false;
-//            if(ll!=null) ll.closeDB();
-            ll = new LangLinker();
-        }
-    }
-
-    public void setRanker(Ranker ranker){
-        this.ranker = ranker;
-    }
-
-    public void setCandidateGenerator(WikiCandidateGenerator wcg){
-        this.wcg = wcg;
-    }
-
-
-    public void wikify(List<QueryDocument> docs){
-        if(this.wcg == null || this.ranker == null){
-            logger.error("Ranker or Candidate Generator is not set");
+            // the longest mentions is the canonical mention
+            corefview.addCorefEdges(cons.get(0), cons);
         }
 
-        wcg.genCandidates(docs, lang);
-        ranker.setWikiTitleByModel(docs);
+        textAnnotation.addView(getViewName(), corefview);
+
     }
 
     /**
-     * This is only used in demo now
+     * Convert textAnnotation to the internal data structure
+     * @param textAnnotation
+     * @return
+     */
+    private QueryDocument ta2QueryDoc(TextAnnotation textAnnotation){
+        QueryDocument doc = new QueryDocument(textAnnotation.getId());
+        doc.plain_text = textAnnotation.getText();
+        for (Constituent c : textAnnotation.getView(language.getNERViewName())) {
+            ELMention m = new ELMention("", c.getStartCharOffset(), c.getEndCharOffset());
+            m.setSurface(c.getSurfaceForm());
+            m.setType(c.getLabel());
+            doc.mentions.add(m);
+        }
+        return doc;
+    }
+
+    /**
+     * Real job happens here: generating title candidates and then rank them.
      * @param doc
      */
-    public static void wikify(QueryDocument doc){
-        List<QueryDocument> docs = new ArrayList<>();
-        docs.add(doc);
-        wcg.genCandidates(docs, lang);
-        ranker.setWikiTitleByModel(docs);
-//        te.solveByWikiTitle(docs, lang);
+    public void annotate(QueryDocument doc) {
+        wcg.genCandidates(doc);
+        ranker.setWikiTitleByModel(doc);
 
+        String lang = language.toString().toLowerCase();
         // get the English title
-        if(!lang.equals("en")) {
+        if (!lang.equals("en")) {
             for (ELMention m : doc.mentions) {
                 if (!m.getWikiTitle().startsWith("NIL")) {
                     String ent = ll.translateToEn(m.getWikiTitle(), lang);
@@ -89,20 +133,12 @@ public class CrossLingualWikifier {
                         m.en_wiki_title = ent;
                 }
             }
-        }
-        else{
-            for(ELMention m: doc.mentions)
+        } else {
+            for (ELMention m : doc.mentions)
                 m.en_wiki_title = m.getWikiTitle();
         }
-    }
 
-    public static void main(String[] args) {
-        CrossLingualNER.init("es", false);
-        String text = "Barack Hussein Obama II3 es el cuadragésimo cuarto y actual presidente de los Estados Unidos de América. Fue senador por el estado de Illinois desde el 3 de enero de 2005 hasta su renuncia el 16 de noviembre de 2008. Además, es el quinto legislador afroamericano en el Senado de los Estados Unidos, tercero desde la era de reconstrucción. También fue el primer candidato afroamericano nominado a la presidencia por el Partido Demócrata y es el primero en ejercer el cargo presidencial.";
-        QueryDocument doc = CrossLingualNER.annotate(text); // from DF_FTR_TUR_0514802_20140900
-        CrossLingualWikifier.init("es");
-        CrossLingualWikifier.wikify(doc);
-        doc.mentions.forEach(x -> System.out.println(x.getMention()+" "+x.getWikiTitle()));
-
+        // save the result, which is used in generating demo output
+        this.result = doc;
     }
 }

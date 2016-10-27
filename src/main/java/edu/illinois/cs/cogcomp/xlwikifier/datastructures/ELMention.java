@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  */
 public class ELMention {
     public String id;
-    private String mention;
+    private String surface;
     public String docid;
     private String type;
     private int start_offset;
@@ -25,9 +25,9 @@ public class ELMention {
     public String en_wiki_title = "NIL";
     private List<WikiCand> cands = new ArrayList<>();
     public boolean eazy;
-	public String pred_type;
+    public String pred_type;
     public String gold_lang;
-    public boolean is_ne;
+    //    public boolean is_ne;
     public boolean is_ne_gold;
     public int ngram;
     public boolean is_stop;
@@ -49,68 +49,141 @@ public class ELMention {
     public String gold_mid;
     public String noun_type;
 
-    public ELMention(){};
+    public ELMention() {
+    }
 
-    public ELMention(String docid, int start, int end){
+    ;
+
+    public ELMention(String docid, int start, int end) {
         this.docid = docid;
         this.start_offset = start;
         this.end_offset = end;
     }
 
-    public ELMention(String id, String mention, String docid){
+    public ELMention(String id, String mention, String docid) {
         this.id = id;
-        this.mention = mention;
+        this.surface = mention;
         this.docid = docid;
     }
 
-    public void setType(String type){ this.type = type; }
-    public void setLanguage(String lang){ this.language = lang; }
-    public void setStartOffset(int start){ this.start_offset = start; }
-    public void setEndOffset(int end){ this.end_offset = end; }
-    public void setMid(String ans){ this.mid = ans; }
-    public void setMention(String mention){
-        this.mention = mention;
+    public ELMention(String surface, int start, int end, String type, String wiki, String enwiki) {
+        this.surface = surface;
+        this.start_offset = start;
+        this.end_offset = end;
+        this.type = type;
+        this.wiki_title = wiki;
+        this.en_wiki_title = enwiki;
     }
-    public void setWikiTitle(String t){ this.wiki_title = t; }
-    public void setNounType(String t){ this.noun_type = t; }
-    public String getNounType(){ return this.noun_type; }
-    public void setMidVec(float[] vec){ this.mid_vec = vec; }
-    public float[] getMidVec(){ return this.mid_vec; }
 
-    public String getID(){ return this.id; }
-    public String getMention(){ return this.mention; }
-    public String getDocID(){ return this.docid; }
-    public String getType(){ return this.type; }
-    public String getLanguage(){ return this.language; }
-    public int getStartOffset(){ return this.start_offset; }
-    public int getEndOffset(){ return this.end_offset; }
-    public String getMid(){ return this.mid; }
-    public String getGoldMidOrNIL(){
-        if(gold_mid.startsWith("NIL"))
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setLanguage(String lang) {
+        this.language = lang;
+    }
+
+    public void setStartOffset(int start) {
+        this.start_offset = start;
+    }
+
+    public void setEndOffset(int end) {
+        this.end_offset = end;
+    }
+
+    public void setMid(String ans) {
+        this.mid = ans;
+    }
+
+    public void setSurface(String surface) {
+        this.surface = surface;
+    }
+
+    public void setWikiTitle(String t) {
+        this.wiki_title = t;
+    }
+
+    public void setNounType(String t) {
+        this.noun_type = t;
+    }
+
+    public String getNounType() {
+        return this.noun_type;
+    }
+
+    public void setMidVec(float[] vec) {
+        this.mid_vec = vec;
+    }
+
+    public float[] getMidVec() {
+        return this.mid_vec;
+    }
+
+    public String getID() {
+        return this.id;
+    }
+
+    public String getSurface() {
+        return this.surface;
+    }
+
+    public String getDocID() {
+        return this.docid;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getLanguage() {
+        return this.language;
+    }
+
+    public int getStartOffset() {
+        return this.start_offset;
+    }
+
+    public int getEndOffset() {
+        return this.end_offset;
+    }
+
+    public String getMid() {
+        return this.mid;
+    }
+
+    public String getGoldMidOrNIL() {
+        if (gold_mid.startsWith("NIL"))
             return "NIL";
-        return this.gold_mid; }
-    public String getWikiTitle(){ return this.wiki_title; }
-    public String getGoldMid(){ return this.gold_mid; }
+        return this.gold_mid;
+    }
+
+    public String getWikiTitle() {
+        return this.wiki_title;
+    }
+
+    public String getGoldMid() {
+        return this.gold_mid;
+    }
 
     @Override
     public String toString() {
-    	return mention+" "+start_offset+","+end_offset;
+        return "\"" + surface + "\", " + start_offset + ", " + end_offset + ", \"" + type + "\", \"" + wiki_title + "\", \"" + en_wiki_title + "\"";
     }
 
     public void setCandidates(List<WikiCand> wikiCandidates) {
         this.cands = wikiCandidates;
     }
 
-    public List<WikiCand> getCandidates(){
+    public List<WikiCand> getCandidates() {
         return this.cands;
     }
 
-    public void prepareFeatures(QueryDocument doc, RankerFeatureManager fm, List<ELMention> pms){
+    public void prepareFeatures(QueryDocument doc, RankerFeatureManager fm, List<ELMention> pms) {
         context30 = fm.getWeightedContextVector(this, doc, 30);
         context100 = fm.getWeightedContextVector(this, doc, 100);
         context200 = fm.getWeightedContextVector(this, doc, 200);
 
-        if(!fm.ner_mode) {
+        if (!fm.ner_mode) {
             other_ne_vecs = new ArrayList<>();
             for (ELMention me : doc.mentions) {
                 if (getStartOffset() != me.getStartOffset() || getEndOffset() != me.getEndOffset())
@@ -124,7 +197,7 @@ public class ELMention {
     }
 
     @Override
-    public boolean equals(Object obj){
+    public boolean equals(Object obj) {
         if (!(obj instanceof ELMention))
             return false;
         if (obj == this)
@@ -132,8 +205,8 @@ public class ELMention {
 
         ELMention rhs = (ELMention) obj;
         return new EqualsBuilder().append(docid, rhs.getDocID())
-                                .append(start_offset, rhs.getStartOffset())
-                                .append(end_offset, rhs.getEndOffset())
-                                .isEquals();
+                .append(start_offset, rhs.getStartOffset())
+                .append(end_offset, rhs.getEndOffset())
+                .isEquals();
     }
 }

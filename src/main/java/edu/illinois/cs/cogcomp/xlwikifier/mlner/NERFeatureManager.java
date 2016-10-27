@@ -1,4 +1,4 @@
-package edu.illinois.cs.cogcomp.mlner.core;
+package edu.illinois.cs.cogcomp.xlwikifier.mlner;
 
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
 import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;
@@ -22,7 +22,7 @@ public class NERFeatureManager implements Serializable {
     private boolean alltype = true;
     private boolean mono = false;
 
-    public NERFeatureManager(String lang){
+    public NERFeatureManager(String lang) {
         lex = new LexManager();
         mws = new MediaWikiSearch();
         ll = new LangLinker();
@@ -31,15 +31,11 @@ public class NERFeatureManager implements Serializable {
     }
 
 
-    public Map<String, Double> getFeatureMap(ELMention mention, List<ELMention> before_mentions, List<ELMention> after_mentions, boolean train){
+    public Map<String, Double> getFeatureMap(ELMention mention, List<ELMention> before_mentions, List<ELMention> after_mentions, boolean train) {
         Map<String, Double> featureMap = new HashMap<>();
-        if(mention.is_ne){
-            addIsNE(mention, featureMap);
-        }
-        else if(mention.is_stop || (mention.getMid().startsWith("NIL") && mention.getWikiTitle().startsWith("NIL"))){
+        if (mention.is_stop || (mention.getMid().startsWith("NIL") && mention.getWikiTitle().startsWith("NIL"))) {
             addStopWord(mention, featureMap);
-        }
-        else {
+        } else {
             addTopWikiTypes(mention, featureMap);
             addBeforeWikiTypes(before_mentions, featureMap, 0);
             addAfterWikiTypes(after_mentions, featureMap, 0);
@@ -55,37 +51,37 @@ public class NERFeatureManager implements Serializable {
         return featureMap;
     }
 
-    private void addIsNE(ELMention m, Map<String, Double> fm){
-        addFeature("ISNEFROMEPREVIOUS-"+m.pred_type, 1, fm);
-        addFeature("ISNEFROMEPREVIOUS-"+m.pred_type.substring(2), 1, fm);
+    private void addIsNE(ELMention m, Map<String, Double> fm) {
+        addFeature("ISNEFROMEPREVIOUS-" + m.pred_type, 1, fm);
+        addFeature("ISNEFROMEPREVIOUS-" + m.pred_type.substring(2), 1, fm);
     }
 
-    private void addStopWord(ELMention m, Map<String, Double> fm){
-        if(m.is_stop)
+    private void addStopWord(ELMention m, Map<String, Double> fm) {
+        if (m.is_stop)
             addFeature("ISSTOPWORD", 1, fm);
     }
 
-    private void addAfterTypes(List<ELMention> after, Map<String, Double> f, int k){
-        if(after.size()>k){
-            if(after.get(k).is_stop) return;
+    private void addAfterTypes(List<ELMention> after, Map<String, Double> f, int k) {
+        if (after.size() > k) {
+            if (after.get(k).is_stop) return;
             String mid = after.get(k).getMid();
-            if(!mid.startsWith("NIL")){
+            if (!mid.startsWith("NIL")) {
                 Set<String> tokenset = FreeBaseQuery.getCoarseTypeSet(mid);
-                for(String t: tokenset)
-                    if(alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
-                        addFeature("AFTERFBTYPETOKEN-"+t, 1.0, f);
+                for (String t : tokenset)
+                    if (alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
+                        addFeature("AFTERFBTYPETOKEN-" + t, 1.0, f);
             }
         }
     }
 
     public void addAfterWikiTypes(List<ELMention> after, Map<String, Double> f, int k) {
-        if(after.size()>k){
-            if(after.get(k).is_stop) return;
-            if(after.get(k).getCandidates().size() == 0) return;
+        if (after.size() > k) {
+            if (after.get(k).is_stop) return;
+            if (after.get(k).getCandidates().size() == 0) return;
             String lang = after.get(k).getCandidates().get(0).lang;
             String wiki_title = after.get(k).getCandidates().get(0).orig_title;
-            if(wiki_title != null && !wiki_title.startsWith("NIL")){
-                if(mono) {
+            if (wiki_title != null && !wiki_title.startsWith("NIL")) {
+                if (mono) {
                     List<String> cats = mws.getCategories(mws.formatTitle(wiki_title), lang);
                     Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                             .collect(toSet());
@@ -93,8 +89,7 @@ public class NERFeatureManager implements Serializable {
                     for (String t : tokenset) {
                         addFeature("FOREIGNAFTERWIKICATTOKEN-" + t, 1.0, f);
                     }
-                }
-                else {
+                } else {
                     String en_title = wiki_title;
                     if (!lang.equals("en")) en_title = ll.translateToEn(wiki_title, lang);
                     if (en_title != null) {
@@ -110,31 +105,31 @@ public class NERFeatureManager implements Serializable {
         }
     }
 
-    private void addBeforeTypes(List<ELMention> ms, Map<String, Double> f, int k){
-        if(ms.size()>k){
-            if(ms.get(k).is_stop) {
+    private void addBeforeTypes(List<ELMention> ms, Map<String, Double> f, int k) {
+        if (ms.size() > k) {
+            if (ms.get(k).is_stop) {
                 return;
             }
             String mid = ms.get(k).getMid();
-            if(!mid.startsWith("NIL")){
+            if (!mid.startsWith("NIL")) {
                 Set<String> tokenset = FreeBaseQuery.getCoarseTypeSet(mid);
-                for(String t: tokenset)
-                    if(alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
-                        addFeature("BEFOREFBTYPETOKEN-"+t, 1.0, f);
+                for (String t : tokenset)
+                    if (alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
+                        addFeature("BEFOREFBTYPETOKEN-" + t, 1.0, f);
             }
         }
     }
 
     public void addBeforeWikiTypes(List<ELMention> ms, Map<String, Double> f, int k) {
-		if(ms.size()>k){
-			if(ms.get(k).is_stop) return;
-			if(ms.get(k).getCandidates().size() == 0){
+        if (ms.size() > k) {
+            if (ms.get(k).is_stop) return;
+            if (ms.get(k).getCandidates().size() == 0) {
                 return;
             }
-			String wiki_title = ms.get(k).getCandidates().get(0).orig_title;
+            String wiki_title = ms.get(k).getCandidates().get(0).orig_title;
             String lang = ms.get(k).getCandidates().get(0).lang;
-            if(wiki_title != null && !wiki_title.startsWith("NIL")){
-                if(mono) {
+            if (wiki_title != null && !wiki_title.startsWith("NIL")) {
+                if (mono) {
                     List<String> cats = mws.getCategories(mws.formatTitle(wiki_title), lang);
                     Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                             .collect(toSet());
@@ -142,8 +137,7 @@ public class NERFeatureManager implements Serializable {
                     for (String t : tokenset) {
                         addFeature("FOREIGNBEFOREWIKICATTOKEN-" + t, 1.0, f);
                     }
-                }
-                else {
+                } else {
                     String en_title = wiki_title;
                     if (!lang.equals("en")) en_title = ll.translateToEn(wiki_title, lang);
                     if (en_title != null) {
@@ -158,15 +152,15 @@ public class NERFeatureManager implements Serializable {
                     }
                 }
             }
-		}
+        }
     }
 
     public void addTopWikiTypes(ELMention m, Map<String, Double> f) {
-        if(m.getCandidates().size()>0){
+        if (m.getCandidates().size() > 0) {
             String wiki_title = m.getCandidates().get(0).orig_title;
             String lang = m.getCandidates().get(0).lang;
-            if(wiki_title != null && !wiki_title.startsWith("NIL")){
-                if(mono) {
+            if (wiki_title != null && !wiki_title.startsWith("NIL")) {
+                if (mono) {
                     List<String> cats = mws.getCategories(mws.formatTitle(wiki_title), lang);
                     Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                             .collect(toSet());
@@ -174,8 +168,7 @@ public class NERFeatureManager implements Serializable {
                     for (String t : tokenset) {
                         addFeature("FOREIGNTOPWIKICATTOKEN-" + t, 1.0, f);
                     }
-                }
-                else {
+                } else {
                     String en_title = wiki_title;
                     if (!lang.equals("en")) en_title = ll.translateToEn(wiki_title, lang);
                     if (en_title != null) {
@@ -197,9 +190,9 @@ public class NERFeatureManager implements Serializable {
             String mid;
             mid = m.getMid();
 
-            if(!mid.startsWith("NIL")) {
+            if (!mid.startsWith("NIL")) {
                 Set<String> tokenset = FreeBaseQuery.getCoarseTypeSet(mid);
-                for(String t: tokenset) {
+                for (String t : tokenset) {
                     addFeature("TOPFBTYPETOKEN-" + t, 1.0, f);
                 }
             }
@@ -210,18 +203,18 @@ public class NERFeatureManager implements Serializable {
 
     public void addAfterSecondTypes(List<ELMention> ms, Map<String, Double> f, int k) {
         try {
-            if(ms.size()>k){
+            if (ms.size() > k) {
                 ELMention m = ms.get(k);
-                if(m.is_stop) {
+                if (m.is_stop) {
                     return;
                 }
-                if(m.getCandidates().size()>1) {
+                if (m.getCandidates().size() > 1) {
                     String mid = m.getCandidates().get(1).title;
-                    if(!mid.startsWith("NIL")) {
+                    if (!mid.startsWith("NIL")) {
                         Set<String> tokenset = FreeBaseQuery.getCoarseTypeSet(mid);
-                        for(String t: tokenset)
-                            if(alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
-                                addFeature("AFTERFBTYPETOKEN-"+t, 1.0, f);
+                        for (String t : tokenset)
+                            if (alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
+                                addFeature("AFTERFBTYPETOKEN-" + t, 1.0, f);
                     }
                 }
             }
@@ -232,18 +225,18 @@ public class NERFeatureManager implements Serializable {
 
     public void addBeforeSecondTypes(List<ELMention> ms, Map<String, Double> f, int k) {
         try {
-            if(ms.size()>k){
+            if (ms.size() > k) {
                 ELMention m = ms.get(k);
-                if(m.is_stop) {
+                if (m.is_stop) {
                     return;
                 }
-                if(m.getCandidates().size()>1) {
+                if (m.getCandidates().size() > 1) {
                     String mid = m.getCandidates().get(1).title;
-                    if(!mid.startsWith("NIL")) {
+                    if (!mid.startsWith("NIL")) {
                         Set<String> tokenset = FreeBaseQuery.getCoarseTypeSet(mid);
-                        for(String t: tokenset)
-                            if(alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
-                                addFeature("BEFOREFBTYPETOKEN-"+t, 1.0, f);
+                        for (String t : tokenset)
+                            if (alltype || t.equals("location") || t.equals("person") || t.equals("organization"))
+                                addFeature("BEFOREFBTYPETOKEN-" + t, 1.0, f);
                     }
                 }
             }
@@ -254,12 +247,12 @@ public class NERFeatureManager implements Serializable {
 
     public void addSecondTypes(ELMention m, Map<String, Double> f) {
         try {
-            if(m.getCandidates().size()>1) {
+            if (m.getCandidates().size() > 1) {
                 String mid = m.getCandidates().get(1).title;
-                if(!mid.startsWith("NIL")) {
+                if (!mid.startsWith("NIL")) {
                     Set<String> tokenset = FreeBaseQuery.getCoarseTypeSet(mid);
-                    for(String t: tokenset)
-                        addFeature("TOPFBTYPETOKEN-"+t, 1.0, f);
+                    for (String t : tokenset)
+                        addFeature("TOPFBTYPETOKEN-" + t, 1.0, f);
                 }
             }
         } catch (Exception e) {

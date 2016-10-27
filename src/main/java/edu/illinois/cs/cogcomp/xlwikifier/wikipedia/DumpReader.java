@@ -22,33 +22,34 @@ public class DumpReader {
     public Map<String, String> title2id;
     public Map<String, String> id2title;
     public Map<String, String> id2en;
-    public DumpReader(){
+
+    public DumpReader() {
 
     }
 
-    public void readId2En(String file, String target_lang){
-        logger.info("Reading lang links "+file);
+    public void readId2En(String file, String target_lang) {
+        logger.info("Reading lang links " + file);
         id2en = new HashMap<>();
         try {
             InputStream in = new GZIPInputStream(new FileInputStream(file));
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
-            while(line!=null){
-                if(!line.contains("INSERT INTO")) {
+            while (line != null) {
+                if (!line.contains("INSERT INTO")) {
                     line = br.readLine();
                     continue;
                 }
                 int start = line.indexOf("(");
-                line = line.substring(start+1, line.length());
+                line = line.substring(start + 1, line.length());
                 String[] tokens = line.split("\\),\\(");
-                for(String t: tokens){
+                for (String t : tokens) {
                     String[] ts = t.split("'");
-                    if(ts.length<4) continue;
-                    String id = ts[0].substring(0, ts[0].length()-1);
+                    if (ts.length < 4) continue;
+                    String id = ts[0].substring(0, ts[0].length() - 1);
                     String lang = ts[1];
                     String en = ts[3];
                     en = en.replaceAll("\\\\", "");
-                    if(lang.equals(target_lang))
+                    if (lang.equals(target_lang))
                         id2en.put(id, en);
                 }
                 line = br.readLine();
@@ -56,18 +57,18 @@ public class DumpReader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        logger.info("id2en size "+id2en.size());
+        logger.info("id2en size " + id2en.size());
     }
 
-    public void readRedirects(String file){
-        logger.info("Reading redirects "+file);
+    public void readRedirects(String file) {
+        logger.info("Reading redirects " + file);
         id2redirect = new HashMap<>();
         try {
             InputStream in = new GZIPInputStream(new FileInputStream(file));
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
-            while(line!=null){
-                if(line.contains("INSERT INTO")) {
+            while (line != null) {
+                if (line.contains("INSERT INTO")) {
                     int start = line.indexOf("(");
                     line = line.substring(start + 1, line.length());
                     String[] tokens = line.split("\\),\\(");
@@ -94,9 +95,8 @@ public class DumpReader {
     }
 
 
-
-    public void readTitle2ID(String file){
-        logger.info("Reading titles "+file);
+    public void readTitle2ID(String file) {
+        logger.info("Reading titles " + file);
         title2id = new HashMap<>();
         id2title = new HashMap<>();
 
@@ -104,8 +104,8 @@ public class DumpReader {
             InputStream in = new GZIPInputStream(new FileInputStream(file));
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
-            while(line!=null){
-                if(line.contains("INSERT INTO")) {
+            while (line != null) {
+                if (line.contains("INSERT INTO")) {
                     int start = line.indexOf("(");
                     line = line.substring(start + 1, line.length());
                     String[] tokens = line.split("\\),\\(");
@@ -132,13 +132,12 @@ public class DumpReader {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        logger.info("#titles:"+title2id.size());
+        logger.info("#titles:" + title2id.size());
     }
 
     public static void main(String[] args) {
 //        DumpReader dr = new DumpReader();
 //        dr.readId2En("/shared/bronte/ctsai12/multilingual/wikidump/es/eswiki-20151002-langlinks.sql.gz");
-
 
 
     }

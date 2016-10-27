@@ -269,7 +269,7 @@ public class RankerFeatureManager implements Serializable {
 
     private void addCharBigramDice(WikiCand cand, ELMention m, Map<String, Double> f) {
 
-        String query = m.getMention().toLowerCase();
+        String query = m.getSurface().toLowerCase();
         String title = cand.title.replaceAll("_", " ");
 
         Set<String> querybi = getCharBigram(query);
@@ -280,7 +280,7 @@ public class RankerFeatureManager implements Serializable {
 
     private void addCharDice(WikiCand cand, ELMention m, Map<String, Double> f) {
 
-        String query = m.getMention().toLowerCase();
+        String query = m.getSurface().toLowerCase();
         String title = cand.title.replaceAll("_", " ");
 
         Set<String> queryset = getCharSet(query);
@@ -318,11 +318,11 @@ public class RankerFeatureManager implements Serializable {
 
         String query, title;
 //        if(cand.orig_title!=null){
-//            query = m.getMention();
+//            query = m.getSurface();
 //            title = cand.orig_title.replaceAll("_", " ");
 //        }
 //        else{
-        query = m.getMention();
+        query = m.getSurface();
         title = cand.getTitle().replaceAll("_", " ");
 //        }
 
@@ -336,7 +336,7 @@ public class RankerFeatureManager implements Serializable {
 
     private void addNumTokenMatch(WikiCand cand, ELMention m, Map<String, Double> f) {
 
-        int mn = m.getMention().split("\\s+").length;
+        int mn = m.getSurface().split("\\s+").length;
         int cn = cand.getTitle().replaceAll("_", " ").split("\\s+").length;
 
         if (mn == cn)

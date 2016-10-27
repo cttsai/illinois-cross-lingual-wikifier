@@ -1,9 +1,9 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
+import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,27 +18,34 @@ public class ConfigParameters {
     public static String model_path;
     public static Map<String, String> ner_models = new HashMap<>();
 
-    public static void setPropValues(){
-        setPropValues("config/xlwikifier.config");
-    }
-
-    public static void setPropValues(String file){
+    public static void setPropValues() {
+        String default_config = "config/xlwikifier.config";
         ResourceManager rm = null;
         try {
-            rm = new ResourceManager(file);
+            rm = new ResourceManager(default_config);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        setPropValues(rm);
+    }
+
+    public static void setPropValues(ResourceManager rm) {
+//        ResourceManager rm = null;
+//        try {
+//            rm = new ResourceManager(file);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         db_path = rm.getString("db_path").trim();
         dump_path = rm.getString("dump_path").trim();
         stopword_path = rm.getString("stopword_path").trim();
         model_path = rm.getString("model_path").trim();
 
         // load NER model configs
-        for(Language lang: Language.values()){
+        for (Language lang : Language.values()) {
             String l = lang.toString().toLowerCase();
-            String key = l+"_ner_config";
-            if(rm.containsKey(key))
+            String key = l + "_ner_config";
+            if (rm.containsKey(key))
                 ner_models.put(l, rm.getString(key).trim());
         }
     }

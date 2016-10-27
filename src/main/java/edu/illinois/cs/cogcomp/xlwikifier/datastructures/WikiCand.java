@@ -18,16 +18,24 @@ public class WikiCand {
     public String query_surface;
     public String orig_title;
 
-    public WikiCand(String title, double s){
+    public WikiCand(String title, double s) {
         this.title = title;
         this.score = s;
     }
 
-    public String getTitle(){ return title; }
-    public double getScore(){ return score; }
-    public void setScore(double s){ this.score = s; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String toString(){
-        return title+"\t"+orig_title+"\t"+score;
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double s) {
+        this.score = s;
+    }
+
+    public String toString() {
+        return title + "\t" + orig_title + "\t" + score;
     }
 }

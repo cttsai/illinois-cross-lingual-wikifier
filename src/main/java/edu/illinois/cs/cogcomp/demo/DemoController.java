@@ -16,8 +16,8 @@ public class DemoController {
 
     @CrossOrigin
     @RequestMapping(value = "/xlwikifier", method = RequestMethod.POST)
-    public XLWikifierDemo annotate(@RequestParam(value="text", defaultValue="") String text,
-                                   @RequestParam(value="lang", defaultValue = "") String lang,
+    public XLWikifierDemo annotate(@RequestParam(value = "text", defaultValue = "") String text,
+                                   @RequestParam(value = "lang", defaultValue = "") String lang,
 //                                   @RequestParam(value="transfer", defaultValue = "") boolean transfer,
                                    HttpServletRequest request) {
 
@@ -26,11 +26,11 @@ public class DemoController {
         System.out.println(binder.getLoggerFactoryClassStr());
 
 
-        logger.info("Request from: "+request.getRemoteAddr()+" "+request.getRemoteUser());
-        logger.info("Text: "+text);
-        logger.info("Lang: "+lang);
+        logger.info("Request from: " + request.getRemoteAddr() + " " + request.getRemoteUser());
+        logger.info("Text: " + text);
+        logger.info("Lang: " + lang);
 //        logger.info("Transfer: "+transfer);
 
-        return new XLWikifierDemo(text, lang, false);
+        return new XLWikifierDemo(text, lang);
     }
 }

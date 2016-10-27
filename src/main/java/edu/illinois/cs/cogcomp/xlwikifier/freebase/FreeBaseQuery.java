@@ -22,16 +22,16 @@ public class FreeBaseQuery {
     public static HTreeMap<String, String> titlelang2mid;
     public static HTreeMap<String, String[]> midlang2title;
 
-    public static boolean isloaded(){
+    public static boolean isloaded() {
         return db != null;
     }
 
-    public static void loadDB(boolean read_only){
+    public static void loadDB(boolean read_only) {
 
-        String db_file = ConfigParameters.db_path+"/freebase/mapdb";
+        String db_file = ConfigParameters.db_path + "/freebase/mapdb";
 //        String db_file = "/shared/bronte/ctsai12/freebase/mapdb-tmp";
 
-        if(read_only) {
+        if (read_only) {
             db = DBMaker.fileDB(db_file)
                     .closeOnJvmShutdown()
                     .readOnly()
@@ -44,8 +44,7 @@ public class FreeBaseQuery {
                     .keySerializer(Serializer.STRING)
                     .valueSerializer(Serializer.STRING)
                     .open();
-        }
-        else {
+        } else {
             db = DBMaker.fileDB(db_file)
                     .closeOnJvmShutdown()
                     .make();
@@ -87,9 +86,9 @@ public class FreeBaseQuery {
         Map<String, List<String>> lang2titles = new HashMap<>();
 
         int cnt = 0;
-        while(line != null){
-            if(++cnt%100000 == 0){
-                System.out.print(cnt+"\r");
+        while (line != null) {
+            if (++cnt % 100000 == 0) {
+                System.out.print(cnt + "\r");
             }
 //            if(cnt == 100000) break;
             String[] parts = line.trim().split("\t");
@@ -106,13 +105,13 @@ public class FreeBaseQuery {
             // process the current line
             mid = parts[0];
 //            if(parts.length == 2) types.add(parts[1]);
-            if(parts.length == 3 && !parts[1].contains("_id")){
+            if (parts.length == 3 && !parts[1].contains("_id")) {
                 String lang = parts[1];
                 String title = parts[2];
 //                if(!lang2titles.containsKey(lang)) lang2titles.put(lang, new ArrayList<>());
 //                lang2titles.get(lang).add(title);
 //                tl2msink.put(title+"|"+lang, mid);
-                populateTitleLang2Mid(title+"|"+lang, mid);
+                populateTitleLang2Mid(title + "|" + lang, mid);
             }
 
             line = br.readLine();
@@ -124,23 +123,23 @@ public class FreeBaseQuery {
         FreeBaseQuery.closeDB();
     }
 
-    public static void populateTitleLang2Mid(String key, String mid){
+    public static void populateTitleLang2Mid(String key, String mid) {
         titlelang2mid.put(key, mid);
     }
 
-    public static void populateMid2Types(String mid, List<String> types){
+    public static void populateMid2Types(String mid, List<String> types) {
         types = types.stream().distinct().collect(toList());
         String[] tmp = new String[types.size()];
         tmp = types.toArray(tmp);
         mid2types.put(mid, tmp);
     }
 
-    public static void populateMidLang2Titles(String mid, Map<String, List<String>> lang2titles){
-        for(String lang: lang2titles.keySet()){
+    public static void populateMidLang2Titles(String mid, Map<String, List<String>> lang2titles) {
+        for (String lang : lang2titles.keySet()) {
             List<String> titles = lang2titles.get(lang);
             String[] tmp = new String[titles.size()];
             tmp = titles.toArray(tmp);
-            midlang2title.put(mid+"|"+lang, tmp);
+            midlang2title.put(mid + "|" + lang, tmp);
         }
     }
 
@@ -182,35 +181,35 @@ public class FreeBaseQuery {
 //                .make();
 //    }
 
-    public static void closeDB(){
-        if(db != null && !db.isClosed())
+    public static void closeDB() {
+        if (db != null && !db.isClosed())
             db.close();
     }
 
-    public static List<String> getTitlesFromMid(String mid, String lang){
-        String key = mid+"|"+lang;
-        if(midlang2title.containsKey(key))
+    public static List<String> getTitlesFromMid(String mid, String lang) {
+        String key = mid + "|" + lang;
+        if (midlang2title.containsKey(key))
             return Arrays.asList(midlang2title.get(key));
         else
             return null;
     }
 
-    public static String getMidFromTitle(String title, String lang){
+    public static String getMidFromTitle(String title, String lang) {
         title = formatTitle(title);
-        String key = title+"|"+lang;
-        if(titlelang2mid.containsKey(key))
+        String key = title + "|" + lang;
+        if (titlelang2mid.containsKey(key))
             return titlelang2mid.get(key);
         else
             return null;
     }
 
-    public static List<String> getTypesFromTitle(String title, String lang){
+    public static List<String> getTypesFromTitle(String title, String lang) {
         String mid = getMidFromTitle(title, lang);
-        if(mid == null) return new ArrayList<>();
+        if (mid == null) return new ArrayList<>();
         return getTypesFromMid(mid);
     }
 
-    public static Set<String> getCoarseTypeSet(String mid){
+    public static Set<String> getCoarseTypeSet(String mid) {
 
         List<String> types = getTypesFromMid(mid);
         Set<String> tokenset = types.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\.")).stream())
@@ -218,26 +217,26 @@ public class FreeBaseQuery {
         return tokenset;
     }
 
-    public static List<String> getTypesFromMid(String mid){
-        if(mid!=null && mid2types.containsKey(mid))
+    public static List<String> getTypesFromMid(String mid) {
+        if (mid != null && mid2types.containsKey(mid))
             return Arrays.asList(mid2types.get(mid));
         else
             return new ArrayList<>();
     }
 
-    public static String formatTitle(String title){
-        if(title.contains(" "))
+    public static String formatTitle(String title) {
+        if (title.contains(" "))
             title = title.replaceAll(" ", "_");
-        if(title.toLowerCase().equals(title)){
+        if (title.toLowerCase().equals(title)) {
             String tmp = "";
-            for(String token: title.split("_")){
-                if(token.length()==0) continue;
-                tmp+=token.substring(0,1).toUpperCase();
-                if(token.length()>1)
-                    tmp+=token.substring(1,token.length());
-                tmp+="_";
+            for (String token : title.split("_")) {
+                if (token.length() == 0) continue;
+                tmp += token.substring(0, 1).toUpperCase();
+                if (token.length() > 1)
+                    tmp += token.substring(1, token.length());
+                tmp += "_";
             }
-            title = tmp.substring(0, tmp.length()-1);
+            title = tmp.substring(0, tmp.length() - 1);
         }
         return title;
     }

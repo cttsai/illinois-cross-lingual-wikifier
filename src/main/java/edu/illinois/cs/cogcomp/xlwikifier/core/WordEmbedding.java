@@ -43,20 +43,20 @@ public class WordEmbedding {
 
     public void createMultiVec(String lang) {
 
-        String path = ConfigParameters.db_path+"/multi-embeddings/"+lang;
+        String path = ConfigParameters.db_path + "/multi-embeddings/" + lang;
         File dir = new File(path);
 
-        logger.info("Creating dictionary: "+path);
+        logger.info("Creating dictionary: " + path);
         dir.mkdir();
         loadDB(lang, false);
     }
 
 
     public void loadDB(String lang, boolean read_only) {
-        logger.info("Loading "+lang+" multi vectors...");
-        File f = new File(ConfigParameters.db_path, "multi-embeddings/"+lang+"/"+lang);
+        logger.info("Loading " + lang + " multi vectors...");
+        File f = new File(ConfigParameters.db_path, "multi-embeddings/" + lang + "/" + lang);
 
-        if(read_only){
+        if (read_only) {
             db = DBMaker.fileDB(f)
                     .closeOnJvmShutdown()
                     .readOnly()
@@ -70,8 +70,7 @@ public class WordEmbedding {
                     .keySerializer(Serializer.STRING)
                     .valueSerializer(Serializer.FLOAT_ARRAY)
                     .open();
-        }
-        else {
+        } else {
             db = DBMaker.fileDB(f)
                     .closeOnJvmShutdown()
                     .make();
@@ -89,61 +88,61 @@ public class WordEmbedding {
 
         multi_vecs.put("en", multi_vec_en);
         multi_vecs.put(lang, multi_vec_lang);
-        if(multi_vec_en.containsKey("obama"))
+        if (multi_vec_en.containsKey("obama"))
             dim = multi_vec_en.get("obama").length;
 
         stopwords.put(lang, StopWord.getStopWords(lang));
     }
 
-    public float[] getVectorFromWords(List<String> words, String lang){
+    public float[] getVectorFromWords(List<String> words, String lang) {
         List<float[]> vecs = new ArrayList<>();
-        for(String word: words){
+        for (String word : words) {
             float[] vec = getWordVector(word, lang);
-            if(vec != null)
+            if (vec != null)
                 vecs.add(vec);
         }
         return averageVectors(vecs);
     }
 
-    public float[] getVectorFromWords(String[] words, String lang){
+    public float[] getVectorFromWords(String[] words, String lang) {
         return getVectorFromWords(Arrays.asList(words), lang);
     }
 
-    public float[] zeroVec(){
+    public float[] zeroVec() {
         float[] ret = new float[dim];
         Arrays.fill(ret, (float) 0.0);
         return ret;
     }
 
-    public float[] averageVectors(List<float[]> vecs){
+    public float[] averageVectors(List<float[]> vecs) {
         float[] ret = zeroVec();
 
         int n = 0;
-        for(float[] v: vecs){
-            if(v == null) continue;
-            for(int i = 0; i < v.length; i++)
+        for (float[] v : vecs) {
+            if (v == null) continue;
+            for (int i = 0; i < v.length; i++)
                 ret[i] += v[i];
             n++;
         }
-        if(vecs.size()>0)
-            for(int i = 0; i < dim; i++)
+        if (vecs.size() > 0)
+            for (int i = 0; i < dim; i++)
                 ret[i] /= n;
         return ret;
     }
 
-    public float[] averageVectors(List<float[]> vecs, List<Float> weights){
+    public float[] averageVectors(List<float[]> vecs, List<Float> weights) {
         float[] ret = zeroVec();
 
         float sum = 0;
-        for(int i = 0; i < vecs.size(); i++){
+        for (int i = 0; i < vecs.size(); i++) {
             float w = weights.get(i);
             sum += w;
-            for(int j = 0; j < vecs.get(i).length; j++)
-                ret[j] += w*vecs.get(i)[j];
+            for (int j = 0; j < vecs.get(i).length; j++)
+                ret[j] += w * vecs.get(i)[j];
         }
 
-        if(vecs.size()>0 && sum > 0)
-            for(int i = 0; i < dim; i++)
+        if (vecs.size() > 0 && sum > 0)
+            for (int i = 0; i < dim; i++)
                 ret[i] /= sum;
         return ret;
     }
@@ -178,30 +177,31 @@ public class WordEmbedding {
 
 
     // TODO: fix the cache
-    public float[] getVector(String query, String lang){
-        if(use_mcache && vec_cache.containsKey(query))
+    public float[] getVector(String query, String lang) {
+        if (use_mcache && vec_cache.containsKey(query))
             return vec_cache.get(query);
 
-        if((stopwords.containsKey(lang) && stopwords.get(lang).contains(query))
-                ||(!multi_vecs.get(lang).containsKey(query))) {
-            if(use_mcache) vec_cache.put(query, null);
+        if ((stopwords.containsKey(lang) && stopwords.get(lang).contains(query))
+                || (!multi_vecs.get(lang).containsKey(query))) {
+            if (use_mcache) vec_cache.put(query, null);
             return null;
         }
 
         float[] vec = multi_vecs.get(lang).get(query);
-        if(use_mcache) vec_cache.put(query, vec);
+        if (use_mcache) vec_cache.put(query, vec);
         return vec;
     }
 
     /**
      * The main function to get word vectors
+     *
      * @param word
      * @param lang
      * @return
      */
-    public float[] getWordVector(String word, String lang){
-        if(!multi_vecs.containsKey(lang)){
-            System.err.println("Couldn't find word embeddings for "+lang);
+    public float[] getWordVector(String word, String lang) {
+        if (!multi_vecs.containsKey(lang)) {
+            System.err.println("Couldn't find word embeddings for " + lang);
             System.exit(-1);
         }
         word = word.toLowerCase();
@@ -210,16 +210,17 @@ public class WordEmbedding {
 
     /**
      * The main function to get title vectors
+     *
      * @param title
      * @param lang
      * @return
      */
-    public float[] getTitleVector(String title, String lang){
-        if(title == null || title.startsWith("NIL")) {
+    public float[] getTitleVector(String title, String lang) {
+        if (title == null || title.startsWith("NIL")) {
             return null;
         }
 
-        title = "title_"+title.replaceAll(" ", "_").toLowerCase();
+        title = "title_" + title.replaceAll(" ", "_").toLowerCase();
         return getVector(title, lang);
     }
 
@@ -247,7 +248,7 @@ public class WordEmbedding {
 
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";
-		String name = args[0];
+        String name = args[0];
 //        String name = "es";
         we.createMultiVec(name);
 //        we.loadEmbeddingToDB(dir + name+"/en"+name+"_orig1_projected.txt", we.multi_vec_en);
