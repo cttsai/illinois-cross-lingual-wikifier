@@ -2,6 +2,7 @@ package edu.illinois.cs.cogcomp.xlwikifier.datastructures;
 
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.xlwikifier.core.RankerFeatureManager;
+import edu.illinois.cs.cogcomp.xlwikifier.evaluation.XMLOffsetHandler;
 
 import java.util.*;
 
@@ -12,8 +13,8 @@ public class QueryDocument {
     private String id;
     private transient TextAnnotation ta;
     public List<ELMention> mentions = new ArrayList<>();
-    public String plain_text;
-    public List<ELMention> tokens = new ArrayList<>();
+    public String text;
+    private XMLOffsetHandler xmlhandler; // for tac documents
 
     public QueryDocument(String id) {
         this.id = id;
@@ -21,6 +22,14 @@ public class QueryDocument {
 
     public String getDocID() {
         return id;
+    }
+
+    public void setText(String t){
+        this.text = t;
+    }
+
+    public String getText(){
+        return text;
     }
 
     public void setTextAnnotation(TextAnnotation ta) {
@@ -31,6 +40,13 @@ public class QueryDocument {
         return this.ta;
     }
 
+    public void setXmlHandler(XMLOffsetHandler xh){
+        xmlhandler = xh;
+    }
+
+    public XMLOffsetHandler getXmlhandler(){
+        return xmlhandler;
+    }
 
     public void prepareFeatures(RankerFeatureManager fm) {
 

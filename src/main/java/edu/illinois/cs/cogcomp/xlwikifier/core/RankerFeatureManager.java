@@ -203,7 +203,7 @@ public class RankerFeatureManager implements Serializable {
 
         int start_off = m.getStartOffset();
         int end_off = m.getEndOffset();
-        String text = doc.plain_text;
+        String text = doc.text;
 
         int start = Math.max(0, start_off - window);
         int end = Math.min(text.length(), end_off + window);

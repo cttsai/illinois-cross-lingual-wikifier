@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
  * <p>
  * Created by ctsai12 on 10/25/16.
  */
-public class NERAnnotatorTest {
+public class TestAnnotators {
 
     final static String spanish_input = "Barack Hussein Obama II3 es el cuadragésimo cuarto y actual presidente de " +
             "los Estados Unidos de América. Fue senador por el estado de Illinois desde el 3 de enero de 2005 hasta su " +
@@ -102,7 +102,7 @@ public class NERAnnotatorTest {
         CoreferenceView corefview = (CoreferenceView) ta.getView(lang.getWikifierViewName());
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
-            String gold_entitle = spanish_answers.get(key).en_wiki_title;
+            String gold_entitle = spanish_answers.get(key).getEnWikiTitle();
 
             assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
                     c.getLabel().equals(gold_entitle));
@@ -149,7 +149,7 @@ public class NERAnnotatorTest {
         CoreferenceView corefview = (CoreferenceView) ta.getView(lang.getWikifierViewName());
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
-            String gold_entitle = chinese_answers.get(key).en_wiki_title;
+            String gold_entitle = chinese_answers.get(key).getEnWikiTitle();
 
             assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
                     c.getLabel().equals(gold_entitle));

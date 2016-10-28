@@ -59,10 +59,10 @@ public class XLWikifierDemo {
         int pend = 0;
         for (ELMention m : doc.mentions) {
             int start = m.getStartOffset();
-            out += doc.plain_text.substring(pend, start);
+            out += doc.text.substring(pend, start);
             String ref = "#";
-            String en_title = formatTitle(m.en_wiki_title);
-            if (!m.en_wiki_title.startsWith("NIL"))
+            String en_title = formatTitle(m.getEnWikiTitle());
+            if (!m.getEnWikiTitle().startsWith("NIL"))
                 ref = "http://en.wikipedia.org/wiki/" + en_title;
             //else if(!m.getWikiTitle().startsWith("NIL"))
             //    ref = "http://"+lang+".wikipedia.org/wiki/"+m.getWikiTitle();
@@ -71,7 +71,7 @@ public class XLWikifierDemo {
             out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\">" + m.getSurface() + "</a>";
             pend = m.getEndOffset();
         }
-        out += doc.plain_text.substring(pend, doc.plain_text.length());
+        out += doc.text.substring(pend, doc.text.length());
         return out;
     }
 

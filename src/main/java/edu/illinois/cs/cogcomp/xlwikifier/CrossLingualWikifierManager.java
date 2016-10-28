@@ -30,8 +30,6 @@ public class CrossLingualWikifierManager {
                 e.printStackTrace();
             }
             annotatorMap.put(lang.getWikifierViewName(), xlwikifier);
-        } else {
-            logger.warn("You are replacing an existing wikifier model for the view name '" + lang.getWikifierViewName());
         }
 
         return annotatorMap.get(lang.getWikifierViewName());

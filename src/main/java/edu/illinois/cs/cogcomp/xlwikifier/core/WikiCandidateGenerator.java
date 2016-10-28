@@ -38,7 +38,7 @@ public class WikiCandidateGenerator {
     private Map<String, List<WikiCand>> cand_cache = new HashMap<>();
     private boolean use_cache = false;
     private int top = 10;
-    public boolean en_search = false;
+    public boolean en_search = true;
     public boolean word_search = false;
     private Tokenizer tokenizer;
     private WikiCandidateGenerator en_generator;

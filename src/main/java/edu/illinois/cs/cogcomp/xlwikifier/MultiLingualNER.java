@@ -28,9 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import static edu.illinois.cs.cogcomp.LbjNer.LbjTagger.Parameters.readAndLoadConfig;
 
@@ -73,6 +71,8 @@ public class MultiLingualNER extends Annotator {
     @Override
     public void initialize(ResourceManager rm) {
 
+        logger.info("Initializing MultiLingualNER...");
+
         ConfigParameters.setPropValues(rm);
 
         String lang = this.language.toString().toLowerCase();
@@ -106,22 +106,22 @@ public class MultiLingualNER extends Annotator {
     @Override
     public void addView(TextAnnotation textAnnotation) {
 
-        // use the language-specific parameters and brown clusters
-        ParametersForLbjCode.currentParameters = this.parameters;
-        BrownClusters.brownclusters = this.brownclusters;
-
         QueryDocument doc = new QueryDocument("");
-        doc.plain_text = textAnnotation.getText();
+        doc.text = textAnnotation.getText();
         doc.setTextAnnotation(textAnnotation);
-        NERDocument nerdoc = annotate(doc);
-        List<ELMention> mentions = extractPredictions(nerdoc, doc.plain_text);
+
+        annotate(doc);
 
         SpanLabelView nerView = new SpanLabelView(getViewName(), textAnnotation);
 
-        for (ELMention m : mentions) {
+        Set<String> seen = new HashSet<>();
+        for (ELMention m : doc.mentions) {
             int start = textAnnotation.getTokenIdFromCharacterOffset(m.getStartOffset());
             int end = textAnnotation.getTokenIdFromCharacterOffset(m.getEndOffset() - 1) + 1;
-            nerView.addSpanLabel(start, end, m.getType(), 1d);
+            if(!seen.contains(start+"_"+end)) {
+                nerView.addSpanLabel(start, end, m.getType(), 1d);
+                seen.add(start+"_"+end);
+            }
         }
 
         textAnnotation.addView(getViewName(), nerView);
@@ -133,7 +133,11 @@ public class MultiLingualNER extends Annotator {
      * @param doc
      * @return
      */
-    private NERDocument annotate(QueryDocument doc) {
+    public void annotate(QueryDocument doc) {
+
+        // use the language-specific parameters and brown clusters
+        ParametersForLbjCode.currentParameters = this.parameters;
+        BrownClusters.brownclusters = this.brownclusters;
 
         // Wikify all n-grams and extract features based on Wikipedia titles
         // doc.mentions stores tokens now
@@ -163,7 +167,7 @@ public class MultiLingualNER extends Annotator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return data.elementAt(0).documents.get(0);
+        doc.mentions = extractPredictions(data.elementAt(0).documents.get(0), doc.getText());
     }
 
     /**
@@ -173,7 +177,7 @@ public class MultiLingualNER extends Annotator {
      * @return
      */
     private Data doc2NERData(QueryDocument doc) {
-        logger.info("Converting document datastructure...");
+//        logger.info("Converting document datastructure...");
 
         Vector<Vector<String>> tokens = new Vector<>();
         TextAnnotation ta = doc.getTextAnnotation();
@@ -211,7 +215,7 @@ public class MultiLingualNER extends Annotator {
      * @param text   the original text of document
      * @return
      */
-    public List<ELMention> extractPredictions(NERDocument nerdoc, String text) {
+    private List<ELMention> extractPredictions(NERDocument nerdoc, String text) {
         List<ELMention> ret = new ArrayList<>();
 
         for (LinkedVector sen : nerdoc.sentences) {

@@ -31,8 +31,6 @@ public class MultiLingualNERManager {
                 e.printStackTrace();
             }
             annotatorMap.put(lang.getNERViewName(), mlner);
-        } else {
-            logger.warn("You are replacing an existing NER model for the view name '" + lang.getNERViewName());
         }
 
         return annotatorMap.get(lang.getNERViewName());

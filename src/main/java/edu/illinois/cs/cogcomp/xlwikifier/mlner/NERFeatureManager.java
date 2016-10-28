@@ -15,7 +15,6 @@ import static java.util.stream.Collectors.toSet;
 public class NERFeatureManager implements Serializable {
     private static final long serialVersionUID = -1932878634118945538L;
     private LexManager lex;
-    private MediaWikiSearch mws;
     private LangLinker ll;
     private Set<String> en_stops;
     private Set<String> fo_stops;
@@ -24,7 +23,6 @@ public class NERFeatureManager implements Serializable {
 
     public NERFeatureManager(String lang) {
         lex = new LexManager();
-        mws = new MediaWikiSearch();
         ll = new LangLinker();
         en_stops = StopWord.getStopWords("en");
         fo_stops = StopWord.getStopWords(lang);
@@ -82,7 +80,7 @@ public class NERFeatureManager implements Serializable {
             String wiki_title = after.get(k).getCandidates().get(0).orig_title;
             if (wiki_title != null && !wiki_title.startsWith("NIL")) {
                 if (mono) {
-                    List<String> cats = mws.getCategories(mws.formatTitle(wiki_title), lang);
+                    List<String> cats = MediaWikiSearch.getCategories(wiki_title, lang);
                     Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                             .collect(toSet());
                     tokenset.removeAll(fo_stops);
@@ -93,7 +91,7 @@ public class NERFeatureManager implements Serializable {
                     String en_title = wiki_title;
                     if (!lang.equals("en")) en_title = ll.translateToEn(wiki_title, lang);
                     if (en_title != null) {
-                        List<String> cats = mws.getCategories(mws.formatTitle(en_title), "en");
+                        List<String> cats = MediaWikiSearch.getCategories(en_title, "en");
                         Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                                 .collect(toSet());
                         tokenset.removeAll(en_stops);
@@ -130,7 +128,7 @@ public class NERFeatureManager implements Serializable {
             String lang = ms.get(k).getCandidates().get(0).lang;
             if (wiki_title != null && !wiki_title.startsWith("NIL")) {
                 if (mono) {
-                    List<String> cats = mws.getCategories(mws.formatTitle(wiki_title), lang);
+                    List<String> cats = MediaWikiSearch.getCategories(wiki_title, lang);
                     Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                             .collect(toSet());
                     tokenset.removeAll(fo_stops);
@@ -141,7 +139,7 @@ public class NERFeatureManager implements Serializable {
                     String en_title = wiki_title;
                     if (!lang.equals("en")) en_title = ll.translateToEn(wiki_title, lang);
                     if (en_title != null) {
-                        List<String> cats = mws.getCategories(mws.formatTitle(en_title), "en");
+                        List<String> cats = MediaWikiSearch.getCategories(en_title, "en");
                         Set<String> tokenset = cats.stream()
                                 .flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                                 .collect(toSet());
@@ -161,7 +159,7 @@ public class NERFeatureManager implements Serializable {
             String lang = m.getCandidates().get(0).lang;
             if (wiki_title != null && !wiki_title.startsWith("NIL")) {
                 if (mono) {
-                    List<String> cats = mws.getCategories(mws.formatTitle(wiki_title), lang);
+                    List<String> cats = MediaWikiSearch.getCategories(wiki_title, lang);
                     Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                             .collect(toSet());
                     tokenset.removeAll(fo_stops);
@@ -172,7 +170,7 @@ public class NERFeatureManager implements Serializable {
                     String en_title = wiki_title;
                     if (!lang.equals("en")) en_title = ll.translateToEn(wiki_title, lang);
                     if (en_title != null) {
-                        List<String> cats = mws.getCategories(mws.formatTitle(en_title), "en");
+                        List<String> cats = MediaWikiSearch.getCategories(en_title, "en");
                         Set<String> tokenset = cats.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\s+")).stream())
                                 .collect(toSet());
                         tokenset.removeAll(en_stops);

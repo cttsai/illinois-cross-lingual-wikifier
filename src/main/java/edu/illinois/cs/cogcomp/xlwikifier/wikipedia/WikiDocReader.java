@@ -133,7 +133,7 @@ public class WikiDocReader {
         mentions = mentions.stream().filter(x -> x.getSurface() != null && !x.getSurface().trim().isEmpty())
                 .collect(Collectors.toList());
         QueryDocument doc = new QueryDocument(filename);
-        doc.plain_text = ta.getText();
+        doc.text = ta.getText();
         doc.mentions = mentions;
         doc.setTextAnnotation(ta);
         return doc;

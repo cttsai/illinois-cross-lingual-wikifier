@@ -41,7 +41,7 @@ public class NERUtils {
         setLang(lang);
         wcg = new WikiCandidateGenerator(lang, true);
         en_wcg = new WikiCandidateGenerator("en", true);
-        ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.model_path + "/ranker/ner/" + lang + "/ranker.model");
+        ranker = Ranker.loadPreTrainedRanker(lang, "models/ranker/ner/" + lang + "/ranker.model");
         ranker.setNERMode(true);
     }
 
@@ -68,6 +68,7 @@ public class NERUtils {
             extractNERFeatures(doc);
             prevm = doc.mentions;
         }
+        logger.info("Done");
     }
 
     public void extractNERFeatures(QueryDocument doc) {
@@ -121,6 +122,7 @@ public class NERUtils {
                 else
                     surface += " " + token;
             }
+            if(surface.trim().isEmpty()) continue;
             m.setSurface(surface);
             m.ngram = n;
             m.is_stop = false;
@@ -182,15 +184,28 @@ public class NERUtils {
 
     }
 
+    public void setEnWikiTitle(QueryDocument doc){
+        for (ELMention m : doc.mentions) {
+            if (!m.getWikiTitle().equals("NIL") && m.getEnWikiTitle().startsWith("NIL")) {
+
+                if (!lang.equals("en"))
+                    m.setEnWikiTitle(ll.translateToEn(m.getWikiTitle(), lang));
+                else
+                    m.setEnWikiTitle(m.getWikiTitle());
+            }
+        }
+
+    }
+
     public void setMidByWikiTitle(QueryDocument doc) {
         for (ELMention m : doc.mentions) {
 
-            if (m.getWikiTitle().startsWith("NIL")) {
+            if (m.getWikiTitle().startsWith("NIL") && m.getEnWikiTitle().startsWith("NIL")) {
                 m.setMid("NIL");
             }
 
             for (WikiCand c : m.getCandidates()) {
-                String mid = getMidByWikiTitle(c.getTitle(), ll, c.lang);
+                String mid = getMidByWikiTitle(c.getTitle(), c.lang);
                 c.orig_title = c.title;
                 if (mid != null)
                     c.title = mid;
@@ -201,22 +216,21 @@ public class NERUtils {
             if (m.getCandidates().size() > 0) {
                 m.setMid(m.getCandidates().get(0).title);
             }
-
         }
     }
 
-    public String getMidByWikiTitle(String title, LangLinker ll, String lang) {
+    public String getMidByWikiTitle(String title, String lang) {
         if (title.trim().isEmpty())
             return null;
         if (title.startsWith("NIL"))
             return null;
-        String ent = ll.translateToEn(title, lang);
-        title = formatTitle(title);
-        if (lang.equals("zh")) lang = "zh-cn";
+        String fblang = lang;
+        if (lang.equals("zh")) fblang = "zh-cn";
 
-        String mid = FreeBaseQuery.getMidFromTitle(title, lang);
+        String mid = FreeBaseQuery.getMidFromTitle(formatTitle(title), fblang);
         if (mid != null) return mid; // in the m.12345 format
 
+        String ent = ll.translateToEn(title, lang);
         if (ent != null) {
             ent = formatTitle(ent);
             mid = FreeBaseQuery.getMidFromTitle(ent, "en");

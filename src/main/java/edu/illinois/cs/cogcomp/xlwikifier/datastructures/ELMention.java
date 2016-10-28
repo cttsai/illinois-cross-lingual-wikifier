@@ -22,7 +22,7 @@ public class ELMention {
     private String language;
     private String wiki_title = "NIL";
     public String gold_wiki_title;
-    public String en_wiki_title = "NIL";
+    private String en_wiki_title = "NIL";
     private List<WikiCand> cands = new ArrayList<>();
     public boolean eazy;
     public String pred_type;
@@ -103,6 +103,17 @@ public class ELMention {
         this.wiki_title = t;
     }
 
+    public void setEnWikiTitle(String t){
+        if(t == null)
+            en_wiki_title = "NIL";
+        else
+            en_wiki_title = t;
+    }
+
+    public String getEnWikiTitle(){
+        return en_wiki_title;
+    }
+
     public void setNounType(String t) {
         this.noun_type = t;
     }
@@ -117,10 +128,6 @@ public class ELMention {
 
     public float[] getMidVec() {
         return this.mid_vec;
-    }
-
-    public String getID() {
-        return this.id;
     }
 
     public String getSurface() {
@@ -149,12 +156,6 @@ public class ELMention {
 
     public String getMid() {
         return this.mid;
-    }
-
-    public String getGoldMidOrNIL() {
-        if (gold_mid.startsWith("NIL"))
-            return "NIL";
-        return this.gold_mid;
     }
 
     public String getWikiTitle() {
