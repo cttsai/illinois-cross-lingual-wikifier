@@ -230,6 +230,9 @@ public class NERUtils {
         String mid = FreeBaseQuery.getMidFromTitle(formatTitle(title), fblang);
         if (mid != null) return mid; // in the m.12345 format
 
+        mid = FreeBaseQuery.getMidFromTitle(formatTitle(title), "en");
+        if (mid != null) return mid;
+
         String ent = ll.translateToEn(title, lang);
         if (ent != null) {
             ent = formatTitle(ent);

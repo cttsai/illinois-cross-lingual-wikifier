@@ -28,7 +28,7 @@ public class WikiCandidateGenerator {
     private DB db;
     private Map<String, DB> db_pool = new HashMap<>();
 
-    public BTreeMap<Object[], Float> p2t2prob; // phrase to title to probability
+    public BTreeMap<Object[], Float> p2t2prob; // prob(title | surface)
     public BTreeMap<Object[], Float> t2p2prob;
     public BTreeMap<Object[], Float> w2t2prob;
     public BTreeMap<Object[], Float> t2w2prob;
@@ -174,8 +174,8 @@ public class WikiCandidateGenerator {
             double s = 1;
             if (dist != 0) s = 1.0 / dist;
             WikiCand cand = new WikiCand(title, s);
-            cand.psgivent = c.getValue();
-            cand.ptgivens = t2p2prob.get(new Object[]{title, surface});
+            cand.psgivent = t2p2prob.get(new Object[]{title, surface});
+            cand.ptgivens = c.getValue();
             cand.lang = lang;
             cand.src = "surface";
             cand.query_surface = surface;
@@ -221,8 +221,8 @@ public class WikiCandidateGenerator {
                 double s = 1;
                 if (dist != 0) s = 1.0 / dist;
                 WikiCand cand = new WikiCand(title, s);
-                cand.psgivent = c.getValue();
-                cand.ptgivens = t2w2prob.get(new Object[]{title, t});
+                cand.psgivent = t2w2prob.get(new Object[]{title, t});
+                cand.ptgivens = c.getValue();
                 cand.lang = lang;
                 cand.src = "word";
                 cand.query_surface = surface;
@@ -521,8 +521,8 @@ public class WikiCandidateGenerator {
 
     public static void main(String[] args) {
         ConfigParameters.setPropValues();
-        WikiCandidateGenerator g = new WikiCandidateGenerator(args[0], true);
-//        System.out.println(g.getCandsBySurface("Michael Pettis", "en"));
+        WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
+        System.out.println(g.getCandsBySurface("中国"));
         System.exit(-1);
 
         g.closeDB();

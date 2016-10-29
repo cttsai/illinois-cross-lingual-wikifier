@@ -248,28 +248,16 @@ public class FreeBaseQuery {
 //                .make();
 //        System.exit(-1);
 
-//        FreeBaseQuery.loadDB(true);
         ConfigParameters params = new ConfigParameters();
         params.setPropValues();
-        try {
-            FreeBaseQuery.importDump();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//        String mid = FreeBaseQuery.getMidFromTitle("巴拉克·歐巴馬", "zh-cn");
-//        System.out.println(mid);
-//        System.out.println(FreeBaseQuery.getTypesFromMid(mid));
-//        for(String key: titlelang2mid.keySet()){
-//            if(key.contains("|ug"))
-//                System.out.println(key);
+        FreeBaseQuery.loadDB(true);
+//        try {
+////            FreeBaseQuery.importDump();
+//        } catch (IOException e) {
+//            e.printStackTrace();
 //        }
-//        String mid = FreeBaseQuery.getMidFromTitle("巴拉克·歐巴馬", "zh-cn");
-//        System.out.println(mid);
-//        System.out.println(FreeBaseQuery.getTypesFromMid(mid).size());
-//        List<String> fbtypes = FreeBaseQuery.getTypesFromMid(mid);
-//        Set<String> tokenset = fbtypes.stream().flatMap(x -> Arrays.asList(x.toLowerCase().split("\\.")).stream())
-//                .collect(toSet());
-//        System.out.println(tokenset);
+        String mid = FreeBaseQuery.getMidFromTitle("中国", "en");
+        System.out.println(mid);
 
     }
 

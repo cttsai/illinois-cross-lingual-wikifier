@@ -36,6 +36,6 @@ public class WikiCand {
     }
 
     public String toString() {
-        return title + "\t" + orig_title + "\t" + score;
+        return title + "\t" + orig_title + "\t" + score+" "+ptgivens;
     }
 }

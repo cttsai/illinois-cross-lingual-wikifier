@@ -8,6 +8,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiDocReader;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
@@ -107,7 +108,7 @@ public class Ranker {
 
     public void writeSVMData(List<QueryDocument> docs, String name) throws IOException {
         System.out.println("Generating svm data...");
-        BufferedWriter bw = new BufferedWriter(new FileWriter("svmdata/tmp"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("svmdata-tmp"));
         int mcnt = 0, dcnt = 0, qid = 1;
         for (QueryDocument doc : docs) {
             dcnt++;
@@ -141,7 +142,7 @@ public class Ranker {
                 dir.mkdirs();
         }
 
-        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata/tmp " + name);
+        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata-tmp " + name);
     }
 
     public void setWikiTitleByTopCand(List<QueryDocument> docs) {

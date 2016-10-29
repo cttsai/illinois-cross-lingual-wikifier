@@ -179,9 +179,9 @@ public class LangLinker {
 
     public static void main(String[] args) {
 
+        ConfigParameters.setPropValues();
         LangLinker ll = new LangLinker();
-        ll.loadDB("tr", true);
-        System.out.println(ll.to_en.size());
-        ll.closeDB();
+//        ll.loadDB("zh", true);
+        System.out.println(ll.translateToEn("中國", "zh"));
     }
 }

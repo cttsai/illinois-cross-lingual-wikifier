@@ -136,7 +136,15 @@ public class CrossLingualWikifier extends Annotator {
     public void annotate(QueryDocument doc) {
         wcg.genCandidates(doc);
 
+//        System.out.println("cands:");
+//        for(ELMention m: doc.mentions)
+//            System.out.println(m.getCandidates());
+
         ranker.setWikiTitleByModel(doc);
+
+//        System.out.println("cands:");
+//        for(ELMention m: doc.mentions)
+//            System.out.println(m.getCandidates());
 
         nerutils.setEnWikiTitle(doc);
 

@@ -1,7 +1,5 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
-import edu.illinois.cs.cogcomp.core.datastructures.Pair;
-import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.xlwikifier.*;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
@@ -13,11 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * This class runs MultiLingualNER and CrossLingualWikifier on TAC-KBP 2016 EDL dataset.
+ * It evaluates on Spanish and Chinese named entity annotations
+ *
+ * The paths to the data are specified in config/xlwikifier-tac.config
+ *
+ * It can be run by executing "scripts/run-benchmark.sh es" or "scripts/run-benchmark.sh zh"
+ *
  * Created by ctsai12 on 10/27/16.
  */
 public class TAC2016Eval {
@@ -61,25 +65,10 @@ public class TAC2016Eval {
         }
         pred_total += doc.mentions.size();
 
-        double rec = span_cnt/gold_total;
-        double pre = span_cnt/pred_total;
-        double f1 = 2*rec*pre/(rec+pre);
-        System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
-
-        rec = ner_cnt/gold_total;
-        pre = ner_cnt/pred_total;
-        f1 = 2*rec*pre/(rec+pre);
-        System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
-
-        rec = link_cnt/gold_total;
-        pre = link_cnt/pred_total;
-        f1 = 2*rec*pre/(rec+pre);
-        System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
-
-        System.out.println("Total predictions "+pred_total);
     }
 
     public static void main(String[] args) {
+
 
         String config = "config/xlwikifier-tac.config";
         try {
@@ -96,7 +85,7 @@ public class TAC2016Eval {
             golds = TACDataReader.readChineseGoldNAM();
 
         }
-        else if(args.equals("es")){
+        else if(args[0].equals("es")){
             lang = Language.ES;
             docs = TACDataReader.readSpanishEvalDocs();
             golds = TACDataReader.readSpanishGoldNAM();
@@ -107,26 +96,51 @@ public class TAC2016Eval {
         CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);
 
         for(QueryDocument doc: docs){
+//            if(!doc.getDocID().equals("CMN_DF_000191_20160428_G00A0D3AC"))
+//                continue;
 
             System.out.println("Working on document: "+doc.getDocID());
 
+            // ner
             mlner.annotate(doc);
 
+            // clean mentions contain xml tags
             PostProcessing.cleanSurface(doc);
 
+            // wikification
             xlwikifier.annotate(doc);
 
+            // map plain text offsets to xml offsets
             TACUtils.setXmlOffsets(doc);
 
+            // add author mentions inside xml tags
             TACUtils.addPostAuthors(doc);
 
+            // remove mentions between <quote> and </quote>
             TACUtils.removeQuoteMentions(doc);
 
+            // simple coref to re-set short mentions' title
             PostProcessing.fixPerAnnotation(doc);
+
+            // NIL clustering
             SurfaceClustering.cluster(doc);
 
             evaluate(doc);
         }
 
+        double rec = span_cnt/gold_total;
+        double pre = span_cnt/pred_total;
+        double f1 = 2*rec*pre/(rec+pre);
+        System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
+
+        rec = ner_cnt/gold_total;
+        pre = ner_cnt/pred_total;
+        f1 = 2*rec*pre/(rec+pre);
+        System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
+
+        rec = link_cnt/gold_total;
+        pre = link_cnt/pred_total;
+        f1 = 2*rec*pre/(rec+pre);
+        System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
     }
 }
