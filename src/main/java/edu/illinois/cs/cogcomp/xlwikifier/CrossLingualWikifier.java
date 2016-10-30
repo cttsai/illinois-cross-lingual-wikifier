@@ -83,8 +83,6 @@ public class CrossLingualWikifier extends Annotator {
         PostProcessing.fixPerAnnotation(doc);
         SurfaceClustering.cluster(doc);
 
-        doc.mentions.forEach(x -> System.out.println(x));
-
         CoreferenceView corefview = new CoreferenceView(getViewName(), textAnnotation);
 
         // cluster mentions by the English Wikipedia title or FreeBase MID
@@ -145,15 +143,7 @@ public class CrossLingualWikifier extends Annotator {
     public void annotate(QueryDocument doc) {
         wcg.genCandidates(doc);
 
-//        System.out.println("cands:");
-//        for(ELMention m: doc.mentions)
-//            System.out.println(m.getCandidates());
-
         ranker.setWikiTitleByModel(doc);
-
-//        System.out.println("cands:");
-//        for(ELMention m: doc.mentions)
-//            System.out.println(m.getCandidates());
 
         nerutils.setEnWikiTitle(doc);
 

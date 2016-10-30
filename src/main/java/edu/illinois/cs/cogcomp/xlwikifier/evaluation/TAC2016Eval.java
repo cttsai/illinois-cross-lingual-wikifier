@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  */
 public class TAC2016Eval {
 
+    private static Logger logger = LoggerFactory.getLogger(TAC2016Eval.class);
     private static List<ELMention> golds;
 
     private static int span_cnt = 0, ner_cnt = 0, link_cnt = 0;
@@ -65,8 +66,12 @@ public class TAC2016Eval {
 
     public static void main(String[] args) {
 
+        if(args.length < 2){
+            logger.error("Require two arguments: language and config file");
+        }
 
-        String config = "config/xlwikifier-tac.config";
+        String config = args[1];
+
         try {
             ConfigParameters.setPropValues(new ResourceManager(config));
         } catch (IOException e) {
@@ -86,6 +91,8 @@ public class TAC2016Eval {
             docs = TACDataReader.readSpanishEvalDocs();
             golds = TACDataReader.readSpanishGoldNAM();
         }
+        else
+            logger.error("Unknown language: "+args[0]);
 
         MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, config);
 
@@ -95,7 +102,7 @@ public class TAC2016Eval {
 //            if(!doc.getDocID().equals("CMN_DF_000191_20160428_G00A0D3AC"))
 //                continue;
 
-            System.out.println("Working on document: "+doc.getDocID());
+            logger.info("Working on document: "+doc.getDocID());
 
             // ner
             mlner.annotate(doc);

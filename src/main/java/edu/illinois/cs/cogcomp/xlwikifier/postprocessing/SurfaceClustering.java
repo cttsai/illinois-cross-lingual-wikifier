@@ -57,15 +57,6 @@ public class SurfaceClustering {
             doc.mentions.forEach(x -> x.setEnWikiTitle(x.gold_wiki_title));
     }
 
-    public static void cluster(List<QueryDocument> docs){
-
-        System.out.println("Performing clustering...");
-
-        for(QueryDocument doc: docs){
-            cluster(doc);
-        }
-    }
-
     private static int longestMention(List<ELMention> mentions){
         OptionalInt m = mentions.stream().mapToInt(x -> x.getSurface().length()).max();
         if(m.isPresent())

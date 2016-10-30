@@ -187,13 +187,11 @@ public class NERUtils {
     public void setEnWikiTitle(QueryDocument doc){
         for (ELMention m : doc.mentions) {
             if (!m.getWikiTitle().equals("NIL") && m.getEnWikiTitle().startsWith("NIL")) {
-
                 if (!lang.equals("en"))
                     m.setEnWikiTitle(ll.translateToEn(m.getWikiTitle(), lang));
                 else
                     m.setEnWikiTitle(m.getWikiTitle());
             }
-            System.out.println(m);
         }
 
     }

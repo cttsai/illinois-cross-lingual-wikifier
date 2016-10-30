@@ -39,7 +39,8 @@ public class PostProcessing {
             for(int j = 0; j < i; j++){
                 ELMention longer = length_sorted.get(j);
 
-                if(longer.getSurface().toLowerCase().contains(current.getSurface().toLowerCase())){
+                if(longer.getSurface().toLowerCase().contains(current.getSurface().toLowerCase())
+                        && longer.getSurface().length() > current.getSurface().length()){
                     if(!longer.getMid().startsWith("NIL"))
                         current.setMid(longer.getMid());
                     if(!longer.getEnWikiTitle().startsWith("NIL"))
@@ -70,7 +71,6 @@ public class PostProcessing {
     }
 
     public static void wikiSearchSolver(QueryDocument doc, String lang){
-        System.out.println("Querying wikipedia...");
         String fb_lang = lang;
         if(lang.equals("zh")) fb_lang = "zh-cn";
 
