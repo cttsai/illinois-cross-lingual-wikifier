@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * This class runs MultiLingualNER and CrossLingualWikifier on TAC-KBP 2016 EDL dataset.
- * It evaluates on Spanish and Chinese named entity annotations
+ * It only evaluates on Spanish and Chinese named entity annotations
  *
  * The paths to the data are specified in config/xlwikifier-tac.config
  *
@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  */
 public class TAC2016Eval {
 
-    private final Logger logger = LoggerFactory.getLogger(TAC2016Eval.class);
     private static List<ELMention> golds;
 
     private static int span_cnt = 0, ner_cnt = 0, link_cnt = 0;
@@ -54,9 +53,6 @@ public class TAC2016Eval {
                         else{
                             if(m.getMid().equals(gm.gold_mid))
                                 link_cnt++;
-                            else
-                                if(m.getCandidates().size() == 0)
-                                System.out.println(m.getSurface());
                         }
                     }
                     break;
@@ -131,16 +127,19 @@ public class TAC2016Eval {
         double rec = span_cnt/gold_total;
         double pre = span_cnt/pred_total;
         double f1 = 2*rec*pre/(rec+pre);
+        System.out.println("Mention Span:");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
 
         rec = ner_cnt/gold_total;
         pre = ner_cnt/pred_total;
         f1 = 2*rec*pre/(rec+pre);
+        System.out.println("Mention Span + Entity Type:");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
 
         rec = link_cnt/gold_total;
         pre = link_cnt/pred_total;
         f1 = 2*rec*pre/(rec+pre);
+        System.out.println("Mention Span + Entity Type + FreeBase ID:");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
     }
 }

@@ -20,13 +20,15 @@ public class ConfigParameters {
     public static String stopword_path;
     public static Map<String, String> ner_models = new HashMap<>();
     public static Map<String, String> ranker_models = new HashMap<>();
+    public static Map<String, String> ranker_ner = new HashMap<>();
     public static String tac_es_dir, tac_zh_dir, tac_golds;
     public static boolean is_set = false;
     public static String search_cache;
     public static boolean use_search = false;
+    public static String target_kb;
 
     public static void setPropValues() {
-        String default_config = "config/xlwikifier.config";
+        String default_config = "config/xlwikifier-tac.config";
         ResourceManager rm = null;
         try {
             rm = new ResourceManager(default_config);
@@ -53,6 +55,10 @@ public class ConfigParameters {
                 key = l + "_ranking_model";
                 if (rm.containsKey(key))
                     ranker_models.put(l, rm.getString(key).trim());
+
+                key = l+"_ner_ranker";
+                if(rm.containsKey(key))
+                    ranker_ner.put(l, rm.getString(key).trim());
             }
 
             if (rm.containsKey("tac_es_dir"))
@@ -65,6 +71,8 @@ public class ConfigParameters {
                 use_search = rm.getBoolean("use_wikisearch");
             if (rm.containsKey("search_cache"))
                 search_cache = rm.getString("search_cache");
+            if (rm.containsKey("target_kb"))
+                target_kb = rm.getString("target_kb");
 
             is_set = true;
         }

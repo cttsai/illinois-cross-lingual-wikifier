@@ -1,6 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier.postprocessing;
 
 
+import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 
@@ -16,35 +17,44 @@ public class SurfaceClustering {
     private static int nil_cnt = 1;
 
     public static void cluster(QueryDocument doc){
+
+        // use gold_wiki_title to store the target ID
+        if(ConfigParameters.target_kb.equals("freebase"))
+            doc.mentions.forEach(x -> x.gold_wiki_title = x.getMid());
+        else if(ConfigParameters.target_kb.equals("enwiki"))
+            doc.mentions.forEach(x -> x.gold_wiki_title = x.getEnWikiTitle());
+
         for(ELMention m: doc.mentions){
-            if(m.getMid().startsWith("NIL"))
-                m.setMid("NIL"+String.format("%04d", nil_cnt++));
+            if (m.gold_wiki_title.startsWith("NIL"))
+                m.gold_wiki_title = "NIL" + String.format("%04d", nil_cnt++);
         }
+
         List<List<ELMention>> clusters = doc.mentions.stream()
-                .collect(groupingBy(x -> x.getMid()))
+                .collect(groupingBy(x -> x.gold_wiki_title))
                 .entrySet().stream().map(x -> x.getValue())
                 .sorted((c1, c2) -> Integer.compare(longestMention(c2), longestMention(c1)))
                 .sorted((c1, c2) -> Integer.compare(c2.size(), c1.size()))
                 .collect(toList());
+
         for(int i = 0; i < clusters.size(); i++){
             if(clusters.get(i).size()==0) continue;
-            String mid = clusters.get(i).get(0).getMid();
+            String id = clusters.get(i).get(0).gold_wiki_title;
             for(int j = i+1; j < clusters.size(); j++){
                 if(clusters.get(j).size()==0) continue;
                 if(compareClusters(clusters.get(i), clusters.get(j))){
-//                        clusters.get(i).forEach(x -> System.out.println(x.getMention()));
-//                        System.out.println("----");
-//                        clusters.get(j).forEach(x -> System.out.println(x.getMention()));
-                    clusters.get(j).forEach(x -> x.setMid(mid));
+                    clusters.get(j).forEach(x -> x.gold_wiki_title = id);
                     clusters.get(i).addAll(clusters.get(j));
                     clusters.get(j).clear();
                 }
             }
         }
 
-
         doc.mentions = clusters.stream().flatMap(x -> x.stream()).collect(toList());
 
+        if(ConfigParameters.target_kb.equals("freebase"))
+            doc.mentions.forEach(x -> x.setMid(x.gold_wiki_title));
+        else if(ConfigParameters.target_kb.equals("enwiki"))
+            doc.mentions.forEach(x -> x.setEnWikiTitle(x.gold_wiki_title));
     }
 
     public static void cluster(List<QueryDocument> docs){

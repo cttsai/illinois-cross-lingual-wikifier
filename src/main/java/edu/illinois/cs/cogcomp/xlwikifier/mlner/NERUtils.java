@@ -41,7 +41,7 @@ public class NERUtils {
         setLang(lang);
         wcg = new WikiCandidateGenerator(lang, true);
         en_wcg = new WikiCandidateGenerator("en", true);
-        ranker = Ranker.loadPreTrainedRanker(lang, "models/ranker/ner/" + lang + "/ranker.model");
+        ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_ner.get(lang));
         ranker.setNERMode(true);
     }
 
@@ -193,6 +193,7 @@ public class NERUtils {
                 else
                     m.setEnWikiTitle(m.getWikiTitle());
             }
+            System.out.println(m);
         }
 
     }

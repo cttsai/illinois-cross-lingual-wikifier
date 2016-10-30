@@ -42,7 +42,7 @@ public class TestAnnotators {
         spanish_answers.put(new Pair<>(78, 103), new ELMention("Estados Unidos de América", 78, 103, "GPE", "estados_unidos", "united_states"));
         spanish_answers.put(new Pair<>(249, 262), new ELMention("afroamericano", 249, 262, "LOC", "afroamericano", "african_diaspora_in_the_americas"));
         spanish_answers.put(new Pair<>(134, 142), new ELMention("Illinois", 134, 142, "GPE", "illinois", "illinois"));
-        spanish_answers.put(new Pair<>(269, 275), new ELMention("Senado", 269, 275, "ORG", "senado_de_los_estados_unidos", "united_states_senate"));
+        spanish_answers.put(new Pair<>(269, 275), new ELMention("Senado", 269, 275, "ORG", "senado", "senate"));
         spanish_answers.put(new Pair<>(283, 297), new ELMention("Estados Unidos", 283, 297, "GPE", "estados_unidos", "united_states"));
         spanish_answers.put(new Pair<>(371, 384), new ELMention("afroamericano", 371, 384, "LOC", "afroamericano", "african_diaspora_in_the_americas"));
         spanish_answers.put(new Pair<>(418, 435), new ELMention("Partido Demócrata", 418, 435, "ORG", "partido_demócrata_(estados_unidos)", "democratic_party_(united_states)"));
@@ -57,9 +57,9 @@ public class TestAnnotators {
         chinese_answers.put(new Pair<>(29, 32), new ELMention("歐巴馬", 29, 32, "PER", "贝拉克·奥巴马", "barack_obama"));
         chinese_answers.put(new Pair<>(36, 37), new ELMention("非", 36, 37, "LOC", "非洲", "africa"));
         chinese_answers.put(new Pair<>(38, 40), new ELMention("美國", 38, 40, "GPE", "美国", "united_states"));
-        chinese_answers.put(new Pair<>(52, 61), new ELMention("美國夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL"));
+        chinese_answers.put(new Pair<>(52, 61), new ELMention("美國夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL0001"));
         chinese_answers.put(new Pair<>(75, 80), new ELMention("哈佛法學院", 75, 80, "ORG", "哈佛法学院", "harvard_law_school"));
-        chinese_answers.put(new Pair<>(102, 109), new ELMention("伊利諾州參議員", 102, 109, "ORG", "NIL", "NIL"));
+        chinese_answers.put(new Pair<>(102, 109), new ELMention("伊利諾州參議員", 102, 109, "ORG", "NIL", "NIL0002"));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class TestAnnotators {
         Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("es");
         TextAnnotation ta = tokenizer.getTextAnnotation(spanish_input);
 
-        String config = "config/xlwikifier.config";
+        String config = "config/xlwikifier-demo.config";
 
         MultiLingualNER ner_annotator = null;
         try {
@@ -117,7 +117,7 @@ public class TestAnnotators {
         Tokenizer tokenizer = new CharacterTokenizer();
         TextAnnotation ta = tokenizer.getTextAnnotation(chinese_input);
 
-        String config = "config/xlwikifier.config";
+        String config = "config/xlwikifier-demo.config";
 
         MultiLingualNER annotator = null;
         try {

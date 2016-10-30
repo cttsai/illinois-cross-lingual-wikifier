@@ -111,6 +111,7 @@ public class WikiCandidateGenerator {
 
         if (title2id.containsKey(title)) {
             String id = title2id.get(title);
+            System.out.println(id);
             if (id2redirect.containsKey(id)) {
                 return id2redirect.get(id);
             }
@@ -522,7 +523,8 @@ public class WikiCandidateGenerator {
     public static void main(String[] args) {
         ConfigParameters.setPropValues();
         WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
-        System.out.println(g.getCandsBySurface("中国"));
+//        System.out.println(g.getCandsBySurface("歐巴馬"));
+        System.out.println(g.getFinalTitle("欧巴马"));
         System.exit(-1);
 
         g.closeDB();

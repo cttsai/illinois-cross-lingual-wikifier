@@ -8,7 +8,4 @@ bin/
 .project
 .svn
 .settings
-data
-brown-clusters
-models
-stopwords
+xlwikifier-data
