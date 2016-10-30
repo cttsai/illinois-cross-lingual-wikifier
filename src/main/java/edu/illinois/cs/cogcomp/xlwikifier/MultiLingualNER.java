@@ -63,7 +63,7 @@ public class MultiLingualNER extends Annotator {
         this.language = lang;
 
         // set all config properties of cross-lingual wikifier
-//        ConfigParameters.setPropValues(configFile);
+        ConfigParameters.setPropValues(configFile);
 
         doInitialize();
     }
@@ -73,7 +73,7 @@ public class MultiLingualNER extends Annotator {
 
         logger.info("Initializing MultiLingualNER...");
 
-        ConfigParameters.setPropValues(rm);
+//        ConfigParameters.setPropValues(rm);
 
         String lang = this.language.toString().toLowerCase();
 

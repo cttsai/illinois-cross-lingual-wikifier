@@ -46,6 +46,8 @@ public class CrossLingualWikifier extends Annotator {
 
         this.language = lang;
 
+        ConfigParameters.setPropValues(configFile);
+
         doInitialize();
     }
 

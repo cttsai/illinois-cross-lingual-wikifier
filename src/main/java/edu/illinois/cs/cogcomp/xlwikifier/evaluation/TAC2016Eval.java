@@ -71,12 +71,7 @@ public class TAC2016Eval {
         }
 
         String config = args[1];
-
-        try {
-            ConfigParameters.setPropValues(new ResourceManager(config));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ConfigParameters.setPropValues(config);
 
         List<QueryDocument> docs = null;
         Language lang = null;
@@ -134,19 +129,19 @@ public class TAC2016Eval {
         double rec = span_cnt/gold_total;
         double pre = span_cnt/pred_total;
         double f1 = 2*rec*pre/(rec+pre);
-        System.out.println("Mention Span:");
+        System.out.print("Mention Span: ");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
 
         rec = ner_cnt/gold_total;
         pre = ner_cnt/pred_total;
         f1 = 2*rec*pre/(rec+pre);
-        System.out.println("Mention Span + Entity Type:");
+        System.out.print("Mention Span + Entity Type: ");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
 
         rec = link_cnt/gold_total;
         pre = link_cnt/pred_total;
         f1 = 2*rec*pre/(rec+pre);
-        System.out.println("Mention Span + Entity Type + FreeBase ID:");
+        System.out.print("Mention Span + Entity Type + FreeBase ID: ");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
     }
 }

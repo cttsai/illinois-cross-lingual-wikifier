@@ -260,10 +260,16 @@ public class Ranker {
 
     public static void main(String[] args) {
 
-        ConfigParameters param = new ConfigParameters();
-        param.setPropValues();
+        if(args.length < 2)
+            logger.error("Require 2 arguments");
 
         String lang = args[0];
+        String config = args[1];
+
+        ConfigParameters.setPropValues(config);
+
+        if(new File(ConfigParameters.dump_path).isDirectory())
+            logger.error("Wikipedia dump is required to train a ranker");
 
         trainRanker(lang, 20000, 0.5, "models/ranker/default/" + lang + "/ranker.model");
     }
