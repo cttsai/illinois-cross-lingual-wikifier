@@ -1,10 +1,12 @@
 #!/bin/sh
 
-TRAIN="/shared/corpora/ner/wikifier-features/en/train-camera3"
+TRAIN="/shared/corpora/ner/wikifier-features/es/tac-traintest+ere"
+#TRAIN="/shared/corpora/ner/wikifier-features/zh/tactrain+ere"
 
-TEST="/shared/corpora/ner/wikifier-features/en/test-camera3"
+TEST="/shared/corpora/ner/wikifier-features/es/tac2015-test12-prop"
+#TEST="/shared/corpora/ner/wikifier-features/zh/tac2015-test12-char-prop"
 
-configFile="config/ner-example.config"
+configFile=$1
 
 cpath="target/classes:target/dependency/*:config"
 

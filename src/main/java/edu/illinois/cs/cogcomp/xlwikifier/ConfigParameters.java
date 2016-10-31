@@ -17,11 +17,12 @@ public class ConfigParameters {
     private static final Logger logger = LoggerFactory.getLogger(ConfigParameters.class);
     public static String db_path;
     public static String dump_path;
-    public static String stopword_path;
+    public static String stopword_path = "xlwikifier-data/stopwords/";
     public static Map<String, String> ner_models = new HashMap<>();
     public static Map<String, String> ranker_models = new HashMap<>();
     public static Map<String, String> ranker_ner = new HashMap<>();
-    public static String tac_es_dir, tac_zh_dir, tac_golds;
+    public static String tac_es_samples, tac_zh_samples;
+    public static String tac_golds = "xlwikifier-data/test/tac-golds";
     public static boolean is_set = false;
     public static String search_cache;
     public static boolean use_search = false;
@@ -53,9 +54,6 @@ public class ConfigParameters {
 
     private static void setPropValues(ResourceManager rm) {
 
-        db_path = rm.getString("db_path").trim();
-        dump_path = rm.getString("dump_path").trim();
-        stopword_path = rm.getString("stopword_path").trim();
 
         // load models configs
         for (Language lang : Language.values()) {
@@ -73,18 +71,27 @@ public class ConfigParameters {
                 ranker_ner.put(l, rm.getString(key).trim());
         }
 
-        if (rm.containsKey("tac_es_dir"))
-            tac_es_dir = rm.getString("tac_es_dir");
-        if (rm.containsKey("tac_zh_dir"))
-            tac_zh_dir = rm.getString("tac_zh_dir");
+        if (rm.containsKey("db_path"))
+            db_path = rm.getString("db_path").trim();
+        else
+            logger.error("db_path is required");
+
+        if (rm.containsKey("dump_path"))
+            dump_path = rm.getString("dump_path").trim();
+        if (rm.containsKey("stopword_path"))
+            stopword_path = rm.getString("stopword_path").trim();
+        if (rm.containsKey("tac_es_samples"))
+            tac_es_samples = rm.getString("tac_es_samples").trim();
+        if (rm.containsKey("tac_zh_samples"))
+            tac_zh_samples = rm.getString("tac_zh_samples").trim();
         if (rm.containsKey("tac_golds"))
-            tac_golds = rm.getString("tac_golds");
+            tac_golds = rm.getString("tac_golds").trim();
         if (rm.containsKey("use_wikisearch"))
             use_search = rm.getBoolean("use_wikisearch");
         if (rm.containsKey("search_cache"))
-            search_cache = rm.getString("search_cache");
+            search_cache = rm.getString("search_cache").trim();
         if (rm.containsKey("target_kb"))
-            target_kb = rm.getString("target_kb");
+            target_kb = rm.getString("target_kb").trim();
     }
 
     public static void main(String[] args) {

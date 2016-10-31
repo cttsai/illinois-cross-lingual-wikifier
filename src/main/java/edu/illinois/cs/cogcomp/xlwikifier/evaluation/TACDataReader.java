@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
+import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
@@ -9,14 +10,17 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * This class reads TAC 2016 data
@@ -32,17 +36,28 @@ public class TACDataReader {
 
         List<QueryDocument> docs = new ArrayList<>();
 
+        List<String> filenames = null;
+        try {
+            filenames = LineIO.read(ConfigParameters.tac_zh_samples);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         Tokenizer tokenizer = new CharacterTokenizer();
-        for (File f : new File(ConfigParameters.tac_zh_dir).listFiles()) {
-            int idx = f.getName().lastIndexOf(".");
-            String docid = f.getName().substring(0, idx);
+        for (String filename: filenames) {
+            int idx = filename.lastIndexOf(".");
+            int idx1 = filename.lastIndexOf("/");
+            String docid = filename.substring(idx1+1, idx);
 
             if(!docids.contains(docid)) continue;
 
             String xml_text = null;
+            InputStream res = ResourceUtilities.loadResource(filename);
             try {
-                xml_text = FileUtils.readFileToString(f, "UTF-8");
-            } catch (IOException e) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+                xml_text = in.lines().collect(joining("\n"))+"\n";
+                in.close();
+            }catch(Exception e){
                 e.printStackTrace();
             }
 
@@ -65,18 +80,30 @@ public class TACDataReader {
         List<QueryDocument> docs = new ArrayList<>();
 
         Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("es");
-        for (File f : new File(ConfigParameters.tac_es_dir).listFiles()) {
-            int idx = f.getName().lastIndexOf(".");
-            String docid = f.getName().substring(0, idx);
+        List<String> filenames = null;
+        try {
+            filenames = LineIO.read(ConfigParameters.tac_es_samples);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        for (String filename: filenames) {
+            int idx = filename.lastIndexOf(".");
+            int idx1 = filename.lastIndexOf("/");
+            String docid = filename.substring(idx1+1, idx);
 
             if(!docids.contains(docid)) continue;
 
             String xml_text = null;
+            InputStream res = ResourceUtilities.loadResource(filename);
             try {
-                xml_text = FileUtils.readFileToString(f, "UTF-8");
-            } catch (IOException e) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+                xml_text = in.lines().collect(joining("\n"));
+                in.close();
+            }catch(Exception e){
                 e.printStackTrace();
             }
+
 
             QueryDocument doc = new QueryDocument(docid);
             XMLOffsetHandler xmlhandler = new XMLOffsetHandler(xml_text, tokenizer);
@@ -110,10 +137,14 @@ public class TACDataReader {
 
     private static List<ELMention> readGoldMentions(String filename){
         List<ELMention> ret = new ArrayList<>();
-        List<String> lines = null;
+        List<String> lines = new ArrayList<>();
+
+        InputStream res = ResourceUtilities.loadResource(filename);
         try {
-            lines = LineIO.read(filename);
-        } catch (FileNotFoundException e) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+            lines = in.lines().collect(Collectors.toList());
+            in.close();
+        }catch (Exception e){
             e.printStackTrace();
         }
 

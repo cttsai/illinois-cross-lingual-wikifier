@@ -1,33 +1,48 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
+import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 /**
  * Created by ctsai12 on 5/1/16.
  */
 public class StopWord {
 
-    public static Set<String> getStopWords(String lang) {
-        Set<String> ret = new HashSet<>();
-        try {
-            File f = new File(ConfigParameters.stopword_path, "stopwords." + lang);
-            if (f.exists()) {
-                ret.addAll(LineIO.read(f.getAbsolutePath()).stream()
-                        .map(x -> x.trim().toLowerCase()).collect(toSet()));
-            } else
-                System.out.println("No stopwords for " + lang);
+    private static Map<String, Set<String>> stopwordMap = new HashMap<>();
 
-            ret.addAll(LineIO.read(ConfigParameters.stopword_path + "/puncs").stream().collect(toSet()));
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static Set<String> getStopWords(String lang) {
+
+        if(stopwordMap.containsKey(lang))
+            return stopwordMap.get(lang);
+        else {
+            Set<String> ret = new HashSet<>();
+
+            try {
+                InputStream res = ResourceUtilities.loadResource(ConfigParameters.stopword_path+"stopwords." + lang);
+                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+                ret.addAll(in.lines().map(x -> x.trim().toLowerCase()).collect(Collectors.toSet()));
+                in.close();
+
+                res = ResourceUtilities.loadResource(ConfigParameters.stopword_path+"puncs");
+                in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+                ret.addAll(in.lines().map(x -> x.trim().toLowerCase()).collect(Collectors.toSet()));
+                in.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            stopwordMap.put(lang, ret);
+            return ret;
         }
-        return ret;
     }
 }

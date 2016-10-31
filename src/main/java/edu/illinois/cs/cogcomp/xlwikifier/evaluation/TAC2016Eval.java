@@ -1,6 +1,5 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
-import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.xlwikifier.*;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
@@ -10,7 +9,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +77,6 @@ public class TAC2016Eval {
             lang = Language.ZH;
             docs = TACDataReader.readChineseEvalDocs();
             golds = TACDataReader.readChineseGoldNAM();
-
         }
         else if(args[0].equals("es")){
             lang = Language.ES;

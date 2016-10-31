@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
+import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
@@ -15,6 +16,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,14 +47,14 @@ public class Ranker {
 
     public static Ranker loadPreTrainedRanker(String lang, String filepath) {
         logger.info("Loading ranker model: " + filepath);
-        if (!new File(filepath).exists()) {
-            logger.error("Model doesn't exist: " + filepath);
-            System.exit(-1);
-        }
-        if (!new File(filepath + ".lm").exists()) {
-            logger.error("Lexical manager doesn't exist: " + filepath + ".lm");
-            System.exit(-1);
-        }
+//        if (!new File(filepath).exists()) {
+//            logger.error("Model doesn't exist: " + filepath);
+//            System.exit(-1);
+//        }
+//        if (!new File(filepath + ".lm").exists()) {
+//            logger.error("Lexical manager doesn't exist: " + filepath + ".lm");
+//            System.exit(-1);
+//        }
         Ranker ranker = new Ranker(lang);
         ranker.readModel(filepath);
         ranker.loadLexicalManager(filepath + ".lm");
@@ -61,9 +63,12 @@ public class Ranker {
 
     public void readModel(String filepath) {
         List<String> lines = null;
+        InputStream res = ResourceUtilities.loadResource(filepath);
         try {
-            lines = LineIO.read(filepath);
-        } catch (FileNotFoundException e) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+            lines = in.lines().collect(Collectors.toList());
+            in.close();
+        }catch (Exception e){
             e.printStackTrace();
         }
         int start = lines.indexOf("w") + 1;
@@ -86,7 +91,8 @@ public class Ranker {
 
         logger.info("loading lexical manager...");
         try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filepath));
+            InputStream res = ResourceUtilities.loadResource(filepath);
+            ObjectInputStream ois = new ObjectInputStream(res);
             LexManager lm = (LexManager) ois.readObject();
             fm.lex = lm;
         } catch (Exception e) {
