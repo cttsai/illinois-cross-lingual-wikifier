@@ -6,15 +6,18 @@ This project implements the following two papers:
 The [live demo](http://bilbo.cs.illinois.edu/~ctsai12/xlwikifier/) will give you some intuition about this project.
 
 ### Setup (for CogComp members)
-* Fork the project and go to the root directory of master branch 
-* ln -s /shared/preprocessed/ctsai12/multilingual/deft/xlwikifier-data/
+If you are not using illinois-xlwikifier-resources in pom.xml, you need to do:
+
+ln -s /shared/preprocessed/ctsai12/multilingual/deft/xlwikifier-data/
 
 This data folder only contains English, Spanish, and Chinese models for TAC EDL. Models for other languages are at /shared/preprocessed/ctsai12/multilingual/xlwikifier-data/
 
 ### Run Benchmark
 * mvn dependency:copy-dependencies
 * mvn compile
-* ./scripts/run-benchmark.sh es (or zh for Chinese)
+* ./scripts/run-benchmark.sh es config/xlwikifier-tac.config
+
+Check run-benchmark.sh for more details
 
 ### Train Ranking Model
 Use ./script/train-ranker.sh and check the [corresponding class](https://github.com/cttsai/cross-lingual-wikifier/blob/demo/src/main/java/edu/illinois/cs/cogcomp/xlwikifier/core/Ranker.java). This script trains a ranking model using Wikipedia articles.
