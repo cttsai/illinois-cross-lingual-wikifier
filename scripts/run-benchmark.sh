@@ -17,9 +17,9 @@
 # Mention Span + Entity Type + FreeBase ID: Precision:0.7740 Recall:0.6975 F1:0.7338
 #
 # Chinese (zh):
-# Mention Span: Precision:0.8994 Recall:0.6859 F1:0.7782
-# Mention Span + Entity Type: Precision:0.8742 Recall:0.6667 F1:0.7565
-# Mention Span + Entity Type + FreeBase ID: Precision:0.7610 Recall:0.5803 F1:0.6585
+# Mention Span: Precision:0.9169 Recall:0.7146 F1:0.8032
+# Mention Span + Entity Type: Precision:0.8923 Recall:0.6954 F1:0.7817
+# Mention Span + Entity Type + FreeBase ID: Precision:0.7754 Recall:0.6043 F1:0.6792
 
 LANG=$1
 CONFIG=$2
