@@ -28,6 +28,8 @@ public class ConfigParameters {
     public static boolean use_search = false;
     public static String target_kb;
     private static String config_name;
+    public static String liblinear_path;
+
 
     public static void setPropValues() {
         String default_config = "config/xlwikifier-tac.config";
@@ -92,6 +94,8 @@ public class ConfigParameters {
             search_cache = rm.getString("search_cache").trim();
         if (rm.containsKey("target_kb"))
             target_kb = rm.getString("target_kb").trim();
+        if (rm.containsKey("liblinear_path"))
+            target_kb = rm.getString("liblinear_path").trim();
     }
 
     public static void main(String[] args) {

@@ -148,7 +148,7 @@ public class Ranker {
                 dir.mkdirs();
         }
 
-        executeCmd("liblinear-ranksvm-1.95/train -c 0.01 svmdata-tmp " + name);
+        executeCmd(ConfigParameters.liblinear_path+"/train -c 0.01 svmdata-tmp " + name);
     }
 
     public void setWikiTitleByTopCand(List<QueryDocument> docs) {

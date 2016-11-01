@@ -20,6 +20,10 @@ This data folder only contains English, Spanish, and Chinese models for TAC EDL.
 Check run-benchmark.sh for more details
 
 ### Train Ranking Model
+Two requirements:
+* Download and build [ranking version of liblinear](https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/#large_scale_ranksvm). In the config file, set the "liblinear_path" to the liblinear folder which contains "train".
+* The path to the processed Wikipedia dumps needs to be set. This is only available on CogComp machines now.
+
 Use ./script/train-ranker.sh and check the [corresponding class](https://github.com/cttsai/cross-lingual-wikifier/blob/demo/src/main/java/edu/illinois/cs/cogcomp/xlwikifier/core/Ranker.java). This script trains a ranking model using Wikipedia articles.
 
 ### Train NER Model
