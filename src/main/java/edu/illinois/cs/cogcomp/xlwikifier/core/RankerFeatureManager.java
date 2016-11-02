@@ -207,31 +207,31 @@ public class RankerFeatureManager implements Serializable {
         int start = Math.max(0, start_off - window);
         int end = Math.min(text.length(), end_off + window);
 
-        TextAnnotation ta = doc.getTextAnnotation();
+//        TextAnnotation ta = doc.getTextAnnotation();
+//
+//        int tid_start = ta.getTokenIdFromCharacterOffset(m.getStartOffset());
+//        int tid_end = ta.getTokenIdFromCharacterOffset(m.getEndOffset()-1)+1;
+//
+//        List<String> words = new ArrayList<>();
+//        for(int i = tid_start -1; i >= 0; i--){
+//            if(ta.getTokenCharacterOffset(i).getSecond() <= start)
+//                break;
+//            words.add(ta.getToken(i));
+//        }
+//
+//        for(int i = tid_end; i < ta.getTokens().length; i++){
+//            if(ta.getTokenCharacterOffset(i).getFirst() >= end)
+//                break;
+//            words.add(ta.getToken(i));
+//        }
 
-        int tid_start = ta.getTokenIdFromCharacterOffset(m.getStartOffset());
-        int tid_end = ta.getTokenIdFromCharacterOffset(m.getEndOffset()-1)+1;
-
-        List<String> words = new ArrayList<>();
-        for(int i = tid_start -1; i >= 0; i--){
-            if(ta.getTokenCharacterOffset(i).getSecond() <= start)
-                break;
-            words.add(ta.getToken(i));
-        }
-
-        for(int i = tid_end; i < ta.getTokens().length; i++){
-            if(ta.getTokenCharacterOffset(i).getFirst() >= end)
-                break;
-            words.add(ta.getToken(i));
-        }
 
 
-
-//        String context = text.substring(start, start_off).trim() + " "
-//                + text.substring(end_off, end).trim();
-//        context = context.toLowerCase().replaceAll(",", "")
-//                .replaceAll("\\.", "").replaceAll("'s", "").replaceAll("\n", " ");
-//        List<String> words = getTokens(context);
+        String context = text.substring(start, start_off).trim() + " "
+                + text.substring(end_off, end).trim();
+        context = context.toLowerCase().replaceAll(",", "")
+                .replaceAll("\\.", "").replaceAll("'s", "").replaceAll("\n", " ");
+        List<String> words = getTokens(context);
         return getWeightedVectorFromWords(words, context_lang);
     }
 

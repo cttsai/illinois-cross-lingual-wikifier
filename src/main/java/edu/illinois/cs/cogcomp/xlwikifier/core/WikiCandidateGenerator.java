@@ -147,7 +147,7 @@ public class WikiCandidateGenerator {
         if (cands.size() == 0) {
             if (word_search)
                 cands = getCandidateByWord(surface, 6);
-            if (en_search)
+            if (!lang.equals("en") && en_search)
                 cands = en_generator.getCandsBySurface(surface);
         }
 

@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
+import com.google.common.io.Files;
 import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
@@ -8,17 +9,10 @@ import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
-import java.net.URL;
-import java.security.CodeSource;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static java.util.stream.Collectors.joining;
 
@@ -28,11 +22,29 @@ import static java.util.stream.Collectors.joining;
  */
 public class TACDataReader {
 
+    public static List<QueryDocument> readEnglishEvalDocs() {
+
+//        Set<String> docids = readEnglishGoldNAM().stream()
+//                .map(x -> x.getDocID()).collect(Collectors.toSet());
+//
+//        String dir = "/shared/corpora/corporaWeb/tac/LDC2016E63_TAC_KBP_2016_Evaluation_Source_Corpus_V1.1/data/eng/";
+//        for(String id: docids){
+//            String f = null;
+//            if(id.contains("_NW_"))
+//                f = dir+"nw/";
+//            else
+//                f = dir+"df/";
+//            try {
+//                Files.copy(new File(f, id+".xml"), new File("/shared/preprocessed/ctsai12/multilingual/deft/xlwikifier-data/test/tac-en/", id+".xml"));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+        List<QueryDocument> docs = new ArrayList<>();
+        return docs;
+    }
 
     public static List<QueryDocument> readChineseEvalDocs() {
-
-        Set<String> docids = readChineseGoldNAM().stream()
-                .map(x -> x.getDocID()).collect(Collectors.toSet());
 
         List<QueryDocument> docs = new ArrayList<>();
 
@@ -48,8 +60,6 @@ public class TACDataReader {
             int idx = filename.lastIndexOf(".");
             int idx1 = filename.lastIndexOf("/");
             String docid = filename.substring(idx1+1, idx);
-
-            if(!docids.contains(docid)) continue;
 
             String xml_text = null;
             InputStream res = ResourceUtilities.loadResource(filename);
@@ -74,9 +84,6 @@ public class TACDataReader {
 
     public static List<QueryDocument> readSpanishEvalDocs() {
 
-        Set<String> docids = readSpanishGoldNAM().stream()
-                .map(x -> x.getDocID()).collect(Collectors.toSet());
-
         List<QueryDocument> docs = new ArrayList<>();
 
         Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("es");
@@ -91,8 +98,6 @@ public class TACDataReader {
             int idx = filename.lastIndexOf(".");
             int idx1 = filename.lastIndexOf("/");
             String docid = filename.substring(idx1+1, idx);
-
-            if(!docids.contains(docid)) continue;
 
             String xml_text = null;
             InputStream res = ResourceUtilities.loadResource(filename);
@@ -116,6 +121,12 @@ public class TACDataReader {
         return docs;
     }
 
+    public static List<ELMention> readEnglishGoldNAM(){
+        return readGoldMentions().stream()
+                .filter(x -> x.getLanguage().equals("ENG"))
+                .filter(x -> x.noun_type.equals("NAM"))
+                .collect(Collectors.toList());
+    }
 
     public static List<ELMention> readChineseGoldNAM(){
         return readGoldMentions().stream()
@@ -172,5 +183,9 @@ public class TACDataReader {
             ret.add(m);
         }
         return ret;
+    }
+
+    public static void main(String[] args) {
+        readEnglishEvalDocs();
     }
 }
