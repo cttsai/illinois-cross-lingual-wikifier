@@ -95,7 +95,7 @@ public class ConfigParameters {
         if (rm.containsKey("target_kb"))
             target_kb = rm.getString("target_kb").trim();
         if (rm.containsKey("liblinear_path"))
-            target_kb = rm.getString("liblinear_path").trim();
+            liblinear_path = rm.getString("liblinear_path").trim();
     }
 
     public static void main(String[] args) {
