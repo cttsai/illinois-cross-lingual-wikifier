@@ -22,9 +22,6 @@ public class DemoController {
                                    HttpServletRequest request) {
 
         final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
-        System.out.println(binder.getLoggerFactory());
-        System.out.println(binder.getLoggerFactoryClassStr());
-
 
         logger.info("Request from: " + request.getRemoteAddr() + " " + request.getRemoteUser());
         logger.info("Text: " + text);

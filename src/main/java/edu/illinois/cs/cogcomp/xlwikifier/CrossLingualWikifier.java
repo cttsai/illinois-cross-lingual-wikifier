@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
+ * Generate cross-lingual wikification annotations using the Annotator API.
+ * The language specific NER view (Language.getNERViewName()) is required in the input TextAnnotation.
+ *
  * Created by ctsai12 on 10/26/16.
  */
 public class CrossLingualWikifier extends Annotator {
@@ -40,6 +43,11 @@ public class CrossLingualWikifier extends Annotator {
     private NERUtils nerutils;
     public QueryDocument result; // saving results in this datastructure for the demo
 
+    /**
+     * @param lang the target language
+     * @param configFile a global configuration file, see config/xlwikifier-tac.config for example
+     * @throws IOException
+     */
     public CrossLingualWikifier(Language lang, String configFile) throws IOException {
 
         super(lang.getWikifierViewName(), new String[]{}, true, new ResourceManager(configFile));

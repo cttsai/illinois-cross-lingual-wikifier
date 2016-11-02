@@ -33,6 +33,9 @@ import java.util.*;
 import static edu.illinois.cs.cogcomp.LbjNer.LbjTagger.Parameters.readAndLoadConfig;
 
 /**
+ * Generate NER annotations using the Annotator API.
+ * The input TextAnnotation has to be tokenized.
+ *
  * Created by ctsai12 on 10/24/16.
  */
 public class MultiLingualNER extends Annotator {

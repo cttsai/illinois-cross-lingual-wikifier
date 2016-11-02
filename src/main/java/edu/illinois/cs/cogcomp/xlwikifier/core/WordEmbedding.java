@@ -46,8 +46,10 @@ public class WordEmbedding {
         String path = ConfigParameters.db_path + "/multi-embeddings/" + lang;
         File dir = new File(path);
 
-        logger.info("Creating dictionary: " + path);
-        dir.mkdir();
+        if(!dir.isDirectory()) {
+            logger.info("Creating dictionary: " + path);
+            dir.mkdir();
+        }
         loadDB(lang, false);
     }
 
@@ -248,12 +250,12 @@ public class WordEmbedding {
 
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";
-        String name = args[0];
+        String lang = args[0];
 //        String name = "es";
-        we.createMultiVec(name);
-//        we.loadEmbeddingToDB(dir + name+"/en"+name+"_orig1_projected.txt", we.multi_vec_en);
-//        we.loadEmbeddingToDB(dir + name+"/en"+name+"_orig2_projected.txt", we.multi_vec_lang);
-        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
+        we.createMultiVec(lang);
+        we.loadEmbeddingToDB(dir + lang+"/en"+lang+"_orig1_projected.txt", we.multi_vec_en);
+        we.loadEmbeddingToDB(dir + lang+"/en"+lang+"_orig2_projected.txt", we.multi_vec_lang);
+//        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
 //        we.loadEmbeddingToDB(dir + name+"/en.txt", we.multi_vec_en);
 //        we.loadEmbeddingToDB(dir + name+"/"+name+".txt", we.multi_vec_lang);
 
