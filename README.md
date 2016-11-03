@@ -28,7 +28,7 @@ Use ./script/train-ranker.sh and check the [corresponding class](https://github.
 
 ### Train NER Model
 
-We use Illinois NER to train and do inference. Check ./script/train-ner.sh as an example. Note that the input files are in the colum format. 
+Use ./script/train-ner.sh to train Illinois NER models with wikifier features. Note that the training and test files should be in the colum format. 
 
 ### Contact
 Chen-Tse Tsai (ctsai12@illinois.edu)
