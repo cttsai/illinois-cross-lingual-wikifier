@@ -58,8 +58,14 @@ public class WikiDocReader {
         return ret;
     }
 
-    public QueryDocument readWikiDocSingle(String lang, String filename, boolean check) {
-        String dir = ConfigParameters.dump_path + lang + "/" + lang + "_wiki_view/";
+    /**
+     * Read a single Wikipedia document
+     * @param lang the target language
+     * @param filename Wikipedia title
+     * @return
+     */
+    public QueryDocument readWikiDoc(String lang, String filename) {
+        String dir = ConfigParameters.dump_path + lang + "/docs/";
         List<String> lines = null;
         TextAnnotation ta = null;
         try {
@@ -71,63 +77,38 @@ public class WikiDocReader {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // read anchor text
         List<ELMention> mentions = new ArrayList<>();
         for (String line : lines) {
-            if (!line.startsWith("#")) {
-                String[] sp = line.split("\t");
-                if (sp.length < 3) continue;
-                try {
-                    Integer.parseInt(sp[1]);
-                    Integer.parseInt(sp[2]);
-                } catch (Exception e) {
-                    continue;
-                }
-            } else {
+            if (line.startsWith("#")) {
                 String[] sp = line.substring(1).split("\t");
                 if (sp.length < 3) continue;
                 if (sp[0].trim().isEmpty()) continue;
-                ELMention m;
-                try {
-                    m = new ELMention(filename, Integer.parseInt(sp[1]), Integer.parseInt(sp[2]));
-                } catch (Exception e) {
-                    continue;
-                }
+                ELMention m = new ELMention(filename, Integer.parseInt(sp[1]), Integer.parseInt(sp[2]));
                 m.gold_wiki_title = sp[0];
                 m.gold_lang = lang;
                 mentions.add(m);
             }
         }
 
+        // check if there is an error regarding token/character offsets
         for (ELMention m : mentions) {
             String surface;
-            // check if there is an error regarding token/character offsets
             try {
                 int start_idx = ta.getTokenIdFromCharacterOffset(m.getStartOffset());
                 int end_idx = ta.getTokenIdFromCharacterOffset(m.getEndOffset() - 1);
-//                if (!lang.equals("zh"))
-//                    surface = adoc.getSurface(m.getStartOffset(), m.getEndOffset());
-//                else
-//                    surface = adoc.getSurfaceNoSpace(m.getStartOffset(), m.getEndOffset());
                 surface = ta.getText().substring(m.getStartOffset(), m.getEndOffset());
                 surface = surface.replaceAll("\n", " ");
 
-
-                if (surface == null || m.getStartOffset() < 0 ||
-                        start_idx < 0 || end_idx < 0
-                        || !surface.contains(ta.getToken(start_idx))
-                        || !surface.contains(ta.getToken(end_idx))) {
-                    if (check)
-                        return null;
-                    else
-                        m.setSurface(null);
+                if (surface == null || m.getStartOffset() < 0 || start_idx < 0 || end_idx < 0
+                        || !surface.contains(ta.getToken(start_idx)) || !surface.contains(ta.getToken(end_idx))) {
+                    m.setSurface(null);
                 } else {
                     m.setSurface(surface);
                 }
             } catch (Exception e) {
-                if (check)
-                    return null;
-                else
-                    m.setSurface(null);
+                m.setSurface(null);
             }
         }
         mentions = mentions.stream().filter(x -> x.getSurface() != null && !x.getSurface().trim().isEmpty())
@@ -139,56 +120,47 @@ public class WikiDocReader {
         return doc;
     }
 
-    public List<QueryDocument> readWikiDocsNew(String lang, int start, int end) {
+    /**
+     * Read Wikipedia articles with hyperlinked phrases
+     * @param lang the target language
+     * @param n number of documents
+     * @return
+     */
+    public List<QueryDocument> readWikiDocs(String lang, int n) {
         logger.info("Reading " + lang + " wikipedia docs...");
         List<String> paths = null;
-        String dir = null;
 
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
 
-        Set<String> badfile = new HashSet<>();
-
         try {
-            dir = "/shared/preprocessed/ctsai12/multilingual/wikidump/" + lang + "/" + lang + "_wiki_view/";
-//            dir = "/shared/preprocessed/ctsai12/multilingual/wikidump/"+lang+"/docs/";
+            String dir = ConfigParameters.dump_path + "/" + lang + "/docs/";
             paths = LineIO.read(dir + "file.list.rand");
-//            badfile.addAll(LineIO.read(dir+"bad.list"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
         List<QueryDocument> docs = new ArrayList<>();
-        int cnt = 0;
         int bad = 0;
-        for (String filename : paths.subList(start, Math.min(paths.size(), end))) {
-            if ((cnt++) % 100 == 0)
-                System.out.print((cnt++) + "\r");
-            if (badfile.contains(filename)) continue;
+        for (String filename : paths) {
+            if(docs.size() == n) break;
 
-            QueryDocument doc = readWikiDocSingle(lang, filename, true);
+            QueryDocument doc = readWikiDoc(lang, filename);
             if (doc == null || doc.mentions.size() == 0) {
                 bad++;
-                badfile.add(filename);
-                continue;
+            } else {
+                docs.add(doc);
             }
-            docs.add(doc);
         }
         System.out.println();
         logger.info("#bad " + bad);
         logger.info("#docs " + docs.size());
         logger.info("#mentions " + docs.stream().flatMap(x -> x.mentions.stream()).count());
-        String badstr = badfile.stream().collect(joining("\n"));
-        try {
-            FileUtils.writeStringToFile(new File(dir + "bad.list"), badstr, "UTF-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return docs;
     }
 
     public static void main(String[] args) throws Exception {
         WikiDocReader r = new WikiDocReader();
-        r.readWikiDocsNew("zh", 0, 5000);
+        r.readWikiDocs("zh", 5000);
 
     }
 }

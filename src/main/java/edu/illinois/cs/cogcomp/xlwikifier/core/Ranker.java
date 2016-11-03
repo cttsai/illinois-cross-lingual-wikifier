@@ -257,7 +257,7 @@ public class Ranker {
         ranker.fm.ner_mode = false;
 
         WikiDocReader reader = new WikiDocReader();
-        List<QueryDocument> docs = reader.readWikiDocsNew(lang, 0, n_docs);
+        List<QueryDocument> docs = reader.readWikiDocs(lang, n_docs);
 
         FreeBaseQuery.loadDB(true);
         WikiCandidateGenerator wcg = new WikiCandidateGenerator(lang, true);
@@ -270,18 +270,26 @@ public class Ranker {
 
     public static void main(String[] args) {
 
-        if(args.length < 2)
-            logger.error("Require 2 arguments");
+        if(args.length < 3)
+            logger.error("Require 3 arguments");
 
         String lang = args[0];
-        String config = args[1];
+        int n_docs = Integer.parseInt(args[1]);
+        String config = args[2];
 
         ConfigParameters.setPropValues(config);
 
-        if(new File(ConfigParameters.dump_path).isDirectory())
+        if(!new File(ConfigParameters.dump_path).isDirectory()) {
             logger.error("Wikipedia dump is required to train a ranker");
+            System.exit(-1);
+        }
 
-        trainRanker(lang, 20000, 0.5, "models/ranker/default/" + lang + "/ranker.model");
+        if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
+            logger.error("Ranking model already exists");
+            System.exit(-1);
+        }
+
+        trainRanker(lang, n_docs, 3, ConfigParameters.ranker_models.get(lang));
     }
 
 }

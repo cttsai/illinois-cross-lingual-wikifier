@@ -28,7 +28,7 @@ public class ConfigParameters {
     public static boolean use_search = false;
     public static String target_kb;
     private static String config_name;
-    public static String liblinear_path;
+    public static String liblinear_path = "liblinear-ranksvm-1.95";
 
 
     public static void setPropValues() {
