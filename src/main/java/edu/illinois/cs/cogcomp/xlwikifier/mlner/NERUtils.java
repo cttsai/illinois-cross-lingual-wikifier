@@ -29,10 +29,10 @@ public class NERUtils {
     public Set<String> stops;
     public String lang;
     private LangLinker ll = new LangLinker();
-    private WikiCandidateGenerator en_wcg;
     private WikiCandidateGenerator wcg;
     private NERFeatureManager fm;
     private Ranker ranker;
+    private Map<String, Map<String, Double>> fcache = new HashMap<>();
 
     public NERUtils() {
     }
@@ -40,7 +40,6 @@ public class NERUtils {
     public NERUtils(String lang) {
         setLang(lang);
         wcg = new WikiCandidateGenerator(lang, true);
-        en_wcg = new WikiCandidateGenerator("en", true);
         ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_ner.get(lang));
         ranker.setNERMode(true);
     }
@@ -58,30 +57,41 @@ public class NERUtils {
      * @param doc
      */
     public void wikifyNgrams(QueryDocument doc) {
-        logger.info("Wikifying n-grams...");
+//        logger.info("Wikifying n-grams...");
 
         List<ELMention> prevm = new ArrayList<>();
         for (int n = 4; n > 0; n--) {
             doc.mentions = getNgramMentions(doc, n);
             propFeatures(doc, prevm);
-            wikifyMentions(doc, n);
-            extractNERFeatures(doc);
+//            wikifyMentions(doc, n);
+            extractNERFeatures(doc, n);
             prevm = doc.mentions;
         }
-        logger.info("Done");
+//        logger.info("Done");
     }
 
-    public void extractNERFeatures(QueryDocument doc) {
+    public void extractNERFeatures(QueryDocument doc, int n) {
         for (int j = 0; j < doc.mentions.size(); j++) {
             ELMention m = doc.mentions.get(j);
-            if (m.ner_features.size() > 0)
+
+            String surface = m.getSurface().toLowerCase();
+
+            if(fcache.containsKey(surface)) {
+                m.ner_features = fcache.get(surface);
                 continue;
-            if (NumberUtils.isNumber(m.getSurface().trim()))
-                continue;
+            }
+
+            if (m.ner_features.size() > 0) continue;
+            if (NumberUtils.isNumber(surface.trim())) continue;
+
+            wikifyMention(m, n);
+
             Map<String, Double> map = getFeatureMap(doc.mentions, j, true);
             for (String key : map.keySet()) {
                 m.ner_features.put(key, map.get(key));
             }
+
+            fcache.put(surface, m.ner_features);
         }
     }
 
@@ -142,47 +152,79 @@ public class NERUtils {
         return mentions;
     }
 
-    public void wikifyMentions(QueryDocument doc, int n) {
-        for (ELMention m : doc.mentions) {
-            if (!m.getWikiTitle().startsWith("NIL")) continue;
-            if (m.ner_features.size() > 0) continue;
+    public void wikifyMention(ELMention m, int n) {
+        if (!m.getWikiTitle().startsWith("NIL")) return;
+        if (m.ner_features.size() > 0) return;
 
-            String surface = m.getSurface().toLowerCase();
-            List<WikiCand> cands = wcg.getCandsBySurface(surface);
+        String surface = m.getSurface().toLowerCase();
+        List<WikiCand> cands = wcg.getCandsBySurface(surface);
 
-            if (cands.size() == 0 && n == 1 && surface.length() > 0) {
+        if (cands.size() == 0 && n == 1 && surface.length() > 0) {
+            if (StringUtils.isCapitalized(m.getSurface())) {
+                cands.addAll(wcg.getCandidateByWord(surface, 6));
+            }
+        }
+
+        if (cands.size() == 0 && !lang.equals("en")) {
+            if (n > 1) {
+                cands.addAll(wcg.en_generator.getCandsBySurface(surface));
+            } else if (surface.length() > 0) {
                 if (StringUtils.isCapitalized(m.getSurface())) {
-                    cands.addAll(wcg.getCandidateByWord(surface, 6));
+                    cands.addAll(wcg.en_generator.getCandsBySurface(surface));
+                    if (cands.size() == 0)
+                        cands.addAll(wcg.en_generator.getCandidateByWord(surface, 6));
                 }
             }
-
-            if (cands.size() == 0 && !lang.equals("en")) {
-                if (n > 1) {
-                    cands.addAll(en_wcg.getCandsBySurface(surface));
-                } else if (surface.length() > 0) {
-                    if (StringUtils.isCapitalized(m.getSurface())) {
-                        cands.addAll(en_wcg.getCandsBySurface(surface));
-                        if (cands.size() == 0)
-                            cands.addAll(en_wcg.getCandidateByWord(surface, 6));
-                    }
-                }
-            }
-
-            m.setCandidates(cands);
         }
 
-//        ranker.setWikiTitleByModel(doc);
-        ranker.setWikiTitleByTopCand(doc);
+        m.setCandidates(cands);
 
+        ranker.setWikiTitleByTopCand(m);
 
-        // just keep top 2 cands to reduce cache size
-        for (ELMention m : doc.mentions) {
-            List<WikiCand> cands = m.getCandidates();
-            m.setCandidates(cands.subList(0, Math.min(cands.size(), 2)));
-        }
-        setMidByWikiTitle(doc);
-
+        setMidByWikiTitle(m);
     }
+
+//    public void wikifyMentions(QueryDocument doc, int n) {
+//        for (ELMention m : doc.mentions) {
+//            if (!m.getWikiTitle().startsWith("NIL")) continue;
+//            if (m.ner_features.size() > 0) continue;
+//
+//            String surface = m.getSurface().toLowerCase();
+//            List<WikiCand> cands = wcg.getCandsBySurface(surface);
+//
+//            if (cands.size() == 0 && n == 1 && surface.length() > 0) {
+//                if (StringUtils.isCapitalized(m.getSurface())) {
+//                    cands.addAll(wcg.getCandidateByWord(surface, 6));
+//                }
+//            }
+//
+//            if (cands.size() == 0 && !lang.equals("en")) {
+//                if (n > 1) {
+//                    cands.addAll(wcg.en_generator.getCandsBySurface(surface));
+//                } else if (surface.length() > 0) {
+//                    if (StringUtils.isCapitalized(m.getSurface())) {
+//                        cands.addAll(wcg.en_generator.getCandsBySurface(surface));
+//                        if (cands.size() == 0)
+//                            cands.addAll(wcg.en_generator.getCandidateByWord(surface, 6));
+//                    }
+//                }
+//            }
+//
+//            m.setCandidates(cands);
+//        }
+//
+////        ranker.setWikiTitleByModel(doc);
+//        ranker.setWikiTitleByTopCand(doc);
+//
+//
+//        // just keep top 2 cands to reduce cache size
+//        for (ELMention m : doc.mentions) {
+//            List<WikiCand> cands = m.getCandidates();
+//            m.setCandidates(cands.subList(0, Math.min(cands.size(), 2)));
+//        }
+//        setMidByWikiTitle(doc);
+//
+//    }
 
     public void setEnWikiTitle(QueryDocument doc){
         for (ELMention m : doc.mentions) {
@@ -196,26 +238,27 @@ public class NERUtils {
 
     }
 
-    public void setMidByWikiTitle(QueryDocument doc) {
-        for (ELMention m : doc.mentions) {
-
-            if (m.getWikiTitle().startsWith("NIL") && m.getEnWikiTitle().startsWith("NIL")) {
-                m.setMid("NIL");
-            }
-
-            for (WikiCand c : m.getCandidates()) {
-                String mid = getMidByWikiTitle(c.getTitle(), c.lang);
-                c.orig_title = c.title;
-                if (mid != null)
-                    c.title = mid;
-                else
-                    c.title = "NIL";
-            }
-
-            if (m.getCandidates().size() > 0) {
-                m.setMid(m.getCandidates().get(0).title);
-            }
+    public void setMidByWikiTitle(ELMention m) {
+        if (m.getWikiTitle().startsWith("NIL") && m.getEnWikiTitle().startsWith("NIL")) {
+            m.setMid("NIL");
         }
+
+        for (WikiCand c : m.getCandidates()) {
+            String mid = getMidByWikiTitle(c.getTitle(), c.lang);
+            c.orig_title = c.title;
+            if (mid != null)
+                c.title = mid;
+            else
+                c.title = "NIL";
+        }
+
+        if (m.getCandidates().size() > 0) {
+            m.setMid(m.getCandidates().get(0).title);
+        }
+    }
+
+    public void setMidByWikiTitle(QueryDocument doc) {
+        doc.mentions.forEach(x -> setMidByWikiTitle(x));
     }
 
     public String getMidByWikiTitle(String title, String lang) {

@@ -41,7 +41,7 @@ public class WikiCandidateGenerator {
     public boolean en_search = true;
     public boolean word_search = false;
     private Tokenizer tokenizer;
-    private WikiCandidateGenerator en_generator;
+    public WikiCandidateGenerator en_generator;
     private static Logger logger = LoggerFactory.getLogger(WikiCandidateGenerator.class);
 
     public WikiCandidateGenerator(String lang, boolean read_only) {
@@ -67,6 +67,9 @@ public class WikiCandidateGenerator {
 //            String dbfile = "/shared/preprocessed/ctsai12/multilingual/mapdb/candidates/"+lang+"_candidates";
             if (read_only) {
                 db = DBMaker.fileDB(new File(dbfile))
+                        .fileChannelEnable()
+                        .allocateStartSize(1024*1024*1024)
+                        .allocateIncrement(512*1024*1024)
                         .closeOnJvmShutdown()
                         .readOnly()
                         .make();

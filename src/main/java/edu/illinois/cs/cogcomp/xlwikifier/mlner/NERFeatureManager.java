@@ -19,7 +19,7 @@ public class NERFeatureManager implements Serializable {
     private Set<String> en_stops;
     private Set<String> fo_stops;
     private boolean alltype = true;
-    private boolean mono = false;
+    private boolean mono = true;
 
     public NERFeatureManager(String lang) {
         lex = new LexManager();
@@ -34,9 +34,9 @@ public class NERFeatureManager implements Serializable {
         if (mention.is_stop || (mention.getMid().startsWith("NIL") && mention.getWikiTitle().startsWith("NIL"))) {
             addStopWord(mention, featureMap);
         } else {
-            addTopWikiTypes(mention, featureMap);
-            addBeforeWikiTypes(before_mentions, featureMap, 0);
-            addAfterWikiTypes(after_mentions, featureMap, 0);
+//            addTopWikiTypes(mention, featureMap);
+//            addBeforeWikiTypes(before_mentions, featureMap, 0);
+//            addAfterWikiTypes(after_mentions, featureMap, 0);
 
             addTopTypes(mention, featureMap, train);
             addBeforeTypes(before_mentions, featureMap, 0);

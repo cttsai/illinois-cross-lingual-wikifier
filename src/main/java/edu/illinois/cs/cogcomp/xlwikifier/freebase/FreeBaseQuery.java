@@ -33,6 +33,9 @@ public class FreeBaseQuery {
 
         if (read_only) {
             db = DBMaker.fileDB(db_file)
+                    .fileChannelEnable()
+                    .allocateStartSize(1024*1024*1024)
+                    .allocateIncrement(1024*1024*1024)
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();

@@ -46,6 +46,7 @@ public class LangLinker {
 
         if (read_only) {
             db = DBMaker.fileDB(dbfile)
+                    .fileChannelEnable()
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();

@@ -40,11 +40,11 @@ public class TestAnnotators {
     static {
         spanish_answers.put(new Pair(0, 20), new ELMention("Barack Hussein Obama", 0, 20, "PER", "barack_obama", "barack_obama"));
         spanish_answers.put(new Pair<>(78, 103), new ELMention("Estados Unidos de América", 78, 103, "GPE", "estados_unidos", "united_states"));
-        spanish_answers.put(new Pair<>(249, 262), new ELMention("afroamericano", 249, 262, "LOC", "afroamericano", "african_diaspora_in_the_americas"));
+        spanish_answers.put(new Pair<>(249, 262), new ELMention("afroamericano", 249, 262, "GPE", "afroamericano", "african_diaspora_in_the_americas"));
         spanish_answers.put(new Pair<>(134, 142), new ELMention("Illinois", 134, 142, "GPE", "illinois", "illinois"));
         spanish_answers.put(new Pair<>(269, 275), new ELMention("Senado", 269, 275, "ORG", "senado", "senate"));
         spanish_answers.put(new Pair<>(283, 297), new ELMention("Estados Unidos", 283, 297, "GPE", "estados_unidos", "united_states"));
-        spanish_answers.put(new Pair<>(371, 384), new ELMention("afroamericano", 371, 384, "LOC", "afroamericano", "african_diaspora_in_the_americas"));
+        spanish_answers.put(new Pair<>(371, 384), new ELMention("afroamericano", 371, 384, "GPE", "afroamericano", "african_diaspora_in_the_americas"));
         spanish_answers.put(new Pair<>(418, 435), new ELMention("Partido Demócrata", 418, 435, "ORG", "partido_demócrata_(estados_unidos)", "democratic_party_(united_states)"));
     }
 
@@ -59,7 +59,7 @@ public class TestAnnotators {
         chinese_answers.put(new Pair<>(38, 40), new ELMention("美國", 38, 40, "GPE", "美国", "united_states"));
         chinese_answers.put(new Pair<>(52, 61), new ELMention("美國夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL0001"));
         chinese_answers.put(new Pair<>(75, 80), new ELMention("哈佛法學院", 75, 80, "ORG", "哈佛法学院", "harvard_law_school"));
-        chinese_answers.put(new Pair<>(102, 109), new ELMention("伊利諾州參議員", 102, 109, "ORG", "NIL", "NIL0002"));
+        chinese_answers.put(new Pair<>(102, 109), new ELMention("伊利諾州參議員", 102, 109, "FAC", "NIL", "NIL0002"));
     }
 
     @Test
@@ -155,5 +155,34 @@ public class TestAnnotators {
                     c.getLabel().equals(gold_entitle));
         }
     }
+
+//    @Test
+//    public void testEnglishResults() {
+//
+//        String text = "Barack Hussein Obama II is an American politician serving as the 44th President of the United States. He is the first African American to hold the office, as well as the first president born outside of the continental United States. Born in Honolulu, Hawaii, Obama is a graduate of Columbia University and Harvard Law School, where he served as president of the Harvard Law Review. He was a community organizer in Chicago before earning his law degree. He worked as a civil rights attorney and taught constitutional law at University of Chicago Law School between 1992 and 2004. He served three terms representing the 13th District in the Illinois Senate from 1997 to 2004, and ran unsuccessfully in the Democratic primary for the United States House of Representatives in 2000 against incumbent Bobby Rush.";
+//        Language lang = Language.EN;
+//        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("en");
+//        TextAnnotation ta = tokenizer.getTextAnnotation(text);
+//
+//        String config = "config/xlwikifier-demo.config";
+//
+//        MultiLingualNER annotator = null;
+//        try {
+//            annotator = new MultiLingualNER(lang, config);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        annotator.addView(ta);
+//
+//        CrossLingualWikifier xlwikifier = null;
+//        try {
+//            xlwikifier = new CrossLingualWikifier(lang, config);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        xlwikifier.addView(ta);
+//    }
 
 }

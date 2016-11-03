@@ -16,9 +16,6 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.lbjava.nlp.Word;
 import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
-import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -44,7 +41,6 @@ public class MultiLingualNER extends Annotator {
     private final Logger logger = LoggerFactory.getLogger(MultiLingualNER.class);
 
     private Language language;
-    private Tokenizer tokenizer;
     private NERUtils nerutils;
     private ParametersForLbjCode parameters;
     private NETaggerLevel1 taggerLevel1;
@@ -82,11 +78,6 @@ public class MultiLingualNER extends Annotator {
 
         if (!FreeBaseQuery.isloaded())
             FreeBaseQuery.loadDB(true);
-
-        if (this.language == Language.ZH)
-            tokenizer = new CharacterTokenizer();
-        else
-            tokenizer = MultiLingualTokenizer.getTokenizer(lang);
 
         nerutils = new NERUtils(lang);
 

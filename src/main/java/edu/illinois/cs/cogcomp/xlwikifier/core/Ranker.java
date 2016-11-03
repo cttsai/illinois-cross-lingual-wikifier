@@ -157,12 +157,16 @@ public class Ranker {
         }
     }
 
+    public void setWikiTitleByTopCand(ELMention m) {
+        if (m.getCandidates().size() > 0)
+            m.setWikiTitle(m.getCandidates().get(0).getTitle());
+        else
+            m.setWikiTitle("NIL");
+    }
+
     public void setWikiTitleByTopCand(QueryDocument doc) {
         for (ELMention m : doc.mentions) {
-            if (m.getCandidates().size() > 0)
-                m.setWikiTitle(m.getCandidates().get(0).getTitle());
-            else
-                m.setWikiTitle("NIL");
+            setWikiTitleByTopCand(m);
         }
     }
 

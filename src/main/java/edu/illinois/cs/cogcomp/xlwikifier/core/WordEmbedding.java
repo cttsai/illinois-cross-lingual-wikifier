@@ -60,6 +60,9 @@ public class WordEmbedding {
 
         if (read_only) {
             db = DBMaker.fileDB(f)
+                    .fileChannelEnable()
+                    .allocateStartSize(1024*1024*1024) // 1G
+                    .allocateIncrement(1024*1024*1024)
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();
