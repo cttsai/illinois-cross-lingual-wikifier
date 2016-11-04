@@ -103,18 +103,20 @@ public class Ranker {
 
 
     public void train(List<QueryDocument> docs, String modelname) {
+        String train_file = modelname+".svm";
         try {
-            writeSVMData(docs, modelname);
+            writeSVMData(docs, train_file);
+            trainSVM(train_file, modelname);
+            FileUtils.forceDelete(new File(train_file));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        trainSVM(modelname);
-        this.readModel(modelname);
+//        this.readModel(modelname);
     }
 
     public void writeSVMData(List<QueryDocument> docs, String name) throws IOException {
         System.out.println("Generating svm data...");
-        BufferedWriter bw = new BufferedWriter(new FileWriter("svmdata-tmp"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(name));
         int mcnt = 0, dcnt = 0, qid = 1;
         for (QueryDocument doc : docs) {
             dcnt++;
@@ -140,15 +142,15 @@ public class Ranker {
         bw.close();
     }
 
-    public void trainSVM(String name) {
+    public void trainSVM(String train_file, String model) {
         System.out.println("Training...");
-        if (name.contains("/")) {
-            File dir = new File(name.substring(0, name.lastIndexOf("/")));
+        if (model.contains("/")) {
+            File dir = new File(model.substring(0, model.lastIndexOf("/")));
             if (!dir.isDirectory() && !dir.exists())
                 dir.mkdirs();
         }
 
-        executeCmd(ConfigParameters.liblinear_path+"/train -c 0.01 svmdata-tmp " + name);
+        executeCmd(ConfigParameters.liblinear_path+"/train -c 0.01 "+train_file+" " + model);
     }
 
     public void setWikiTitleByTopCand(List<QueryDocument> docs) {
