@@ -1,7 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
-import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
-import edu.illinois.cs.cogcomp.core.io.IOUtils;
+//import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
+//import edu.illinois.cs.cogcomp.core.io.IOUtils;
 import edu.illinois.cs.cogcomp.xlwikifier.*;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;

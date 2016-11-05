@@ -1,7 +1,8 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
-import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
-import edu.illinois.cs.cogcomp.core.io.LineIO;
+//import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
+//import edu.illinois.cs.cogcomp.core.io.LineIO;
+import edu.illinois.cs.cogcomp.ner.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 
 import java.io.BufferedReader;

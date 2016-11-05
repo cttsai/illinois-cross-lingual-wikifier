@@ -1,12 +1,11 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
-import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.indsup.learning.LexManager;
+import edu.illinois.cs.cogcomp.ner.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
-import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.indsup.learning.FeatureVector;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiDocReader;
 import org.apache.commons.io.FileUtils;

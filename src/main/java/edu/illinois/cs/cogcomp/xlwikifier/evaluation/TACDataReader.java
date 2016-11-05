@@ -1,8 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
-import com.google.common.io.Files;
-import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
+import edu.illinois.cs.cogcomp.ner.IO.ResourceUtilities;
 import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;

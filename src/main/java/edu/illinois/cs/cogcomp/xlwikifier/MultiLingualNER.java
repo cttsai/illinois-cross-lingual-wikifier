@@ -1,21 +1,22 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
-import edu.illinois.cs.cogcomp.LbjNer.ExpressiveFeatures.BrownClusters;
-import edu.illinois.cs.cogcomp.LbjNer.ExpressiveFeatures.ExpressiveFeaturesAnnotator;
-import edu.illinois.cs.cogcomp.LbjNer.InferenceMethods.Decoder;
-import edu.illinois.cs.cogcomp.LbjNer.LbjFeatures.NETaggerLevel1;
-import edu.illinois.cs.cogcomp.LbjNer.LbjFeatures.NETaggerLevel2;
-import edu.illinois.cs.cogcomp.LbjNer.LbjTagger.Data;
-import edu.illinois.cs.cogcomp.LbjNer.LbjTagger.NERDocument;
-import edu.illinois.cs.cogcomp.LbjNer.LbjTagger.NEWord;
-import edu.illinois.cs.cogcomp.LbjNer.LbjTagger.ParametersForLbjCode;
-import edu.illinois.cs.cogcomp.LbjNer.ParsingProcessingData.TaggedDataReader;
 import edu.illinois.cs.cogcomp.annotation.Annotator;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.SpanLabelView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.lbjava.nlp.Word;
 import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
+import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.BrownClusters;
+import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.ExpressiveFeaturesAnnotator;
+import edu.illinois.cs.cogcomp.ner.InferenceMethods.Decoder;
+import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel1;
+import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel2;
+import edu.illinois.cs.cogcomp.ner.LbjTagger.Data;
+import edu.illinois.cs.cogcomp.ner.LbjTagger.NERDocument;
+import edu.illinois.cs.cogcomp.ner.LbjTagger.NEWord;
+import edu.illinois.cs.cogcomp.ner.LbjTagger.ParametersForLbjCode;
+import edu.illinois.cs.cogcomp.ner.ParsingProcessingData.TaggedDataReader;
+import edu.illinois.cs.cogcomp.ner.config.NerBaseConfigurator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 
-import static edu.illinois.cs.cogcomp.LbjNer.LbjTagger.Parameters.readAndLoadConfig;
+import static edu.illinois.cs.cogcomp.ner.LbjTagger.Parameters.readAndLoadConfig;
 
 /**
  * Generate NER annotations using the Annotator API.
@@ -72,8 +73,6 @@ public class MultiLingualNER extends Annotator {
 
         logger.info("Initializing MultiLingualNER...");
 
-//        ConfigParameters.setPropValues(rm);
-
         String lang = this.language.toString().toLowerCase();
 
         if (!FreeBaseQuery.isloaded())
@@ -85,9 +84,10 @@ public class MultiLingualNER extends Annotator {
 
             logger.info("loading NER config from " + ConfigParameters.ner_models.get(lang));
             ResourceManager ner_rm = new ResourceManager(ConfigParameters.ner_models.get(lang));
+            NerBaseConfigurator baseConfigurator = new NerBaseConfigurator();
 
             // Save the parameters and brown clusters for this language. These resources are language specific.
-            this.parameters = readAndLoadConfig(ner_rm, false);
+            this.parameters = readAndLoadConfig(baseConfigurator.getConfig(ner_rm), false);
             this.brownclusters = BrownClusters.get();
 
         } catch (IOException e) {
@@ -96,6 +96,8 @@ public class MultiLingualNER extends Annotator {
         taggerLevel1 = new NETaggerLevel1(this.parameters.pathToModelFile + ".level1", this.parameters.pathToModelFile + ".level1.lex");
         taggerLevel2 = new NETaggerLevel2(this.parameters.pathToModelFile + ".level2", this.parameters.pathToModelFile + ".level2.lex");
     }
+
+
 
     @Override
     public void addView(TextAnnotation textAnnotation) {
@@ -131,18 +133,17 @@ public class MultiLingualNER extends Annotator {
 
         // use the language-specific parameters and brown clusters
         ParametersForLbjCode.currentParameters = this.parameters;
-        BrownClusters.brownclusters = this.brownclusters;
+        BrownClusters.setBrownClusters(brownclusters);
 
         // Wikify all n-grams and extract features based on Wikipedia titles
         // doc.mentions stores tokens now
-        if (ParametersForLbjCode.currentParameters.featuresToUse.containsKey("Wikifier"))
+        if (ParametersForLbjCode.currentParameters.featuresToUse.containsKey("WikifierFeatures"))
             nerutils.wikifyNgrams(doc);
         else {
             doc.mentions = nerutils.getNgramMentions(doc, 1);
         }
 
         Data nerdata = doc2NERData(doc);
-        ExpressiveFeaturesAnnotator.train = false;
         try {
             ExpressiveFeaturesAnnotator.annotate(nerdata);
         } catch (Exception e) {
@@ -176,7 +177,7 @@ public class MultiLingualNER extends Annotator {
         Vector<Vector<String>> tokens = new Vector<>();
         TextAnnotation ta = doc.getTextAnnotation();
         tokens.add(new Vector<>());
-        Vector<LinkedVector> sentences = new Vector<>();
+        ArrayList<LinkedVector> sentences = new ArrayList<>();
         int psen = -1;
         sentences.add(new LinkedVector());
         for (ELMention m : doc.mentions) {
@@ -187,15 +188,15 @@ public class MultiLingualNER extends Annotator {
                 psen = senid;
             }
             NEWord word = new NEWord(new Word(m.getSurface()), null, "unlabeled");
-            word.char_start = m.getStartOffset();
-            word.char_end = m.getEndOffset();
+            word.start = m.getStartOffset();
+            word.end = m.getEndOffset();
             String[] wikif = new String[m.ner_features.size()];
             int i = 0;
             for (String key : m.ner_features.keySet()) {
-                wikif[i++] = key + ":" + m.ner_features.get(key);
+                wikif[i++] = key;
             }
-            word.wikifierfeats = wikif;
-            NEWord.addTokenToSentence(sentences.lastElement(), word);
+            word.wikifierFeatures = wikif;
+            NEWord.addTokenToSentence(sentences.get(sentences.size()-1), word);
         }
         TaggedDataReader.connectSentenceBoundaries(sentences);
         NERDocument nerdoc = new NERDocument(sentences, "consoleInput");
@@ -226,11 +227,11 @@ public class MultiLingualNER extends Annotator {
                             m.setType(pretype);
                             ret.add(m);
                         }
-                        start = w.char_start;
-                        end = w.char_end;
+                        start = w.start;
+                        end = w.end;
                         pretype = type;
                     } else {   // extend the mention
-                        end = w.char_end;
+                        end = w.end;
                     }
                 } else {
                     if (start != -1) {
