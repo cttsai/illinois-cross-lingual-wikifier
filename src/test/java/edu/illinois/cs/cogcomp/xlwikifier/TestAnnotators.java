@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestAnnotators {
 
-    final static String spanish_input = "Barack Hussein Obama II3 es el cuadragésimo cuarto y actual presidente de " +
+    final static String spanish_input = "Barack Obama es el cuadragésimo cuarto y actual presidente de " +
             "los Estados Unidos de América. Fue senador por el estado de Illinois desde el 3 de enero de 2005 hasta su " +
             "renuncia el 16 de noviembre de 2008. Además, es el quinto legislador afroamericano en el Senado de los Estados Unidos, " +
             "tercero desde la era de reconstrucción. También fue el primer candidato afroamericano nominado a la presidencia " +
@@ -38,14 +38,9 @@ public class TestAnnotators {
     final private static Map<Pair<Integer, Integer>, ELMention> spanish_answers = new HashMap<>();
 
     static {
-        spanish_answers.put(new Pair(0, 20), new ELMention("Barack Hussein Obama", 0, 20, "PER", "barack_obama", "barack_obama"));
-        spanish_answers.put(new Pair<>(78, 103), new ELMention("Estados Unidos de América", 78, 103, "GPE", "estados_unidos", "united_states"));
-        spanish_answers.put(new Pair<>(249, 262), new ELMention("afroamericano", 249, 262, "GPE", "afroamericano", "african_diaspora_in_the_americas"));
-        spanish_answers.put(new Pair<>(134, 142), new ELMention("Illinois", 134, 142, "GPE", "illinois", "illinois"));
-        spanish_answers.put(new Pair<>(269, 275), new ELMention("Senado", 269, 275, "ORG", "senado", "senate"));
-        spanish_answers.put(new Pair<>(283, 297), new ELMention("Estados Unidos", 283, 297, "GPE", "estados_unidos", "united_states"));
-        spanish_answers.put(new Pair<>(371, 384), new ELMention("afroamericano", 371, 384, "GPE", "afroamericano", "african_diaspora_in_the_americas"));
-        spanish_answers.put(new Pair<>(418, 435), new ELMention("Partido Demócrata", 418, 435, "ORG", "partido_demócrata_(estados_unidos)", "democratic_party_(united_states)"));
+        spanish_answers.put(new Pair<>(66, 80), new ELMention("Estados Unidos", 66, 80, "GPE", "estados_unidos", "united_states"));
+        spanish_answers.put(new Pair<>(122, 130), new ELMention("Illinois", 122, 130, "GPE", "illinois", "illinois"));
+        spanish_answers.put(new Pair<>(257, 285), new ELMention("Senado de los Estados Unidos", 257, 285, "ORG", "senado_de_los_estados_unidos", "united_states_senate"));
     }
 
     final private static Map<Pair<Integer, Integer>, ELMention> chinese_answers = new HashMap<>();
@@ -53,13 +48,14 @@ public class TestAnnotators {
     static {
         chinese_answers.put(new Pair<>(0, 7), new ELMention("巴拉克·歐巴馬", 0, 7, "PER", "贝拉克·奥巴马", "barack_obama"));
         chinese_answers.put(new Pair<>(8, 13), new ELMention("美國民主黨", 8, 13, "ORG", "民主党_(美国)", "democratic_party_(united_states)"));
-        chinese_answers.put(new Pair<>(24, 26), new ELMention("美國", 24, 26, "GPE", "美国", "united_states"));
+        chinese_answers.put(new Pair<>(24, 28), new ELMention("美國總統", 24, 28, "ORG", "美国总统", "president_of_the_united_states"));
         chinese_answers.put(new Pair<>(29, 32), new ELMention("歐巴馬", 29, 32, "PER", "贝拉克·奥巴马", "barack_obama"));
         chinese_answers.put(new Pair<>(36, 37), new ELMention("非", 36, 37, "LOC", "非洲", "africa"));
-        chinese_answers.put(new Pair<>(38, 40), new ELMention("美國", 38, 40, "GPE", "美国", "united_states"));
-        chinese_answers.put(new Pair<>(52, 61), new ELMention("美國夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL0001"));
+        chinese_answers.put(new Pair<>(38, 42), new ELMention("美國總統", 38, 42, "ORG", "美国总统", "president_of_the_united_states"));
+        chinese_answers.put(new Pair<>(52, 54), new ELMention("美國", 52, 54, "ORG", "美国", "united_states"));
+        chinese_answers.put(new Pair<>(54, 61), new ELMention("夏威夷州檀香山", 54, 61, "GPE", "NIL", "NIL0001"));
         chinese_answers.put(new Pair<>(75, 80), new ELMention("哈佛法學院", 75, 80, "ORG", "哈佛法学院", "harvard_law_school"));
-        chinese_answers.put(new Pair<>(102, 109), new ELMention("伊利諾州參議員", 102, 109, "FAC", "NIL", "NIL0002"));
+        chinese_answers.put(new Pair<>(102, 106), new ELMention("伊利諾州", 102, 106, "GPE", "伊利诺伊州", "illinois"));
     }
 
     @Test
@@ -84,7 +80,6 @@ public class TestAnnotators {
         for (Constituent c : ta.getView(lang.getNERViewName()).getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             assertTrue("No entity mention \"" + c.getSurfaceForm() + "\"", spanish_answers.containsKey(key));
-
             String gold_type = spanish_answers.get(key).getType();
             assertTrue("Entity " + c.getSurfaceForm() + " has type " + c.getLabel() + " instead of " + gold_type
                     , c.getLabel().equals(gold_type));
@@ -103,7 +98,6 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = spanish_answers.get(key).getEnWikiTitle();
-
             assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
                     c.getLabel().equals(gold_entitle));
         }
@@ -150,7 +144,6 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = chinese_answers.get(key).getEnWikiTitle();
-
             assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
                     c.getLabel().equals(gold_entitle));
         }

@@ -184,48 +184,6 @@ public class NERUtils {
         setMidByWikiTitle(m);
     }
 
-//    public void wikifyMentions(QueryDocument doc, int n) {
-//        for (ELMention m : doc.mentions) {
-//            if (!m.getWikiTitle().startsWith("NIL")) continue;
-//            if (m.ner_features.size() > 0) continue;
-//
-//            String surface = m.getSurface().toLowerCase();
-//            List<WikiCand> cands = wcg.getCandsBySurface(surface);
-//
-//            if (cands.size() == 0 && n == 1 && surface.length() > 0) {
-//                if (StringUtils.isCapitalized(m.getSurface())) {
-//                    cands.addAll(wcg.getCandidateByWord(surface, 6));
-//                }
-//            }
-//
-//            if (cands.size() == 0 && !lang.equals("en")) {
-//                if (n > 1) {
-//                    cands.addAll(wcg.en_generator.getCandsBySurface(surface));
-//                } else if (surface.length() > 0) {
-//                    if (StringUtils.isCapitalized(m.getSurface())) {
-//                        cands.addAll(wcg.en_generator.getCandsBySurface(surface));
-//                        if (cands.size() == 0)
-//                            cands.addAll(wcg.en_generator.getCandidateByWord(surface, 6));
-//                    }
-//                }
-//            }
-//
-//            m.setCandidates(cands);
-//        }
-//
-////        ranker.setWikiTitleByModel(doc);
-//        ranker.setWikiTitleByTopCand(doc);
-//
-//
-//        // just keep top 2 cands to reduce cache size
-//        for (ELMention m : doc.mentions) {
-//            List<WikiCand> cands = m.getCandidates();
-//            m.setCandidates(cands.subList(0, Math.min(cands.size(), 2)));
-//        }
-//        setMidByWikiTitle(doc);
-//
-//    }
-
     public void setEnWikiTitle(QueryDocument doc){
         for (ELMention m : doc.mentions) {
             if (!m.getWikiTitle().equals("NIL") && m.getEnWikiTitle().startsWith("NIL")) {

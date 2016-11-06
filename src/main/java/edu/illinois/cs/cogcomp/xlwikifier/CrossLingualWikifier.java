@@ -91,6 +91,7 @@ public class CrossLingualWikifier extends Annotator {
         annotate(doc);
 
         PostProcessing.fixPerAnnotation(doc);
+
         SurfaceClustering.cluster(doc);
 
         CoreferenceView corefview = new CoreferenceView(getViewName(), textAnnotation);
@@ -136,6 +137,7 @@ public class CrossLingualWikifier extends Annotator {
      */
     private QueryDocument ta2QueryDoc(TextAnnotation textAnnotation){
         QueryDocument doc = new QueryDocument(textAnnotation.getId());
+        doc.setTextAnnotation(textAnnotation);
         doc.text = textAnnotation.getText();
         for (Constituent c : textAnnotation.getView(language.getNERViewName())) {
             ELMention m = new ELMention("", c.getStartCharOffset(), c.getEndCharOffset());
