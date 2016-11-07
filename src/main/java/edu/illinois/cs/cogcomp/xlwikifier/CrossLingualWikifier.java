@@ -94,6 +94,8 @@ public class CrossLingualWikifier extends Annotator {
 
         SurfaceClustering.cluster(doc);
 
+        doc.mentions.forEach(x -> System.out.println(x));
+
         CoreferenceView corefview = new CoreferenceView(getViewName(), textAnnotation);
 
         // cluster mentions by the English Wikipedia title or FreeBase MID

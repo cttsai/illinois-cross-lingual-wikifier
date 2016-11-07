@@ -6,6 +6,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -56,6 +57,9 @@ public class SurfaceClustering {
             doc.mentions.forEach(x -> x.setMid(x.gold_wiki_title));
         else if(ConfigParameters.target_kb.equals("enwiki"))
             doc.mentions.forEach(x -> x.setEnWikiTitle(x.gold_wiki_title));
+
+        doc.mentions = doc.mentions.stream().sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
+                .collect(Collectors.toList());
     }
 
     private static int longestMention(List<ELMention> mentions){

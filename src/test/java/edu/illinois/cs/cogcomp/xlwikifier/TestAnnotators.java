@@ -25,6 +25,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestAnnotators {
 
+    final static  String english_input = "Barack Obama is an American politician serving as the 44th President of the United States. " +
+            "Born in Honolulu, Hawaii, Obama is a graduate of Columbia University " +
+            "and Harvard Law School. He worked as a civil rights attorney and taught constitutional law at University of Chicago Law School " +
+            "between 1992 and 2004. He ran unsuccessfully in the Democratic primary for the United States House of Representatives " +
+            "in 2000 against incumbent Bobby Rush.";
+
     final static String spanish_input = "Barack Obama es el cuadragésimo cuarto y actual presidente de " +
             "los Estados Unidos de América. Fue senador por el estado de Illinois desde el 3 de enero de 2005 hasta su " +
             "renuncia el 16 de noviembre de 2008. Además, es el quinto legislador afroamericano en el Senado de los Estados Unidos, " +
@@ -38,9 +44,12 @@ public class TestAnnotators {
     final private static Map<Pair<Integer, Integer>, ELMention> spanish_answers = new HashMap<>();
 
     static {
-        spanish_answers.put(new Pair<>(66, 80), new ELMention("Estados Unidos", 66, 80, "GPE", "estados_unidos", "united_states"));
+        spanish_answers.put(new Pair<>(0, 12), new ELMention("Barack Obama", 0, 12, "PER", "barack_obama", "barack_obama"));
+        spanish_answers.put(new Pair<>(66, 91), new ELMention("Estados Unidos de América", 66, 91, "GPE", "estados_unidos", "united_states"));
         spanish_answers.put(new Pair<>(122, 130), new ELMention("Illinois", 122, 130, "GPE", "illinois", "illinois"));
-        spanish_answers.put(new Pair<>(257, 285), new ELMention("Senado de los Estados Unidos", 257, 285, "ORG", "senado_de_los_estados_unidos", "united_states_senate"));
+        spanish_answers.put(new Pair<>(257, 263), new ELMention("Senado", 257, 263, "ORG", "senado", "senate"));
+        spanish_answers.put(new Pair<>(271, 285), new ELMention("Estados Unidos", 271, 285, "GPE", "estados_unidos", "united_states"));
+        spanish_answers.put(new Pair<>(406, 423), new ELMention("Partido Demócrata", 406, 423, "ORG", "partido_demócrata_(estados_unidos)", "democratic_party_(united_states)"));
     }
 
     final private static Map<Pair<Integer, Integer>, ELMention> chinese_answers = new HashMap<>();
@@ -152,10 +161,9 @@ public class TestAnnotators {
 //    @Test
 //    public void testEnglishResults() {
 //
-//        String text = "Barack Hussein Obama II is an American politician serving as the 44th President of the United States. He is the first African American to hold the office, as well as the first president born outside of the continental United States. Born in Honolulu, Hawaii, Obama is a graduate of Columbia University and Harvard Law School, where he served as president of the Harvard Law Review. He was a community organizer in Chicago before earning his law degree. He worked as a civil rights attorney and taught constitutional law at University of Chicago Law School between 1992 and 2004. He served three terms representing the 13th District in the Illinois Senate from 1997 to 2004, and ran unsuccessfully in the Democratic primary for the United States House of Representatives in 2000 against incumbent Bobby Rush.";
 //        Language lang = Language.EN;
 //        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("en");
-//        TextAnnotation ta = tokenizer.getTextAnnotation(text);
+//        TextAnnotation ta = tokenizer.getTextAnnotation(english_input);
 //
 //        String config = "config/xlwikifier-demo.config";
 //

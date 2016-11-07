@@ -1,6 +1,7 @@
 package edu.illinois.cs.cogcomp.demo;
 
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
@@ -27,7 +28,11 @@ public class XLWikifierDemo {
     public XLWikifierDemo(String text, String language) {
         Language lang = Language.getLanguage(language);
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(language);
+        Tokenizer tokenizer;
+        if(language.equals("zh"))
+            tokenizer = new CharacterTokenizer();
+        else
+            tokenizer = MultiLingualTokenizer.getTokenizer(language);
         TextAnnotation ta = tokenizer.getTextAnnotation(text);
 
         long startTime = System.currentTimeMillis();

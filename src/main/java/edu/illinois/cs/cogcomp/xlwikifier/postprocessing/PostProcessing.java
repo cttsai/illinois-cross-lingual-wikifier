@@ -52,22 +52,6 @@ public class PostProcessing {
 
             }
         }
-//        for(ELMention m: doc.mentions){
-//            if(!m.getType().equals("PER")) continue;
-//            String mid = null;
-//            int length = m.getSurface().length();
-//
-//            for(ELMention m1: doc.mentions){
-//                if(!m1.getType().equals("PER")) continue;
-//                if(m1.getSurface().toLowerCase().contains(m.getSurface().toLowerCase())
-//                        && m1.getSurface().length() > length){
-//                    mid = m1.getMid();
-//                    length = m1.getSurface().length();
-//                }
-//            }
-//            if(mid!=null)
-//                m.setMid(mid);
-//        }
     }
 
     public static void wikiSearchSolver(QueryDocument doc, String lang){

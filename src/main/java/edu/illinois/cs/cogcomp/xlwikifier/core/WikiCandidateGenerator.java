@@ -525,9 +525,8 @@ public class WikiCandidateGenerator {
 
     public static void main(String[] args) {
         ConfigParameters.setPropValues();
-        WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
-//        System.out.println(g.getCandsBySurface("歐巴馬"));
-        System.out.println(g.getFinalTitle("欧巴马"));
+        WikiCandidateGenerator g = new WikiCandidateGenerator("en", true);
+        System.out.println(g.getCandsBySurface("born"));
         System.exit(-1);
 
         g.closeDB();
