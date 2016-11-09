@@ -76,7 +76,7 @@ public class MultiLingualNER extends Annotator {
 
         logger.info("Initializing MultiLingualNER...");
 
-        String lang = this.language.toString().toLowerCase();
+        String lang = this.language.getShortName();
 
         if (!FreeBaseQuery.isloaded())
             FreeBaseQuery.loadDB(true);

@@ -63,7 +63,7 @@ public class CrossLingualWikifier extends Annotator {
     public void initialize(ResourceManager resourceManager) {
 
         logger.info("Initializing CrossLingualWikifier...");
-        String lang = this.language.toString().toLowerCase();
+        String lang = this.language.getShortName();
 
         if (!FreeBaseQuery.isloaded())
             FreeBaseQuery.loadDB(true);

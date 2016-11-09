@@ -102,7 +102,7 @@ public class XMLOffsetHandler {
                     if(ta.getToken(i).contains(" ")){
                         continue;
                     }
-                    System.out.println(ta.getToken(i)+" "+ta.getTokenCharacterOffset(i)+" "+idx+" "+ta.getToken(i).length()+" "+search_start);
+                    System.out.println(ta.getToken(i)+" "+ta.getTokenCharacterOffset(i)+" "+idx+" "+ta.getToken(i).length()+" "+search_start+" "+xml_text.substring(search_start, search_start+1));
                     System.out.println(ta.getToken(i + 1) + " " + ta.getTokenCharacterOffset(i + 1));
                     System.exit(-1);
                 }

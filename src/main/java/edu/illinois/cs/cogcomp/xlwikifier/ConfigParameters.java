@@ -59,18 +59,20 @@ public class ConfigParameters {
 
         // load models configs
         for (Language lang : Language.values()) {
-            String l = lang.toString().toLowerCase();
+            String l = lang.getShortName();
             String key = l + "_ner_config";
             if (rm.containsKey(key))
                 ner_models.put(l, rm.getString(key).trim());
 
             key = l + "_ranking_model";
-            if (rm.containsKey(key))
+            if (rm.containsKey(key)) {
                 ranker_models.put(l, rm.getString(key).trim());
-
-            key = l+"_ner_ranker";
-            if(rm.containsKey(key))
                 ranker_ner.put(l, rm.getString(key).trim());
+            }
+
+//            key = l+"_ner_ranker";
+//            if(rm.containsKey(key))
+//                ranker_ner.put(l, rm.getString(key).trim());
         }
 
         if (rm.containsKey("db_path"))

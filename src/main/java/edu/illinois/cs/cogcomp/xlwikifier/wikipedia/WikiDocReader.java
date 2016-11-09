@@ -2,7 +2,6 @@ package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
-import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
@@ -18,7 +17,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.joining;
 
 /**
  * Created by ctsai12 on 8/31/15.
@@ -131,10 +129,7 @@ public class WikiDocReader {
         logger.info("Reading " + lang + " wikipedia docs...");
         List<String> paths = null;
 
-        if(lang.equals("zh"))
-            tokenizer = new CharacterTokenizer();
-        else
-            tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+        tokenizer = MultiLingualTokenizer.getTokenizer(lang);
 
         try {
             String dir = ConfigParameters.dump_path + "/" + lang + "/docs/";

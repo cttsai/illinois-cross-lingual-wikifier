@@ -1,7 +1,7 @@
 package edu.illinois.cs.cogcomp.demo;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
-import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
@@ -28,11 +28,9 @@ public class XLWikifierDemo {
     public XLWikifierDemo(String text, String language) {
         Language lang = Language.getLanguage(language);
 
-        Tokenizer tokenizer;
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(language);
         if(language.equals("zh"))
-            tokenizer = new CharacterTokenizer();
-        else
-            tokenizer = MultiLingualTokenizer.getTokenizer(language);
+            text = ChineseHelper.convertToSimplifiedChinese(text);
         TextAnnotation ta = tokenizer.getTextAnnotation(text);
 
         long startTime = System.currentTimeMillis();

@@ -198,7 +198,7 @@ public class Importer {
 
     public void importCandidates() {
         logger.info("Importing into candidate DB...");
-        WikiCandidateGenerator wcg = new WikiCandidateGenerator(lang, false);
+        WikiCandidateGenerator wcg = new WikiCandidateGenerator(lang, true);
         wcg.populateDB(lang, redirectfile, pagefile, candfile);
     }
 
@@ -214,7 +214,7 @@ public class Importer {
 
 
     public static void main(String[] args) {
-        ConfigParameters.setPropValues();
+        ConfigParameters.setPropValues(args[2]);
 
         Importer importer = new Importer(args[0], args[1]);
         try {

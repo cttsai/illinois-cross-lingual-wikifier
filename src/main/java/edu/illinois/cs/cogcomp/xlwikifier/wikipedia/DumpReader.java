@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,7 @@ public class DumpReader {
         logger.info("id2en size " + id2en.size());
     }
 
-    public void readRedirects(String file) {
+    public void readRedirects(String file, String lang) {
         logger.info("Reading redirects " + file);
         id2redirect = new HashMap<>();
         try {
@@ -83,6 +84,8 @@ public class DumpReader {
 
                         String title = tmp.substring(1).toLowerCase();
                         title = title.replaceAll("\\\\", "");
+                        if(lang.equals("zh"))
+                            title = ChineseHelper.convertToSimplifiedChinese(title);
 
                         id2redirect.put(id, title);
                     }
@@ -95,7 +98,7 @@ public class DumpReader {
     }
 
 
-    public void readTitle2ID(String file) {
+    public void readTitle2ID(String file, String lang) {
         logger.info("Reading titles " + file);
         title2id = new HashMap<>();
         id2title = new HashMap<>();
@@ -122,6 +125,8 @@ public class DumpReader {
                             String id = cs[0];
                             String title = tmp.substring(1).toLowerCase();
                             title = title.replaceAll("\\\\", "");
+                            if(lang.equals("zh"))
+                                title = ChineseHelper.convertToSimplifiedChinese(title);
                             title2id.put(title, id);
                             id2title.put(id, title);
                         }

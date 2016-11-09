@@ -89,9 +89,9 @@ xlwikifier-data/gazetteers/nl-org
 xlwikifier-data/gazetteers/de-loc
 xlwikifier-data/gazetteers/de-org
 xlwikifier-data/gazetteers/de-per
-xlwikifier-data/gazetteers/zh-loc
-xlwikifier-data/gazetteers/zh-org
-xlwikifier-data/gazetteers/zh-per
+xlwikifier-data/gazetteers/zh-loc-simp
+xlwikifier-data/gazetteers/zh-org-simp
+xlwikifier-data/gazetteers/zh-per-simp
 xlwikifier-data/gazetteers/tr-loc
 xlwikifier-data/gazetteers/tr-org
 xlwikifier-data/gazetteers/tr-per

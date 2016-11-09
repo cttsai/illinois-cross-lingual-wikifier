@@ -4,7 +4,6 @@ import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
-import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
@@ -55,24 +54,23 @@ public class TestAnnotators {
     final private static Map<Pair<Integer, Integer>, ELMention> chinese_answers = new HashMap<>();
 
     static {
-        chinese_answers.put(new Pair<>(0, 7), new ELMention("巴拉克·歐巴馬", 0, 7, "PER", "贝拉克·奥巴马", "barack_obama"));
-        chinese_answers.put(new Pair<>(8, 13), new ELMention("美國民主黨", 8, 13, "ORG", "民主党_(美国)", "democratic_party_(united_states)"));
-        chinese_answers.put(new Pair<>(24, 28), new ELMention("美國總統", 24, 28, "ORG", "美国总统", "president_of_the_united_states"));
-        chinese_answers.put(new Pair<>(29, 32), new ELMention("歐巴馬", 29, 32, "PER", "贝拉克·奥巴马", "barack_obama"));
-        chinese_answers.put(new Pair<>(36, 37), new ELMention("非", 36, 37, "LOC", "非洲", "africa"));
-        chinese_answers.put(new Pair<>(38, 42), new ELMention("美國總統", 38, 42, "ORG", "美国总统", "president_of_the_united_states"));
-        chinese_answers.put(new Pair<>(52, 54), new ELMention("美國", 52, 54, "ORG", "美国", "united_states"));
-        chinese_answers.put(new Pair<>(54, 61), new ELMention("夏威夷州檀香山", 54, 61, "GPE", "NIL", "NIL0001"));
-        chinese_answers.put(new Pair<>(75, 80), new ELMention("哈佛法學院", 75, 80, "ORG", "哈佛法学院", "harvard_law_school"));
-        chinese_answers.put(new Pair<>(102, 106), new ELMention("伊利諾州", 102, 106, "GPE", "伊利诺伊州", "illinois"));
+        chinese_answers.put(new Pair<>(0, 7), new ELMention("巴拉克·欧巴马", 0, 7, "PER", "贝拉克·奥巴马", "barack_obama"));
+        chinese_answers.put(new Pair<>(8, 10), new ELMention("美国", 8, 10, "GPE", "美国", "united_states"));
+        chinese_answers.put(new Pair<>(10, 13), new ELMention("民主党", 10, 13, "ORG", "民主党_(美国)", "democratic_party_(united_states)"));
+        chinese_answers.put(new Pair<>(24, 26), new ELMention("美国", 24, 26, "GPE", "美国", "united_states"));
+        chinese_answers.put(new Pair<>(29, 32), new ELMention("欧巴马", 29, 32, "PER", "贝拉克·奥巴马", "barack_obama"));
+        chinese_answers.put(new Pair<>(38, 40), new ELMention("美国", 38, 40, "GPE", "美国", "united_states"));
+        chinese_answers.put(new Pair<>(52, 61), new ELMention("美国夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL0001"));
+        chinese_answers.put(new Pair<>(75, 80), new ELMention("哈佛法学院", 75, 80, "ORG", "哈佛法学院", "harvard_law_school"));
+        chinese_answers.put(new Pair<>(102, 106), new ELMention("伊利诺州", 102, 106, "GPE", "伊利诺伊州", "illinois"));
     }
 
     @Test
     public void testSpanishResults() {
 
-        Language lang = Language.ES;
+        Language lang = Language.Spanish;
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("es");
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
         TextAnnotation ta = tokenizer.getTextAnnotation(spanish_input);
 
         String config = "config/xlwikifier-demo.config";
@@ -116,8 +114,8 @@ public class TestAnnotators {
     @Test
     public void testChineseResults() {
 
-        Language lang = Language.ZH;
-        Tokenizer tokenizer = new CharacterTokenizer();
+        Language lang = Language.Chinese;
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
         TextAnnotation ta = tokenizer.getTextAnnotation(chinese_input);
 
         String config = "config/xlwikifier-demo.config";

@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
@@ -116,6 +117,7 @@ public class WikiCandidateGenerator {
             String id = title2id.get(title);
             System.out.println(id);
             if (id2redirect.containsKey(id)) {
+                System.out.println(id2redirect.get(id));
                 return id2redirect.get(id);
             }
         }
@@ -293,8 +295,10 @@ public class WikiCandidateGenerator {
                 String t = getFinalTitle(sp[1]);
 
                 String[] tokens;
-                if (lang.equals("zh"))
+                if (lang.equals("zh")) {
                     tokens = s.split("·");
+//                    t = ChineseHelper.convertToSimplifiedChinese(t);
+                }
                 else
                     tokens = tokenizer.getTextAnnotation(s).getTokens();
 
@@ -370,15 +374,14 @@ public class WikiCandidateGenerator {
     public void populateDB(String lang, String redirect_file, String page_file, String cand_file) {
         tokenizer = MultiLingualTokenizer.getTokenizer(lang);
         DumpReader dr = new DumpReader();
-        dr.readRedirects(redirect_file);
-        dr.readTitle2ID(page_file);
+        dr.readRedirects(redirect_file, lang);
+        dr.readTitle2ID(page_file, lang);
         this.setId2Redirect(dr.id2redirect);
         this.setTitle2Id(dr.title2id);
-        populateMentionDB(cand_file, lang);
-        populateWord2Title(cand_file, lang);
-        db.commit();
-        db.close();
-//        loadDB(lang, true);
+//        populateMentionDB(cand_file, lang);
+//        populateWord2Title(cand_file, lang);
+//        db.commit();
+//        db.close();
     }
 
 //    public void populate4GramIdx(String lang, String redirect_file, String page_file){
@@ -446,6 +449,8 @@ public class WikiCandidateGenerator {
 
                 String s = sp[0].toLowerCase().trim();
                 String t = getFinalTitle(sp[1]);
+//                if(lang.equals("zh"))
+//                    t = ChineseHelper.convertToSimplifiedChinese(t);
                 if (!s2t.containsKey(s))
                     s2t.put(s, new ArrayList<>());
                 s2t.get(s).add(t);
@@ -525,8 +530,8 @@ public class WikiCandidateGenerator {
 
     public static void main(String[] args) {
         ConfigParameters.setPropValues();
-        WikiCandidateGenerator g = new WikiCandidateGenerator("en", true);
-        System.out.println(g.getCandsBySurface("born"));
+        WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
+        System.out.println(g.getCandsBySurface("臺灣"));
         System.exit(-1);
 
         g.closeDB();

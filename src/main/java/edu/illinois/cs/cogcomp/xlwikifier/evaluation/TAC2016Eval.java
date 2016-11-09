@@ -81,12 +81,12 @@ public class TAC2016Eval {
         List<QueryDocument> docs = null;
         Language lang = null;
         if(args[0].equals("zh")){
-            lang = Language.ZH;
+            lang = Language.Chinese;
             docs = TACDataReader.readChineseEvalDocs();
             golds = TACDataReader.readChineseGoldNAM();
         }
         else if(args[0].equals("es")){
-            lang = Language.ES;
+            lang = Language.Spanish;
             docs = TACDataReader.readSpanishEvalDocs();
             golds = TACDataReader.readSpanishGoldNAM();
         }

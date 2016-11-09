@@ -1,8 +1,8 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.ner.IO.ResourceUtilities;
-import edu.illinois.cs.cogcomp.tokenizers.CharacterTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
@@ -54,7 +54,7 @@ public class TACDataReader {
             e.printStackTrace();
         }
 
-        Tokenizer tokenizer = new CharacterTokenizer();
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("zh");
         for (String filename: filenames) {
             int idx = filename.lastIndexOf(".");
             int idx1 = filename.lastIndexOf("/");
@@ -65,6 +65,12 @@ public class TACDataReader {
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
                 xml_text = in.lines().collect(joining("\n"))+"\n";
+                String tmp = ChineseHelper.convertToSimplifiedChinese(xml_text);
+                if(xml_text.length() != tmp.length()){
+                    System.out.println(docid+" "+xml_text.length()+" "+tmp.length());
+                    System.exit(-1);
+                }
+                xml_text = ChineseHelper.convertToSimplifiedChinese(xml_text);
                 in.close();
             }catch(Exception e){
                 e.printStackTrace();

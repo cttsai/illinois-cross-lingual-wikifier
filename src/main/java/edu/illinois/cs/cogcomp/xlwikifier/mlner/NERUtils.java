@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.mlner;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.core.StopWord;

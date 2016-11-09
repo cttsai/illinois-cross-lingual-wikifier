@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.tokenizers.ChineseTokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import org.apache.commons.io.FileUtils;
@@ -86,20 +87,21 @@ public class LangLinker {
 
 
     public void populateDBNew(String lang, String lang_file, String page_file) {
-        ChineseTokenizer ct = null;
-        if (lang.equals("zh"))
-            ct = new ChineseTokenizer();
+//        ChineseTokenizer ct = null;
+//        if (lang.equals("zh"))
+//            ct = new ChineseTokenizer();
         loadDB(lang, false);
         DumpReader dr = new DumpReader();
-        dr.readTitle2ID(page_file);
+        dr.readTitle2ID(page_file, lang);
         dr.readId2En(lang_file, "en");
         List<String> aligns = new ArrayList<>();
         for (String id : dr.id2title.keySet()) {
             if (dr.id2en.containsKey(id)) {
                 String en = formatTitle(dr.id2en.get(id));
                 String foreign = formatTitle(dr.id2title.get(id));
-                if (lang.equals("zh"))
-                    foreign = ct.trad2simp(foreign);
+//                if (lang.equals("zh"))
+//                    foreign = ChineseHelper.convertToSimplifiedChinese(foreign);
+//                    foreign = ct.trad2simp(foreign);
                 if (!en.isEmpty() && !foreign.isEmpty()) {
                     to_en.put(foreign, en);
                     from_en.put(en, foreign);
@@ -110,7 +112,7 @@ public class LangLinker {
 
         closeDB();
 
-        String ali_file = "/shared/preprocessed/ctsai12/multilingual/wikidump/" + lang + "/titles.en" + lang + ".align";
+        String ali_file = ConfigParameters.dump_path+"/"+ lang + "/titles.en" + lang + ".align";
         try {
             FileUtils.writeStringToFile(new File(ali_file), aligns.stream().collect(joining("\n")), "UTF-8");
         } catch (IOException e) {
@@ -183,6 +185,7 @@ public class LangLinker {
         ConfigParameters.setPropValues();
         LangLinker ll = new LangLinker();
 //        ll.loadDB("zh", true);
-        System.out.println(ll.translateToEn("中國", "zh"));
+
+        System.out.println(ll.translateToEn(ChineseHelper.convertToSimplifiedChinese("希拉蕊·柯林頓"), "zh"));
     }
 }
