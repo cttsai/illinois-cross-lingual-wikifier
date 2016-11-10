@@ -10,7 +10,7 @@ If you are not using illinois-xlwikifier-resources in pom.xml, you need to do:
 
 ln -s /shared/preprocessed/ctsai12/multilingual/deft/xlwikifier-data/
 
-This data folder only contains English, Spanish, and Chinese models for TAC EDL. Models for other languages are at /shared/preprocessed/ctsai12/multilingual/xlwikifier-data/
+This data folder only contains English, Spanish, and Chinese models for TAC EDL. Models and resources for other languages are at /shared/preprocessed/ctsai12/multilingual/xlwikifier-data/
 
 ### Run Benchmark
 ```
@@ -18,7 +18,7 @@ mvn dependency:copy-dependencies
 mvn compile
 ./scripts/run-benchmark.sh es config/xlwikifier-tac.config
 ```
-The testing documents are specified in the config file. Check run-benchmark.sh for the desired performance and other details.
+The test documents are specified in the config file. These documents are from TAC 2016 EDL shared task. Check run-benchmark.sh for the desired performance and other details. 
 
 ### Train Ranking Model
 Requirements:
