@@ -156,32 +156,32 @@ public class TestAnnotators {
         }
     }
 
-//    @Test
-//    public void testEnglishResults() {
-//
-//        Language lang = Language.EN;
-//        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("en");
-//        TextAnnotation ta = tokenizer.getTextAnnotation(english_input);
-//
-//        String config = "config/xlwikifier-demo.config";
-//
-//        MultiLingualNER annotator = null;
-//        try {
-//            annotator = new MultiLingualNER(lang, config);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        annotator.addView(ta);
-//
-//        CrossLingualWikifier xlwikifier = null;
-//        try {
-//            xlwikifier = new CrossLingualWikifier(lang, config);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        xlwikifier.addView(ta);
-//    }
+    @Test
+    public void testEnglishResults() {
+
+        Language lang = Language.English;
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
+        TextAnnotation ta = tokenizer.getTextAnnotation(english_input);
+
+        String config = "config/xlwikifier-demo.config";
+
+        MultiLingualNER annotator = null;
+        try {
+            annotator = new MultiLingualNER(lang, config);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        annotator.addView(ta);
+
+        CrossLingualWikifier xlwikifier = null;
+        try {
+            xlwikifier = new CrossLingualWikifier(lang, config);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        xlwikifier.addView(ta);
+    }
 
 }

@@ -75,6 +75,7 @@ public class CrossLingualWikifier extends Annotator {
 
         nerutils = new NERUtils(lang);
 
+        logger.info("Initialization done");
     }
 
     @Override
@@ -164,7 +165,7 @@ public class CrossLingualWikifier extends Annotator {
         nerutils.setMidByWikiTitle(doc);
 
         if(ConfigParameters.use_search)
-            PostProcessing.wikiSearchSolver(doc,language.toString().toLowerCase());
+            PostProcessing.wikiSearchSolver(doc,language.getShortName());
 
         // save the result, which is used in generating demo output
         this.result = doc;

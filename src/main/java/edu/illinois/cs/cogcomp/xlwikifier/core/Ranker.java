@@ -103,6 +103,8 @@ public class Ranker {
 
     public void train(List<QueryDocument> docs, String modelname) {
         String train_file = modelname+".svm";
+        String dir = modelname.substring(0, modelname.lastIndexOf("/"));
+        new File(dir).mkdirs();
         try {
             writeSVMData(docs, train_file);
             trainSVM(train_file, modelname);

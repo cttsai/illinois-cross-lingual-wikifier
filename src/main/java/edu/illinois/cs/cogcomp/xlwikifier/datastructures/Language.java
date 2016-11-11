@@ -6,7 +6,15 @@ package edu.illinois.cs.cogcomp.xlwikifier.datastructures;
 public enum Language {
     English("EN"),
     Spanish("ES"),
-    Chinese("ZH");
+    Chinese("ZH"),
+    German("DE"),
+    Dutch("NL"),
+    Turkish("TR"),
+    Tagalog("TL"),
+    Yoruba("YO"),
+    Bengali("BN"),
+    Tamil("TA");
+
 
     private String NER_VIEW;
     private String WIKI_VIEW;
@@ -38,6 +46,26 @@ public enum Language {
             return Language.Spanish;
         else if(lang.equals("zh"))
             return Language.Chinese;
+        else if(lang.equals("nl"))
+            return Language.Dutch;
+        else if(lang.equals("de"))
+            return Language.German;
+        else if(lang.equals("tr"))
+            return Language.Turkish;
+        else if(lang.equals("tl"))
+            return Language.Tagalog;
+        else if(lang.equals("yo"))
+            return Language.Yoruba;
+        else if(lang.equals("bn"))
+            return Language.Bengali;
+        else if(lang.equals("ta"))
+            return Language.Tamil;
+        else{
+            System.out.println("Unknown language: "+lang);
+            System.exit(-1);
+        }
+
+
 
         return null;
     }

@@ -120,7 +120,9 @@ public class ModelTrainer {
             List<QueryDocument> test_docs = data2QueryDocs(test_data);
             if (ParametersForLbjCode.currentParameters.featuresToUse.containsKey("WikifierFeatures")) {
                 logger.info("Wikifying training documents");
+                int cnt = 0;
                 for (QueryDocument doc : train_docs) {
+                    System.out.print((cnt++)+"\r");
                     nerutils.wikifyNgrams(doc);
                 }
                 copyWikifierFeatures(train_data, train_docs);

@@ -74,7 +74,7 @@ public class WikiDocReader {
             if (ta == null)
                 return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
 
         // read anchor text
