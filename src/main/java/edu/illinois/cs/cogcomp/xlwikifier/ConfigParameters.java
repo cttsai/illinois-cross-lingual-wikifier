@@ -2,6 +2,7 @@ package edu.illinois.cs.cogcomp.xlwikifier;
 
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
+import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +77,11 @@ public class ConfigParameters {
 //                ranker_ner.put(l, rm.getString(key).trim());
         }
 
-        if (rm.containsKey("db_path"))
+        if (rm.containsKey("db_path")) {
             db_path = rm.getString("db_path").trim();
+            if (!FreeBaseQuery.isloaded())
+                FreeBaseQuery.loadDB(true);
+        }
         else
             logger.error("db_path is required");
 

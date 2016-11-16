@@ -77,9 +77,6 @@ public class MultiLingualNER extends Annotator {
 
         String lang = this.language.getShortName();
 
-        if (!FreeBaseQuery.isloaded())
-            FreeBaseQuery.loadDB(true);
-
         nerutils = new NERUtils(lang);
 
         try {

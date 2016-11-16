@@ -65,9 +65,6 @@ public class CrossLingualWikifier extends Annotator {
         logger.info("Initializing CrossLingualWikifier...");
         String lang = this.language.getShortName();
 
-        if (!FreeBaseQuery.isloaded())
-            FreeBaseQuery.loadDB(true);
-
         wcg = new WikiCandidateGenerator(lang, true);
         ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_models.get(lang));
         ranker.setNERMode(false);

@@ -5,6 +5,8 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.ExpressiveFeaturesAnnotator;
+import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel1;
+import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel2;
 import edu.illinois.cs.cogcomp.ner.LbjTagger.Data;
 import edu.illinois.cs.cogcomp.ner.LbjTagger.NERDocument;
 import edu.illinois.cs.cogcomp.ner.LbjTagger.NEWord;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Vector;
 
 import static edu.illinois.cs.cogcomp.ner.LbjTagger.LearningCurveMultiDataset.getLearningCurve;
+import static edu.illinois.cs.cogcomp.ner.LbjTagger.NETesterMultiDataset.printTestResultsByDataset;
 import static edu.illinois.cs.cogcomp.ner.LbjTagger.Parameters.readAndLoadConfig;
 
 /**
@@ -90,16 +93,7 @@ public class ModelTrainer {
         }
     }
 
-    public static void main(String[] args) {
-
-        String train_dir = args[0];
-        String test_dir = args[1];
-        String lang = args[2];
-        String config = args[3];
-        ConfigParameters.setPropValues(config);
-
-        if (!FreeBaseQuery.isloaded())
-            FreeBaseQuery.loadDB(true);
+    public static void trainModel(String train_dir, String test_dir, String lang){
 
         try {
             NerBaseConfigurator baseConfigurator = new NerBaseConfigurator();
@@ -130,7 +124,7 @@ public class ModelTrainer {
                 for (QueryDocument doc : test_docs) {
                     nerutils.wikifyNgrams(doc);
                 }
-                copyWikifierFeatures(train_data, train_docs);
+                copyWikifierFeatures(test_data, test_docs);
             }
             ExpressiveFeaturesAnnotator.annotate(train_data);
             ExpressiveFeaturesAnnotator.annotate(test_data);
@@ -142,6 +136,71 @@ public class ModelTrainer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Read the model of train_lang, but use test_lang wikifier to generate features
+     * @param test_dir
+     * @param train_lang
+     * @param test_lang
+     */
+    public static void testModel(String test_dir, String train_lang, String test_lang){
+
+        try {
+            NerBaseConfigurator baseConfigurator = new NerBaseConfigurator();
+            ResourceManager ner_rm = new ResourceManager(ConfigParameters.ner_models.get(train_lang));
+            ParametersForLbjCode.currentParameters = readAndLoadConfig(baseConfigurator.getConfig(ner_rm), false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        NERUtils nerutils = new NERUtils(test_lang);
+
+        try {
+            Data test_data = new Data(test_dir, test_dir, "-c", new String[]{}, new String[]{});
+            List<QueryDocument> test_docs = data2QueryDocs(test_data);
+            if (ParametersForLbjCode.currentParameters.featuresToUse.containsKey("WikifierFeatures")) {
+                logger.info("Wikifying test documents");
+                for (QueryDocument doc : test_docs) {
+                    nerutils.wikifyNgrams(doc);
+                }
+                copyWikifierFeatures(test_data, test_docs);
+            }
+            ExpressiveFeaturesAnnotator.annotate(test_data);
+            Vector<Data> test=new Vector<>();
+            test.addElement(test_data);
+
+
+            NETaggerLevel1 taggerLevel1 = new NETaggerLevel1(ParametersForLbjCode.currentParameters.pathToModelFile + ".level1", ParametersForLbjCode.currentParameters.pathToModelFile + ".level1.lex");
+            NETaggerLevel2 taggerLevel2 = new NETaggerLevel2(ParametersForLbjCode.currentParameters.pathToModelFile + ".level2", ParametersForLbjCode.currentParameters.pathToModelFile + ".level2.lex");
+            System.out.println(test.get(0).documents.get(0).sentences.get(0).size());
+            printTestResultsByDataset(test, taggerLevel1, taggerLevel2, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void main(String[] args) {
+
+        if(args[0].equals("train")) {
+            String train_dir = args[1];
+            String test_dir = args[2];
+            String lang = args[3];
+            String config = args[4];
+            ConfigParameters.setPropValues(config);
+            trainModel(train_dir, test_dir, lang);
+        }
+        else if(args[0].equals("test")){
+            String test_dir = args[1];
+            String train_lang = args[2];
+            String test_lang = args[3];
+            String config = args[4];
+            ConfigParameters.setPropValues(config);
+            testModel(test_dir, train_lang, test_lang);
+        }
+
 
     }
 }
