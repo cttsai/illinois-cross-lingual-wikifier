@@ -9,7 +9,6 @@ import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.BrownClusters;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.ExpressiveFeaturesAnnotator;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.Gazetteers;
-import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.GazetteersFactory;
 import edu.illinois.cs.cogcomp.ner.InferenceMethods.Decoder;
 import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel1;
 import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel2;
@@ -99,6 +98,7 @@ public class MultiLingualNER extends Annotator {
         }
         taggerLevel1 = new NETaggerLevel1(this.parameters.pathToModelFile + ".level1", this.parameters.pathToModelFile + ".level1.lex");
         taggerLevel2 = new NETaggerLevel2(this.parameters.pathToModelFile + ".level2", this.parameters.pathToModelFile + ".level2.lex");
+
     }
 
 
@@ -137,6 +137,8 @@ public class MultiLingualNER extends Annotator {
 
         // use the language-specific parameters and brown clusters
         ParametersForLbjCode.currentParameters = this.parameters;
+
+        System.out.println(ParametersForLbjCode.currentParameters.language);
         BrownClusters.set(brownclusters);
 //        GazetteersFactory.set(gazetteers);
 

@@ -22,10 +22,10 @@ public class SurfaceClustering {
         // use gold_wiki_title to store the target ID
         if(ConfigParameters.target_kb.equals("freebase"))
             doc.mentions.forEach(x -> x.gold_wiki_title = x.getMid());
-        else if(ConfigParameters.target_kb.equals("enwiki")) {
+        else if(ConfigParameters.target_kb.equals("enwiki"))
             doc.mentions.forEach(x -> x.gold_wiki_title = x.getEnWikiTitle());
-        }
 
+        // assign NIL singltons
         for(ELMention m: doc.mentions){
             if (m.gold_wiki_title.startsWith("NIL"))
                 m.gold_wiki_title = "NIL" + String.format("%04d", nil_cnt++);

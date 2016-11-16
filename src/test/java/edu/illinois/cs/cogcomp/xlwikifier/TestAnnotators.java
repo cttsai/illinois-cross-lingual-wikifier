@@ -4,6 +4,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
+import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.GazetteersFactory;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
@@ -156,32 +157,32 @@ public class TestAnnotators {
         }
     }
 
-    @Test
-    public void testEnglishResults() {
-
-        Language lang = Language.English;
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
-        TextAnnotation ta = tokenizer.getTextAnnotation(english_input);
-
-        String config = "config/xlwikifier-demo.config";
-
-        MultiLingualNER annotator = null;
-        try {
-            annotator = new MultiLingualNER(lang, config);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        annotator.addView(ta);
-
-        CrossLingualWikifier xlwikifier = null;
-        try {
-            xlwikifier = new CrossLingualWikifier(lang, config);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        xlwikifier.addView(ta);
-    }
+//    @Test
+//    public void testEnglishResults() {
+//
+//        Language lang = Language.English;
+//        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
+//        TextAnnotation ta = tokenizer.getTextAnnotation(english_input);
+//
+//        String config = "config/xlwikifier-demo.config";
+//
+//        MultiLingualNER annotator = null;
+//        try {
+//            annotator = new MultiLingualNER(lang, config);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        annotator.addView(ta);
+//
+//        CrossLingualWikifier xlwikifier = null;
+//        try {
+//            xlwikifier = new CrossLingualWikifier(lang, config);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        xlwikifier.addView(ta);
+//    }
 
 }

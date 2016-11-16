@@ -44,10 +44,11 @@ public class ConfigParameters {
             e.printStackTrace();
         }
 
-        if(!is_set) {
+        if(!is_set || !config_file.equals(config_name)) {
             logger.info("Loading configuration: " + config_file);
             setPropValues(rm);
             config_name = config_file;
+            is_set = true;
         }
         else{
             logger.info("Config is already set to "+config_file);
