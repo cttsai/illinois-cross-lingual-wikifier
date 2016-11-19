@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 public class XLWikifierDemo {
 
     private String output;
-    private String runtime;
 
     private String default_config = "config/xlwikifier-demo.config";
     private static Logger logger = LoggerFactory.getLogger(XLWikifierDemo.class);
@@ -29,8 +28,6 @@ public class XLWikifierDemo {
         Language lang = Language.getLanguage(language);
 
         Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(language);
-        if(language.equals("zh"))
-            text = ChineseHelper.convertToSimplifiedChinese(text);
         TextAnnotation ta = tokenizer.getTextAnnotation(text);
 
         long startTime = System.currentTimeMillis();
@@ -98,18 +95,6 @@ public class XLWikifierDemo {
 
     public String getOutput() {
         return this.output;
-    }
-
-    public String getRuntime() {
-        return this.runtime;
-    }
-
-    public static void main(String[] args) {
-        String text = "Louis van Gaal , Endonezya maçı sonrasında oldukça ses getirecek açıklamalarda bulundu .";
-        String lang = "tr";
-//        text = "Paul Kantor teaches information science at Rutgers University";
-        XLWikifierDemo result = new XLWikifierDemo(text, lang);
-        System.out.println(result.getOutput());
     }
 
 }

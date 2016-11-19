@@ -19,7 +19,7 @@ public class NERFeatureManager implements Serializable {
     private Set<String> en_stops;
     private Set<String> fo_stops;
     private boolean alltype = true;
-    private boolean mono = true;
+    private boolean mono = false;
 
     public NERFeatureManager(String lang) {
         lex = new LexManager();

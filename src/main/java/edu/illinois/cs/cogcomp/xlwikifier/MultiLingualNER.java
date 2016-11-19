@@ -9,6 +9,7 @@ import edu.illinois.cs.cogcomp.lbjava.parse.LinkedVector;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.BrownClusters;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.ExpressiveFeaturesAnnotator;
 import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.Gazetteers;
+import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.GazetteersFactory;
 import edu.illinois.cs.cogcomp.ner.InferenceMethods.Decoder;
 import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel1;
 import edu.illinois.cs.cogcomp.ner.LbjFeatures.NETaggerLevel2;
@@ -88,7 +89,7 @@ public class MultiLingualNER extends Annotator {
             // Save the parameters and brown clusters for this language. These resources are language specific.
             this.parameters = readAndLoadConfig(baseConfigurator.getConfig(ner_rm), false);
             this.brownclusters = BrownClusters.get();
-//            this.gazetteers = GazetteersFactory.get();
+            this.gazetteers = GazetteersFactory.get();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,9 +136,8 @@ public class MultiLingualNER extends Annotator {
         // use the language-specific parameters and brown clusters
         ParametersForLbjCode.currentParameters = this.parameters;
 
-        System.out.println(ParametersForLbjCode.currentParameters.language);
         BrownClusters.set(brownclusters);
-//        GazetteersFactory.set(gazetteers);
+        GazetteersFactory.set(gazetteers);
 
         // Wikify all n-grams and extract features based on Wikipedia titles
         // doc.mentions stores tokens now
