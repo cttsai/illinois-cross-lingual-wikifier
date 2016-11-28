@@ -1,5 +1,5 @@
 # Illinois Cross-Lingual Wikifier
-This project implements the following two papers:
+Given a piece of text in any language, a cross-lingual wikifier identifies mentions of named entities and grounds them to the corresponding entries in the English Wikipedia. This project implements the approaches proposed in the following two papers:
 * <a href="http://cogcomp.cs.illinois.edu/papers/TsaiRo16b.pdf" target="_blank">Cross-Lingual Wikification Using Multilingual Embeddings (Tsai and Roth, NAACL 2016)</a> 
 * <a href="http://cogcomp.cs.illinois.edu/papers/TsaiMaRo16.pdf" target="_blank">Cross-Lingual Named Entity Recognition via Wikification (Tsai et al., CoNLL 2016)</a> 
 
