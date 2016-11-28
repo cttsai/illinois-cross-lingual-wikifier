@@ -43,6 +43,7 @@ public class XLWikifierDemo {
         logger.info("Time " + totaltime + " secs");
 
         output = formatOutput(xlwikifier.result, language);
+        logger.info("Done");
     }
 
     /**
@@ -53,7 +54,6 @@ public class XLWikifierDemo {
      * @return
      */
     private String formatOutput(QueryDocument doc, String lang) {
-        logger.info("Formatting demo outputs...");
         String out = "";
 
         int pend = 0;

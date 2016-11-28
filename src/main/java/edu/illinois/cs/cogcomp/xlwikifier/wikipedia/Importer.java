@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
+import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.core.TFIDFManager;
 import edu.illinois.cs.cogcomp.core.datastructures.ViewNames;
@@ -16,15 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -198,7 +194,7 @@ public class Importer {
 
     public void importCandidates() {
         logger.info("Importing into candidate DB...");
-        WikiCandidateGenerator wcg = new WikiCandidateGenerator(lang, true);
+        WikiCandidateGenerator wcg = new WikiCandidateGenerator(lang, false);
         wcg.populateDB(lang, redirectfile, pagefile, candfile);
     }
 
@@ -212,19 +208,63 @@ public class Importer {
         }
     }
 
+    public void getMostFreqWords(){
+
+        Map<String, Integer> wcnt = new HashMap<>();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(textfile));
+            String line;
+            while ((line = br.readLine())!= null) {
+                for (String token : line.toLowerCase().split("\\s+")) {
+                    if (!wcnt.containsKey(token))
+                        wcnt.put(token, 1);
+                    else
+                        wcnt.put(token, wcnt.get(token) + 1);
+                }
+            }
+            br.close();
+
+            List<String> sorted = wcnt.entrySet().stream()
+                    .sorted((x1, x2) -> Integer.compare(x2.getValue(), x1.getValue()))
+                    .map(x -> x.getKey()).filter(x -> !x.startsWith("title_"))
+                    .collect(Collectors.toList());
+
+            String out = sorted.subList(0, 50).stream().collect(joining("\n"));
+            FileUtils.writeStringToFile(new File(ConfigParameters.dump_path+"/"+lang, "stopwords."+lang), out, "UTF-8");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
         ConfigParameters.setPropValues(args[2]);
 
-        Importer importer = new Importer(args[0], args[1]);
+//        Importer importer = new Importer(args[0], args[1]);
+
+        List<String> langs = null;
         try {
-//            importer.downloadDump();
-//            importer.parseWikiDump();
-//            importer.importLangLinks();
-            importer.importCandidates();
-//            importer.importTFIDF();
-        } catch (Exception e) {
+            langs = LineIO.read("import-langs");
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
+        }
+        String date = "20161101";
+        for (String lang : langs) {
+            lang = lang.trim();
+            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
+            Importer importer = new Importer(lang, date);
+            try {
+//                importer.downloadDump();
+//                importer.parseWikiDump();
+//                importer.importLangLinks();
+//                importer.importCandidates();
+//                importer.importTFIDF();
+                importer.getMostFreqWords();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

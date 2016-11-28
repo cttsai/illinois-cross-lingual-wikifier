@@ -23,7 +23,7 @@ public class ConfigParameters {
     public static Map<String, String> ranker_models = new HashMap<>();
     public static Map<String, String> ranker_ner = new HashMap<>();
     public static String tac_es_samples, tac_zh_samples;
-    public static String tac_golds = "xlwikifier-data/test/tac-golds";
+    public static String tac_golds;
     public static boolean is_set = false;
     public static String search_cache;
     public static boolean use_search = false;
@@ -89,10 +89,10 @@ public class ConfigParameters {
             dump_path = rm.getString("dump_path").trim();
         if (rm.containsKey("stopword_path"))
             stopword_path = rm.getString("stopword_path").trim();
-        if (rm.containsKey("tac_es_samples"))
-            tac_es_samples = rm.getString("tac_es_samples").trim();
-        if (rm.containsKey("tac_zh_samples"))
-            tac_zh_samples = rm.getString("tac_zh_samples").trim();
+        if (rm.containsKey("tac_es_docs"))
+            tac_es_samples = rm.getString("tac_es_docs").trim();
+        if (rm.containsKey("tac_zh_docs"))
+            tac_zh_samples = rm.getString("tac_zh_docs").trim();
         if (rm.containsKey("tac_golds"))
             tac_golds = rm.getString("tac_golds").trim();
         if (rm.containsKey("use_wikisearch"))

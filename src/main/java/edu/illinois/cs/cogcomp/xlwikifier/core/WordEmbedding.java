@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
+import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -253,15 +254,26 @@ public class WordEmbedding {
 
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";
-        String lang = args[0];
-//        String name = "es";
-        we.createMultiVec(lang);
-//        we.loadEmbeddingToDB(dir + lang+"/en"+lang+"_orig1_projected.txt", we.multi_vec_en);
-//        we.loadEmbeddingToDB(dir + lang+"/en"+lang+"_orig2_projected.txt", we.multi_vec_lang);
-//        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
-        we.loadEmbeddingToDB(dir + lang+"/en.txt", we.multi_vec_en);
-        we.loadEmbeddingToDB(dir + lang+"/"+lang+".txt", we.multi_vec_lang);
+//        String lang = args[0];
 
-        we.closeDB();
+        ArrayList<String> langs = null;
+        try {
+            langs = LineIO.read("import-langs");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        for (String lang : langs) {
+
+            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
+//        String name = "es";
+            we.createMultiVec(lang);
+        we.loadEmbeddingToDB(dir + "en"+lang+"_orig1_projected.txt", we.multi_vec_en);
+        we.loadEmbeddingToDB(dir + "en"+lang+"_orig2_projected.txt", we.multi_vec_lang);
+//        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
+//            we.loadEmbeddingToDB(dir + lang + "/en.txt", we.multi_vec_en);
+//            we.loadEmbeddingToDB(dir + lang + "/" + lang + ".txt", we.multi_vec_lang);
+
+            we.closeDB();
+        }
     }
 }

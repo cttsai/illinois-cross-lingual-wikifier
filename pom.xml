@@ -47,7 +47,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-xlwikifier-resources</artifactId>
-            <version>1.0.9</version>
+            <version>1.0.12</version>
         </dependency>
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-mlner</artifactId>
-            <version>3.0.83</version>
+            <version>3.0.85</version>
         </dependency>
     </dependencies>
 
