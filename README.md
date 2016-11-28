@@ -18,7 +18,20 @@ mvn dependency:copy-dependencies
 mvn compile
 ./scripts/run-benchmark.sh es config/xlwikifier-tac.config
 ```
-The test documents are specified in the config file. These documents are from TAC 2016 EDL shared task. Check run-benchmark.sh for the desired performance and other details. 
+This script evaluates Spanish and Chinese performnace on TAC-KBP 2016 EDL shared task. You need to specify the paths to the test documents and the gold annotations in the config file. Check [config/xlwikifier-tac.config](https://github.com/cttsai/illinois-cross-lingual-wikifier/blob/master/config/xlwikifier-tac.config) for example. These documents are in the original format provided by LDC. You will get the following performance on named entities:
+
+```
+Spanish 
+strong mention match:       Precision:0.879 Recall:0.800 F1:0.838
+strong typed mention match: Precision:0.853 Recall:0.777 F1:0.813
+strong typed all match:     Precision:0.769 Recall:0.700 F1:0.733
+
+Chinese
+strong mention match:       Precision:0.868 Recall:0.724 F1:0.789
+strong typed mention match: Precision:0.835 Recall:0.696 F1:0.759
+strong typed all match:     Precision:0.750 Recall:0.625 F1:0.682
+```
+
 
 ### Train NER Model
 
