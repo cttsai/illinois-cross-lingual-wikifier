@@ -36,7 +36,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-tokenizer</artifactId>
-            <version>3.0.79</version>
+            <version>3.0.86</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -77,8 +77,8 @@
         </dependency>
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
-            <artifactId>illinois-mlner</artifactId>
-            <version>3.0.85</version>
+            <artifactId>illinois-ner</artifactId>
+            <version>3.0.86</version>
         </dependency>
     </dependencies>
 
