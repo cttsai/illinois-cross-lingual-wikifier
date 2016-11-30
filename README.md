@@ -1,16 +1,17 @@
 # Illinois Cross-Lingual Wikifier
-This project implements the following two papers:
+Given a piece of text in any language, a cross-lingual wikifier identifies mentions of named entities and grounds them to the corresponding entries in the English Wikipedia. This project implements the approaches proposed in the following two papers:
 * <a href="http://cogcomp.cs.illinois.edu/papers/TsaiRo16b.pdf" target="_blank">Cross-Lingual Wikification Using Multilingual Embeddings (Tsai and Roth, NAACL 2016)</a> 
 * <a href="http://cogcomp.cs.illinois.edu/papers/TsaiMaRo16.pdf" target="_blank">Cross-Lingual Named Entity Recognition via Wikification (Tsai et al., CoNLL 2016)</a> 
 
 This <a href="http://bilbo.cs.illinois.edu/~ctsai12/xlwikifier/" target="_blank">demo</a> will give you some intuition about this project.
 
-### Setup (for CogComp members)
-If you are not using illinois-xlwikifier-resources in pom.xml, you need to do:
+### Setup
 
-ln -s /shared/preprocessed/ctsai12/multilingual/deft/xlwikifier-data/
+Download [this file](http://cogcomp.cs.illinois.edu/Data/ccgPapersData/ctsai12/xlwikifier-mapdb.tar.gz) which contains MapDB indices of FreeBase dump and English, Spanish, and Chinese Wikipedia. Follow the README inside to extract the files and set the corresponding paths in the config file.
 
-This data folder (and illinois-xlwikifier-resources) only contains English, Spanish, and Chinese models for TAC EDL. Models and resources for other languages are at /shared/preprocessed/ctsai12/multilingual/xlwikifier-data/
+Note that we currently only release the resources for these three languages.
+
+For CogComp members, if you want to know where are the resources for other languages, please contact me.
 
 ### Run Benchmark
 ```
@@ -31,8 +32,6 @@ strong mention match:       Precision:0.868 Recall:0.724 F1:0.789
 strong typed mention match: Precision:0.835 Recall:0.696 F1:0.759
 strong typed all match:     Precision:0.750 Recall:0.625 F1:0.682
 ```
-
-
 ### Train NER Model
 
 Use ./scripts/train-ner.sh to train Illinois NER models with wikifier features. Note that the training and test files should be in the column format. 
