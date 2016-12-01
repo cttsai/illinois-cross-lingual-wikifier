@@ -1,6 +1,6 @@
 package edu.illinois.cs.cogcomp.demo;
 
-import com.github.stuxuhai.jpinyin.ChineseHelper;
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
@@ -9,7 +9,6 @@ import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifierManager;
 import edu.illinois.cs.cogcomp.xlwikifier.MultiLingualNER;
 import edu.illinois.cs.cogcomp.xlwikifier.MultiLingualNERManager;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class XLWikifierDemo {
     private static Logger logger = LoggerFactory.getLogger(XLWikifierDemo.class);
 
     public XLWikifierDemo(String text, String language) {
-        Language lang = Language.getLanguage(language);
+        Language lang = Language.getLanguageByCode(language);
 
         Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(language);
         TextAnnotation ta = tokenizer.getTextAnnotation(text);

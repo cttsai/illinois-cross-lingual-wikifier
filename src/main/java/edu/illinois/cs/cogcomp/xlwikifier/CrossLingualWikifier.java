@@ -1,16 +1,14 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
 import edu.illinois.cs.cogcomp.annotation.Annotator;
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.evaluation.TACUtils;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.mlner.NERUtils;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.PostProcessing;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
@@ -41,6 +39,8 @@ public class CrossLingualWikifier extends Annotator {
     private Ranker ranker;
     private LangLinker ll;
     private NERUtils nerutils;
+    private String ner_view;
+    private String wikifier_view;
     public QueryDocument result; // saving results in this datastructure for the demo
 
     /**
@@ -50,20 +50,23 @@ public class CrossLingualWikifier extends Annotator {
      */
     public CrossLingualWikifier(Language lang, String configFile) throws IOException {
 
-        super(lang.getWikifierViewName(), new String[]{}, true, new ResourceManager(configFile));
+        super(lang.name()+"_WIKIFIERVIEW", new String[]{}, true, new ResourceManager(configFile));
 
         this.language = lang;
+
+        this.ner_view = lang.name()+"_NERVIEW";
 
         ConfigParameters.setPropValues(configFile);
 
         doInitialize();
     }
 
+
     @Override
     public void initialize(ResourceManager resourceManager) {
 
         logger.info("Initializing CrossLingualWikifier...");
-        String lang = this.language.getShortName();
+        String lang = this.language.getCode();
 
         wcg = new WikiCandidateGenerator(lang, true);
         ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_models.get(lang));
@@ -78,8 +81,8 @@ public class CrossLingualWikifier extends Annotator {
     @Override
     public void addView(TextAnnotation textAnnotation) {
 
-        if (!textAnnotation.hasView(language.getNERViewName())) {
-            logger.error(language.getNERViewName() + " is required");
+        if (!textAnnotation.hasView(ner_view)) {
+            logger.error(ner_view + " is required");
         }
 
         QueryDocument doc = ta2QueryDoc(textAnnotation);
@@ -139,7 +142,7 @@ public class CrossLingualWikifier extends Annotator {
         QueryDocument doc = new QueryDocument(textAnnotation.getId());
         doc.setTextAnnotation(textAnnotation);
         doc.text = textAnnotation.getText();
-        for (Constituent c : textAnnotation.getView(language.getNERViewName())) {
+        for (Constituent c : textAnnotation.getView(ner_view)) {
             ELMention m = new ELMention("", c.getStartCharOffset(), c.getEndCharOffset());
             m.setSurface(c.getSurfaceForm());
             m.setType(c.getLabel());
@@ -162,7 +165,7 @@ public class CrossLingualWikifier extends Annotator {
         nerutils.setMidByWikiTitle(doc);
 
         if(ConfigParameters.use_search)
-            PostProcessing.wikiSearchSolver(doc,language.getShortName());
+            PostProcessing.wikiSearchSolver(doc,language.getCode());
 
         // save the result, which is used in generating demo output
         this.result = doc;

@@ -1,7 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
-import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,16 +22,16 @@ public class MultiLingualNERManager {
         if(annotatorMap == null)
             annotatorMap = new HashMap<>();
 
-        if(!annotatorMap.containsKey(lang.getNERViewName())){
+        if(!annotatorMap.containsKey(lang.name())){
             MultiLingualNER mlner = null;
             try {
                 mlner = new MultiLingualNER(lang, configFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            annotatorMap.put(lang.getNERViewName(), mlner);
+            annotatorMap.put(lang.name(), mlner);
         }
 
-        return annotatorMap.get(lang.getNERViewName());
+        return annotatorMap.get(lang.name());
     }
 }

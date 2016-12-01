@@ -1,6 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
 import edu.illinois.cs.cogcomp.annotation.Annotator;
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.SpanLabelView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
@@ -19,10 +20,8 @@ import edu.illinois.cs.cogcomp.ner.LbjTagger.NEWord;
 import edu.illinois.cs.cogcomp.ner.LbjTagger.ParametersForLbjCode;
 import edu.illinois.cs.cogcomp.ner.ParsingProcessingData.TaggedDataReader;
 import edu.illinois.cs.cogcomp.ner.config.NerBaseConfigurator;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.mlner.NERUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +60,7 @@ public class MultiLingualNER extends Annotator {
      * @throws IOException
      */
     public MultiLingualNER(Language lang, String configFile) throws IOException {
-        super(lang.getNERViewName(), new String[]{}, true, new ResourceManager(configFile));
+        super(lang.name()+"_NERVIEW", new String[]{}, true, new ResourceManager(configFile));
 
         this.language = lang;
 
@@ -76,7 +75,7 @@ public class MultiLingualNER extends Annotator {
 
         logger.info("Initializing MultiLingualNER...");
 
-        String lang = this.language.getShortName();
+        String lang = this.language.getCode();
 
         nerutils = new NERUtils(lang);
 

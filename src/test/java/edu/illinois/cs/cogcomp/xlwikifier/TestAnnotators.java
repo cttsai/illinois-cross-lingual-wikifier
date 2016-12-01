@@ -1,13 +1,12 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
-import edu.illinois.cs.cogcomp.ner.ExpressiveFeatures.GazetteersFactory;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import org.junit.Test;
 
@@ -71,7 +70,7 @@ public class TestAnnotators {
 
         Language lang = Language.Spanish;
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
         TextAnnotation ta = tokenizer.getTextAnnotation(spanish_input);
 
         String config = "config/xlwikifier-demo.config";
@@ -85,7 +84,7 @@ public class TestAnnotators {
 
         ner_annotator.addView(ta);
 
-        for (Constituent c : ta.getView(lang.getNERViewName()).getConstituents()) {
+        for (Constituent c : ta.getView(ner_annotator.getViewName()).getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             assertTrue("No entity mention \"" + c.getSurfaceForm() + "\"", spanish_answers.containsKey(key));
             String gold_type = spanish_answers.get(key).getType();
@@ -102,7 +101,7 @@ public class TestAnnotators {
 
         xlwikifier.addView(ta);
 
-        CoreferenceView corefview = (CoreferenceView) ta.getView(lang.getWikifierViewName());
+        CoreferenceView corefview = (CoreferenceView) ta.getView(xlwikifier.getViewName());
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = spanish_answers.get(key).getEnWikiTitle();
@@ -116,7 +115,7 @@ public class TestAnnotators {
     public void testChineseResults() {
 
         Language lang = Language.Chinese;
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getShortName());
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
         TextAnnotation ta = tokenizer.getTextAnnotation(chinese_input);
 
         String config = "config/xlwikifier-demo.config";
@@ -130,7 +129,7 @@ public class TestAnnotators {
 
         annotator.addView(ta);
 
-        for (Constituent c : ta.getView(lang.getNERViewName()).getConstituents()) {
+        for (Constituent c : ta.getView(annotator.getViewName()).getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             assertTrue("No entity mention \"" + c.getSurfaceForm() + "\"", chinese_answers.containsKey(key));
 
@@ -148,7 +147,7 @@ public class TestAnnotators {
 
         xlwikifier.addView(ta);
 
-        CoreferenceView corefview = (CoreferenceView) ta.getView(lang.getWikifierViewName());
+        CoreferenceView corefview = (CoreferenceView) ta.getView(xlwikifier.getViewName());
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = chinese_answers.get(key).getEnWikiTitle();

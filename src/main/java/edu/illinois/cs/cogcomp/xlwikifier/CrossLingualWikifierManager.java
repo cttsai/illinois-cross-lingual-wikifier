@@ -1,6 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,16 +22,16 @@ public class CrossLingualWikifierManager {
         if(annotatorMap == null)
             annotatorMap = new HashMap<>();
 
-        if(!annotatorMap.containsKey(lang.getWikifierViewName())){
+        if(!annotatorMap.containsKey(lang.name())){
             CrossLingualWikifier xlwikifier = null;
             try {
                 xlwikifier = new CrossLingualWikifier(lang, configFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            annotatorMap.put(lang.getWikifierViewName(), xlwikifier);
+            annotatorMap.put(lang.name(), xlwikifier);
         }
 
-        return annotatorMap.get(lang.getWikifierViewName());
+        return annotatorMap.get(lang.name());
     }
 }
