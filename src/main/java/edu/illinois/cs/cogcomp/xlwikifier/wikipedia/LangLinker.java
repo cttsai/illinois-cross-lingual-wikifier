@@ -1,15 +1,14 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
 import com.github.stuxuhai.jpinyin.ChineseHelper;
-import edu.illinois.cs.cogcomp.tokenizers.ChineseTokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
-import org.apache.commons.io.FileUtils;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 import org.mapdb.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -93,7 +94,11 @@ public class CrossLingualWikifier extends Annotator {
 
         PostProcessing.fixPerAnnotation(doc);
 
-        SurfaceClustering.cluster(doc);
+        SurfaceClustering.cluster(doc.mentions);
+
+        doc.mentions = doc.mentions.stream()
+                .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+                .collect(Collectors.toList());
 
         doc.mentions.forEach(x -> System.out.println(x));
 
@@ -130,7 +135,6 @@ public class CrossLingualWikifier extends Annotator {
         }
 
         textAnnotation.addView(getViewName(), corefview);
-
     }
 
     /**

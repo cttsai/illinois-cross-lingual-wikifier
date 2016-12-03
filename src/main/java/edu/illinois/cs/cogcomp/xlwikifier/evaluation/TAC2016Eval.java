@@ -9,6 +9,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,7 +119,10 @@ public class TAC2016Eval {
             PostProcessing.fixPerAnnotation(doc);
 
             // NIL clustering
-            SurfaceClustering.cluster(doc);
+            SurfaceClustering.cluster(doc.mentions);
+            doc.mentions = doc.mentions.stream()
+                    .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+                    .collect(Collectors.toList());
 
             evaluate(doc);
         }
