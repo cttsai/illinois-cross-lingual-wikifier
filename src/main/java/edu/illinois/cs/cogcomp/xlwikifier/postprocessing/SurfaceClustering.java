@@ -3,6 +3,7 @@ package edu.illinois.cs.cogcomp.xlwikifier.postprocessing;
 
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
+import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 
 import java.util.*;
 
@@ -15,7 +16,26 @@ public class SurfaceClustering {
 
     private static int nil_cnt = 1;
 
+    public static void crossDocCoref(List<QueryDocument> docs){
+
+        List<ELMention> mentions = docs.stream().flatMap(x -> x.mentions.stream()).collect(toList());
+
+        List<ELMention> results = SurfaceClustering.cluster(mentions);
+
+        Map<String, List<ELMention>> doc2mentions = results.stream().collect(groupingBy(x -> x.getDocID()));
+
+        for(QueryDocument doc: docs){
+            if(doc2mentions.containsKey(doc.getDocID())){
+                doc.mentions = doc2mentions.get(doc.getDocID()).stream()
+                        .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+                        .collect(toList());
+            }
+        }
+    }
+
     public static List<ELMention> cluster(List<ELMention> mentions){
+
+        nil_cnt = 1;
 
         // use gold_wiki_title to store the target ID
         if(ConfigParameters.target_kb.equals("freebase"))

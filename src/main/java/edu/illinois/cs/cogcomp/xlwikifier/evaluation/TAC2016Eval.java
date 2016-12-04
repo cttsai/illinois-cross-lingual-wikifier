@@ -92,8 +92,6 @@ public class TAC2016Eval {
         CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);
 
         for(QueryDocument doc: docs){
-//            if(!doc.getDocID().equals("CMN_DF_000191_20160428_G00A0D3AC"))
-//                continue;
 
             logger.info("Working on document: "+doc.getDocID());
 

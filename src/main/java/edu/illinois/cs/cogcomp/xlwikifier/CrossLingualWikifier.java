@@ -41,7 +41,8 @@ public class CrossLingualWikifier extends Annotator {
     private LangLinker ll;
     private NERUtils nerutils;
     private String ner_view;
-    private String wikifier_view;
+
+    private List<QueryDocument> processed_docs = new ArrayList<>(); // for cross-doc coref
     public QueryDocument result; // saving results in this datastructure for the demo
 
     /**
@@ -101,6 +102,9 @@ public class CrossLingualWikifier extends Annotator {
                 .collect(Collectors.toList());
 
         doc.mentions.forEach(x -> System.out.println(x));
+
+        // save the result, which is used in generating demo output
+        this.result = doc;
 
         CoreferenceView corefview = new CoreferenceView(getViewName(), textAnnotation);
 
@@ -171,7 +175,5 @@ public class CrossLingualWikifier extends Annotator {
         if(ConfigParameters.use_search)
             PostProcessing.wikiSearchSolver(doc,language.getCode());
 
-        // save the result, which is used in generating demo output
-        this.result = doc;
     }
 }
