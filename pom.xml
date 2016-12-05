@@ -3,8 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.illinois.cs.cogcomp</groupId>
     <artifactId>xlwikifier</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <cogcompNlpVersion>3.0.86</cogcompNlpVersion>
+    </properties>
     <repositories>
         <repository>
             <id>CogcompSoftware</id>
@@ -36,7 +41,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-tokenizer</artifactId>
-            <version>3.0.86</version>
+            <version>${cogcompNlpVersion}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -52,7 +57,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>wikipediaAPI-multilingual</artifactId>
-            <version>1.1.3</version>
+            <version>1.1.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
@@ -78,7 +83,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-ner</artifactId>
-            <version>3.0.86</version>
+            <version>${cogcompNlpVersion}</version>
         </dependency>
     </dependencies>
 
