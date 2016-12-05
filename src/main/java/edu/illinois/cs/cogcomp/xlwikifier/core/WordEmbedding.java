@@ -262,18 +262,21 @@ public class WordEmbedding {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        boolean start = false;
         for (String lang : langs) {
-
-            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
+            lang = lang.trim();
+            if(lang.equals("da") && !start) start = true;
+            if(start) {
 //        String name = "es";
-            we.createMultiVec(lang);
-        we.loadEmbeddingToDB(dir + "en"+lang+"_orig1_projected.txt", we.multi_vec_en);
-        we.loadEmbeddingToDB(dir + "en"+lang+"_orig2_projected.txt", we.multi_vec_lang);
+                we.createMultiVec(lang);
+                we.loadEmbeddingToDB(dir + "en" + lang + "_orig1_projected.txt", we.multi_vec_en);
+                we.loadEmbeddingToDB(dir + "en" + lang + "_orig2_projected.txt", we.multi_vec_lang);
 //        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
 //            we.loadEmbeddingToDB(dir + lang + "/en.txt", we.multi_vec_en);
 //            we.loadEmbeddingToDB(dir + lang + "/" + lang + ".txt", we.multi_vec_lang);
 
-            we.closeDB();
+                we.closeDB();
+            }
         }
     }
 }

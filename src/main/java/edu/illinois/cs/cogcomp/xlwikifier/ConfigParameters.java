@@ -1,7 +1,7 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class ConfigParameters {
 
         // load models configs
         for (Language lang : Language.values()) {
-            String l = lang.getShortName();
+            String l = lang.getCode();
             String key = l + "_ner_config";
             if (rm.containsKey(key))
                 ner_models.put(l, rm.getString(key).trim());

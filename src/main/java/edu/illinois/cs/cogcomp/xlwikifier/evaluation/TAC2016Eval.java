@@ -1,21 +1,15 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
-//import edu.illinois.cs.cogcomp.LbjNer.IO.ResourceUtilities;
-//import edu.illinois.cs.cogcomp.core.io.IOUtils;
+import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.*;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
-import edu.illinois.cs.cogcomp.xlwikifier.datastructures.Language;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.PostProcessing;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,8 +92,6 @@ public class TAC2016Eval {
         CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);
 
         for(QueryDocument doc: docs){
-//            if(!doc.getDocID().equals("CMN_DF_000191_20160428_G00A0D3AC"))
-//                continue;
 
             logger.info("Working on document: "+doc.getDocID());
 
@@ -125,7 +117,10 @@ public class TAC2016Eval {
             PostProcessing.fixPerAnnotation(doc);
 
             // NIL clustering
-            SurfaceClustering.cluster(doc);
+            SurfaceClustering.cluster(doc.mentions);
+            doc.mentions = doc.mentions.stream()
+                    .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+                    .collect(Collectors.toList());
 
             evaluate(doc);
         }
