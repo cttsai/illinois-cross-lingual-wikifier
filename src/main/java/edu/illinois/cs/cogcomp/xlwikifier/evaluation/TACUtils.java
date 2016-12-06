@@ -58,7 +58,7 @@ public class TACUtils {
                 nm.add(m);
         }
         doc.mentions = nm;
-        logger.info("Removed "+n_add+" mentions in the <quote>");
+//        logger.info("Removed "+n_add+" mentions in the <quote>");
     }
 
     public static void setXmlOffsets(QueryDocument doc){
@@ -93,7 +93,7 @@ public class TACUtils {
             m.setMid("NIL");
             ret.add(m);
         }
-        logger.info("Extracted "+ret.size()+" authors in xml tags");
+//        logger.info("Extracted "+ret.size()+" authors in xml tags");
 
         doc.mentions.addAll(ret);
     }
