@@ -197,6 +197,18 @@ public class ELMention {
         }
     }
 
+    public void cleanFeatureCache(){
+        mid_vec = null;
+        context30 = null;
+        context100 = null;
+        context200 = null;
+        other_ne = null;
+        pre_title = null;
+        pre_title_vecs = null;
+        other_ne_vecs = null;
+        mention_vec = null;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof ELMention))

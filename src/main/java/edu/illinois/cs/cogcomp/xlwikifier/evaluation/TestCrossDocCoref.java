@@ -21,50 +21,54 @@ public class TestCrossDocCoref {
 
         String config = "config/test-coref.config";
         ConfigParameters.setPropValues(config);
+        int[] nds = {5000, 2000, 1000, 200};
 
-        Language lang = Language.Spanish;
-        List<QueryDocument> docs = TACDataReader.readSpanishEvalDocs();
+        for (int ndoc : nds) {
+            Language lang = Language.Spanish;
+            List<QueryDocument> docs = TACDataReader.readSpanishEvalDocs(ndoc);
 
-        MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, config);
+            MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, config);
 
-        CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);
+            CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);
 
-        double starttime = System.currentTimeMillis();
-        int cnt = 0;
-        for (QueryDocument doc : docs) {
-            System.out.println(cnt++);
+            double starttime = System.currentTimeMillis();
+            int cnt = 0;
+            for (QueryDocument doc : docs) {
+                System.out.println(cnt++);
 
-            // ner
-            mlner.annotate(doc);
+                // ner
+                mlner.annotate(doc);
 
-            // clean mentions contain xml tags
-            PostProcessing.cleanSurface(doc);
+                // clean mentions contain xml tags
+                PostProcessing.cleanSurface(doc);
 
-            // wikification
-            xlwikifier.annotate(doc);
+                // wikification
+                xlwikifier.annotate(doc);
 
-            // map plain text offsets to xml offsets
-            TACUtils.setXmlOffsets(doc);
+                // map plain text offsets to xml offsets
+                TACUtils.setXmlOffsets(doc);
 
-            // add author mentions inside xml tags
-            TACUtils.addPostAuthors(doc);
+                // add author mentions inside xml tags
+                TACUtils.addPostAuthors(doc);
 
-            // remove mentions between <quote> and </quote>
-            TACUtils.removeQuoteMentions(doc);
+                // remove mentions between <quote> and </quote>
+                TACUtils.removeQuoteMentions(doc);
 
-            // simple coref to re-set short mentions' title
-            PostProcessing.fixPerAnnotation(doc);
+                // simple coref to re-set short mentions' title
+                PostProcessing.fixPerAnnotation(doc);
 
-            // NIL clustering
-            doc.mentions = SurfaceClustering.cluster(doc.mentions);
+                // NIL clustering
+                doc.mentions = SurfaceClustering.cluster(doc.mentions);
+
+            }
+            double totaltime = (System.currentTimeMillis() - starttime) / 1000.0;
+            System.out.println("Time " + totaltime + " secs");
+
+            starttime = System.currentTimeMillis();
+            SurfaceClustering.crossDocCoref(docs);
+            totaltime = (System.currentTimeMillis() - starttime) / 1000.0;
+            System.out.println("Time " + totaltime + " secs");
 
         }
-        double totaltime = (System.currentTimeMillis() - starttime) / 1000.0;
-        System.out.println("Time " + totaltime + " secs");
-
-        starttime = System.currentTimeMillis();
-        SurfaceClustering.crossDocCoref(docs);
-        totaltime = (System.currentTimeMillis() - starttime) / 1000.0;
-        System.out.println("Time " + totaltime + " secs");
     }
 }

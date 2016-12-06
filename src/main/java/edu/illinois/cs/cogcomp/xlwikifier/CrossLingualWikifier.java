@@ -175,5 +175,6 @@ public class CrossLingualWikifier extends Annotator {
         if(ConfigParameters.use_search)
             PostProcessing.wikiSearchSolver(doc,language.getCode());
 
+        doc.mentions.forEach(x -> x.cleanFeatureCache());
     }
 }
