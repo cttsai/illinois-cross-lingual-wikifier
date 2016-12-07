@@ -4,10 +4,7 @@ import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
-import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
-import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifierManager;
-import edu.illinois.cs.cogcomp.xlwikifier.MultiLingualNER;
-import edu.illinois.cs.cogcomp.xlwikifier.MultiLingualNERManager;
+import edu.illinois.cs.cogcomp.xlwikifier.*;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +28,23 @@ public class DemoController {
     @PostConstruct
     public void initAnnotators(){
 
+        ConfigParameters.setPropValues(default_config);
         logger.info("Initializing demo");
-        for(Language lang: Language.values()) {
-            logger.info("Initializing " + lang.toString() + " NER and wikification");
-            MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(lang, default_config);
-            CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, default_config);
+        for(String lang: ConfigParameters.ranker_models.keySet()) {
+            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
 
-            Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
-            String sample = readExample(lang);
+                Language language = Language.getLanguageByCode(lang);
+                logger.info("Initializing " + lang + " NER and Wikifier");
+                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
+                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
 
-            TextAnnotation ta = tokenizer.getTextAnnotation(sample);
-            ner.addView(ta);
-            wikifier.addView(ta);
+                Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+                String sample = readExample(language);
+
+                TextAnnotation ta = tokenizer.getTextAnnotation(sample);
+                ner.addView(ta);
+                wikifier.addView(ta);
+            }
         }
     }
 
