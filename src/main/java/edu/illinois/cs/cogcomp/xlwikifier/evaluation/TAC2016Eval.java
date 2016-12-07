@@ -81,7 +81,7 @@ public class TAC2016Eval {
         }
         else if(args[0].equals("es")){
             lang = Language.Spanish;
-            docs = TACDataReader.readSpanishEvalDocs();
+            docs = TACDataReader.readSpanishEvalDocs(10000);
             golds = TACDataReader.readSpanishGoldNAM();
         }
         else

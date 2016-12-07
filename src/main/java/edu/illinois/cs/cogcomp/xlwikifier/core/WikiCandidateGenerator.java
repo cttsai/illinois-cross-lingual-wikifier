@@ -115,9 +115,7 @@ public class WikiCandidateGenerator {
 
         if (title2id.containsKey(title)) {
             String id = title2id.get(title);
-            System.out.println(id);
             if (id2redirect.containsKey(id)) {
-                System.out.println(id2redirect.get(id));
                 return id2redirect.get(id);
             }
         }
@@ -378,10 +376,10 @@ public class WikiCandidateGenerator {
         dr.readTitle2ID(page_file, lang);
         this.setId2Redirect(dr.id2redirect);
         this.setTitle2Id(dr.title2id);
-//        populateMentionDB(cand_file, lang);
-//        populateWord2Title(cand_file, lang);
-//        db.commit();
-//        db.close();
+        populateMentionDB(cand_file, lang);
+        populateWord2Title(cand_file, lang);
+        db.commit();
+        db.close();
     }
 
 //    public void populate4GramIdx(String lang, String redirect_file, String page_file){

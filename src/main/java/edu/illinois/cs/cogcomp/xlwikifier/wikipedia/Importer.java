@@ -253,15 +253,15 @@ public class Importer {
         String date = "20161101";
         for (String lang : langs) {
             lang = lang.trim();
-            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
+//            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
             Importer importer = new Importer(lang, date);
             try {
 //                importer.downloadDump();
 //                importer.parseWikiDump();
 //                importer.importLangLinks();
-//                importer.importCandidates();
+                importer.importCandidates();
 //                importer.importTFIDF();
-                importer.getMostFreqWords();
+//                importer.getMostFreqWords();
             } catch (Exception e) {
                 e.printStackTrace();
             }

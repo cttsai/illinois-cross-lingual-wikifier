@@ -88,7 +88,7 @@ public class TACDataReader {
         return docs;
     }
 
-    public static List<QueryDocument> readSpanishEvalDocs() {
+    public static List<QueryDocument> readSpanishEvalDocs(int ndocs) {
 
         List<QueryDocument> docs = new ArrayList<>();
 
@@ -101,6 +101,7 @@ public class TACDataReader {
         }
 
         for (String filename: filenames) {
+            if(docs.size() == ndocs) break;
             int idx = filename.lastIndexOf(".");
             int idx1 = filename.lastIndexOf("/");
             String docid = filename.substring(idx1+1, idx);
