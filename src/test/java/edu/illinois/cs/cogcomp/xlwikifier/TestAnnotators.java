@@ -1,12 +1,12 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import org.junit.Test;
 
@@ -70,8 +70,8 @@ public class TestAnnotators {
 
         Language lang = Language.Spanish;
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
-        TextAnnotation ta = tokenizer.getTextAnnotation(spanish_input);
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
+        TextAnnotation ta = tokenizer.createTextAnnotation(spanish_input);
 
         String config = "config/xlwikifier-demo.config";
 
@@ -115,8 +115,8 @@ public class TestAnnotators {
     public void testChineseResults() {
 
         Language lang = Language.Chinese;
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
-        TextAnnotation ta = tokenizer.getTextAnnotation(chinese_input);
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
+        TextAnnotation ta = tokenizer.createTextAnnotation(chinese_input);
 
         String config = "config/xlwikifier-demo.config";
 

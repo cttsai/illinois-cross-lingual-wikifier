@@ -1,10 +1,11 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
 import com.github.stuxuhai.jpinyin.ChineseHelper;
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.ner.IO.ResourceUtilities;
+import edu.illinois.cs.cogcomp.nlp.tokenizer.Tokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -54,7 +55,7 @@ public class TACDataReader {
             e.printStackTrace();
         }
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("zh");
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer("zh");
         for (String filename: filenames) {
             int idx = filename.lastIndexOf(".");
             int idx1 = filename.lastIndexOf("/");
@@ -91,7 +92,7 @@ public class TACDataReader {
 
         List<QueryDocument> docs = new ArrayList<>();
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer("es");
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer("es");
         List<String> filenames = null;
         try {
             filenames = LineIO.read(ConfigParameters.tac_es_samples);

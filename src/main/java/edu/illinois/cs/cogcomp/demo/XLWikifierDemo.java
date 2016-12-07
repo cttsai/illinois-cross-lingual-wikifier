@@ -1,9 +1,9 @@
 package edu.illinois.cs.cogcomp.demo;
 
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifierManager;
 import edu.illinois.cs.cogcomp.xlwikifier.MultiLingualNER;
@@ -26,8 +26,8 @@ public class XLWikifierDemo {
     public XLWikifierDemo(String text, String language) {
         Language lang = Language.getLanguageByCode(language);
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(language);
-        TextAnnotation ta = tokenizer.getTextAnnotation(text);
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(language);
+        TextAnnotation ta = tokenizer.createTextAnnotation(text);
 
         long startTime = System.currentTimeMillis();
         MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, default_config);

@@ -8,7 +8,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cogcompNlpVersion>3.0.86</cogcompNlpVersion>
+        <cogcompNlpVersion>3.0.87</cogcompNlpVersion>
     </properties>
     <repositories>
         <repository>
