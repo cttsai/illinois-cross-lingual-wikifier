@@ -7,6 +7,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.PostProcessing;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +21,12 @@ public class TestCrossDocCoref {
     public static void main(String[] args) {
 
         String config = "config/test-coref.config";
-        ConfigParameters.setPropValues(config);
+        try {
+            ConfigParameters.setPropValues(config);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         int[] nds = {5000, 2000, 1000, 200};
 
         for (int ndoc : nds) {

@@ -527,7 +527,12 @@ public class WikiCandidateGenerator {
     }
 
     public static void main(String[] args) {
-        ConfigParameters.setPropValues();
+        try {
+            ConfigParameters.setPropValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
         System.out.println(g.getCandsBySurface("臺灣"));
         System.exit(-1);

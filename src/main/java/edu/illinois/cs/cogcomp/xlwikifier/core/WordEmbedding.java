@@ -250,7 +250,12 @@ public class WordEmbedding {
     }
 
     public static void main(String[] args) {
-        ConfigParameters.setPropValues(args[1]);
+        try {
+            ConfigParameters.setPropValues(args[1]);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";

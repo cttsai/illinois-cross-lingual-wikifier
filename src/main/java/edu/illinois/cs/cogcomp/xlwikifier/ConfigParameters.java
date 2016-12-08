@@ -32,18 +32,14 @@ public class ConfigParameters {
     public static String liblinear_path = "liblinear-ranksvm-1.95";
 
 
-    public static void setPropValues() {
+    public static void setPropValues() throws IOException {
         String default_config = "config/xlwikifier-tac.config";
         setPropValues(default_config);
     }
 
-    public static void setPropValues(String config_file){
+    public static void setPropValues(String config_file) throws IOException {
         ResourceManager rm = null;
-        try {
-            rm = new ResourceManager(config_file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        rm = new ResourceManager(config_file);
 
         if(!is_set || !config_file.equals(config_name)) {
             logger.info("Loading configuration: " + config_file);
@@ -56,8 +52,7 @@ public class ConfigParameters {
         }
     }
 
-    private static void setPropValues(ResourceManager rm) {
-
+    private static void setPropValues(ResourceManager rm) throws IOException {
 
         // load models configs
         for (Language lang : Language.values()) {
@@ -82,9 +77,10 @@ public class ConfigParameters {
             if (!FreeBaseQuery.isloaded())
                 FreeBaseQuery.loadDB(true);
         }
-        else
+        else {
             logger.error("db_path is required");
-
+            throw new IOException("missing required parameter 'db_path'." );
+        }
         if (rm.containsKey("dump_path"))
             dump_path = rm.getString("dump_path").trim();
         if (rm.containsKey("stopword_path"))
@@ -108,6 +104,11 @@ public class ConfigParameters {
     public static void main(String[] args) {
 
         ConfigParameters param = new ConfigParameters();
-        param.setPropValues();
+        try {
+            param.setPropValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 }

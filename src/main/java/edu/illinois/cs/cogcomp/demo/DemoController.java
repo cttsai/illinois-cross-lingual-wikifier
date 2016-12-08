@@ -28,7 +28,12 @@ public class DemoController {
     @PostConstruct
     public void initAnnotators(){
 
-        ConfigParameters.setPropValues(default_config);
+        try {
+            ConfigParameters.setPropValues(default_config);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         logger.info("Initializing demo");
         for(String lang: ConfigParameters.ranker_models.keySet()) {
             if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
