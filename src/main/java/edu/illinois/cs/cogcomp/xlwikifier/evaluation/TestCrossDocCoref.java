@@ -21,7 +21,7 @@ public class TestCrossDocCoref {
 
         String config = "config/test-coref.config";
         ConfigParameters.setPropValues(config);
-        int[] nds = {5000, 2000, 1000, 200};
+        int[] nds = {20000, 10000, 5000, 2000};
 
         for (int ndoc : nds) {
             Language lang = Language.Spanish;
@@ -65,9 +65,13 @@ public class TestCrossDocCoref {
             System.out.println("Time " + totaltime + " secs");
 
             starttime = System.currentTimeMillis();
-            SurfaceClustering.crossDocCoref(docs);
+
+            SurfaceClustering.NILClustering(docs);
             totaltime = (System.currentTimeMillis() - starttime) / 1000.0;
             System.out.println("Time " + totaltime + " secs");
+
+            Runtime instance = Runtime.getRuntime();
+            System.out.println("Used Memory: " + (instance.totalMemory() - instance.freeMemory()) / (1024*1024));
 
         }
     }

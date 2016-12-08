@@ -8,10 +8,13 @@ import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.PostProcessing;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
+import java.io.IOException;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.io.File;
 
 /**
  * This class runs MultiLingualNER and CrossLingualWikifier on TAC-KBP 2016 EDL dataset.
@@ -60,8 +63,25 @@ public class TAC2016Eval {
             }
         }
         pred_total += doc.mentions.size();
-
     }
+
+	public static void printEvalFormat(List<QueryDocument> docs, String outfile){
+
+		String out = "";
+		int cnt = 0;
+		for(QueryDocument doc: docs){
+			for(ELMention m: doc.mentions){
+				out += doc.getDocID()+"\t"+m.getStartOffset()+"\t"+(m.getEndOffset()-1)+"\t"+m.getMid()+"\t0\t"+m.getType()+"\n";
+			}
+		}
+
+		try {
+			FileUtils.writeStringToFile(new File(outfile), out, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 
     public static void main(String[] args) {
 
@@ -116,15 +136,20 @@ public class TAC2016Eval {
             // simple coref to re-set short mentions' title
             PostProcessing.fixPerAnnotation(doc);
 
-            // NIL clustering
-            SurfaceClustering.cluster(doc.mentions);
+            // cluster mentions based on surface forms
+            doc.mentions = SurfaceClustering.cluster(doc.mentions);
             doc.mentions = doc.mentions.stream()
-                    .sorted(Comparator.comparingInt(ELMention::getStartOffset))
-                    .collect(Collectors.toList());
+                   .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+                   .collect(Collectors.toList());
 
-            evaluate(doc);
         }
 
+		//SurfaceClustering.NILClustering(docs);
+		
+		printEvalFormat(docs, "tac."+args[0]+".results");
+
+		for(QueryDocument doc: docs)
+            evaluate(doc);
         double rec = span_cnt/gold_total;
         double pre = span_cnt/pred_total;
         double f1 = 2*rec*pre/(rec+pre);
