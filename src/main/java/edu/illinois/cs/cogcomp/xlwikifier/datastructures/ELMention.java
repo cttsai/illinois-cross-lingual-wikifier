@@ -138,6 +138,10 @@ public class ELMention {
         return this.docid;
     }
 
+	public void setDocID(String id) {
+		this.docid = id;
+	}
+
     public String getType() {
         return this.type;
     }

@@ -16,17 +16,47 @@ public class SurfaceClustering {
 
     private static int nil_cnt = 1;
 
-    public static void crossDocCoref(List<QueryDocument> docs){
+	public static double jaccard_th = 0.5;
+	public static int mention_th = 1;
 
-        List<ELMention> mentions = docs.stream().flatMap(x -> x.mentions.stream()).collect(toList());
+    public static void NILClustering(List<QueryDocument> docs){
 
-        List<ELMention> results = SurfaceClustering.cluster(mentions);
+		mention_th = 3;
+
+		List<ELMention> nils = new ArrayList();
+		for(QueryDocument doc: docs){
+			List<ELMention> non_nils = new ArrayList();
+			for(ELMention m: doc.mentions){
+
+				m.setDocID(doc.getDocID());
+
+        		if(ConfigParameters.target_kb.equals("freebase")){
+					if(m.getMid().startsWith("NIL"))
+						nils.add(m);
+					else
+						non_nils.add(m);
+				}
+				else if(ConfigParameters.target_kb.equals("enwiki")){
+					if(m.getEnWikiTitle().startsWith("NIL"))
+						nils.add(m);
+					else
+						non_nils.add(m);
+				}
+			}
+
+			doc.mentions = non_nils;
+		}
+		
+		System.out.println("#NIL mentions: "+nils.size());
+
+        List<ELMention> results = SurfaceClustering.cluster(nils);
 
         Map<String, List<ELMention>> doc2mentions = results.stream().collect(groupingBy(x -> x.getDocID()));
 
         for(QueryDocument doc: docs){
             if(doc2mentions.containsKey(doc.getDocID())){
-                doc.mentions = doc2mentions.get(doc.getDocID()).stream()
+				doc.mentions.addAll(doc2mentions.get(doc.getDocID()));
+                doc.mentions = doc.mentions.stream()
                         .sorted(Comparator.comparingInt(ELMention::getStartOffset))
                         .collect(toList());
             }
@@ -35,7 +65,7 @@ public class SurfaceClustering {
 
     public static List<ELMention> cluster(List<ELMention> mentions){
 
-        nil_cnt = 1;
+        //nil_cnt = 1;
 
         // use gold_wiki_title to store the target ID
         if(ConfigParameters.target_kb.equals("freebase"))
@@ -45,8 +75,8 @@ public class SurfaceClustering {
 
         // assign NIL singltons
         for(ELMention m: mentions){
-            if (m.gold_wiki_title.startsWith("NIL"))
-                m.gold_wiki_title = "NIL" + String.format("%04d", nil_cnt++);
+            if (m.gold_wiki_title.equals("NIL"))
+                m.gold_wiki_title = "NIL" + String.format("%05d", nil_cnt++);
         }
 
         List<List<ELMention>> clusters = mentions.stream()
@@ -67,7 +97,8 @@ public class SurfaceClustering {
 
         List<ELMention> results = new ArrayList<>();
         for(String type: type2clusters.keySet()){
-            results.addAll(clusterClusters(type2clusters.get(type)));
+			List<ELMention> rs = clusterClusters(type2clusters.get(type));
+            results.addAll(rs);
         }
 
         if(ConfigParameters.target_kb.equals("freebase"))
@@ -103,26 +134,31 @@ public class SurfaceClustering {
 
 
     private static boolean compareClusters(List<ELMention> c1, List<ELMention> c2){
-        Set<String> c1_surface = c1.stream().map(x -> x.getSurface()).collect(toSet());
-        Set<String> c2_surface = c2.stream().map(x -> x.getSurface()).collect(toSet());
+        List<String> c1_surface = c1.stream().map(x -> x.getSurface()).collect(toList());
+        List<String> c2_surface = c2.stream().map(x -> x.getSurface()).collect(toList());
+
+		int cnt = 0;
         for(String m2: c2_surface){
-            if(compareMentionCluster(m2, c1_surface))
-                return true;
+            if(compareMentionCluster(m2, c1_surface)){
+				cnt++;
+				if(cnt >= mention_th)
+					return true;
+			}
         }
         return false;
     }
 
 
-    private static boolean compareMentionCluster(String m, Set<String> c){
+    private static boolean compareMentionCluster(String m, List<String> c){
         OptionalDouble max = c.stream().mapToDouble(x -> jaccard(x, m)).max();
-        if(max.isPresent() && max.getAsDouble() >= 0.5)
+        if(max.isPresent() && max.getAsDouble() >= jaccard_th)
             return true;
         return false;
     }
 
     private static double jaccard(String m1, String m2){
-        String[] t1 = m1.toLowerCase().split("\\s+");
-        String[] t2 = m2.toLowerCase().split("\\s+");
+        String[] t1 = m1.toLowerCase().split("\\s+|·");
+        String[] t2 = m2.toLowerCase().split("\\s+|·");
 
         Set<String> s1 = Arrays.asList(t1).stream().collect(toSet());
         Set<String> s2 = Arrays.asList(t2).stream().collect(toSet());
