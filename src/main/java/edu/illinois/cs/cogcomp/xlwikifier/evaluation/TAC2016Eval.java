@@ -144,7 +144,7 @@ public class TAC2016Eval {
 
         }
 
-		SurfaceClustering.NILClustering(docs);
+		SurfaceClustering.NILClustering(docs, 3);
 		printEvalFormat(docs, "tac."+args[0]+".results");
 
 		for(QueryDocument doc: docs)
