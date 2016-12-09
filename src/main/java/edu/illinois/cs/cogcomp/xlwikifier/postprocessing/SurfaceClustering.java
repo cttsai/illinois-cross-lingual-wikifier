@@ -19,9 +19,9 @@ public class SurfaceClustering {
 	public static double jaccard_th = 0.5;
 	public static int mention_th = 1;
 
-    public static void NILClustering(List<QueryDocument> docs){
+    public static void NILClustering(List<QueryDocument> docs, int th){
 
-		mention_th = 3;
+		mention_th = th;
 
 		List<ELMention> nils = new ArrayList();
 		for(QueryDocument doc: docs){
@@ -134,8 +134,8 @@ public class SurfaceClustering {
 
 
     private static boolean compareClusters(List<ELMention> c1, List<ELMention> c2){
-        List<String> c1_surface = c1.stream().map(x -> x.getSurface()).collect(toList());
-        List<String> c2_surface = c2.stream().map(x -> x.getSurface()).collect(toList());
+        Set<String> c1_surface = c1.stream().map(x -> x.getSurface()).collect(toSet());
+        Set<String> c2_surface = c2.stream().map(x -> x.getSurface()).collect(toSet());
 
 		int cnt = 0;
         for(String m2: c2_surface){
@@ -149,7 +149,7 @@ public class SurfaceClustering {
     }
 
 
-    private static boolean compareMentionCluster(String m, List<String> c){
+    private static boolean compareMentionCluster(String m, Set<String> c){
         OptionalDouble max = c.stream().mapToDouble(x -> jaccard(x, m)).max();
         if(max.isPresent() && max.getAsDouble() >= jaccard_th)
             return true;

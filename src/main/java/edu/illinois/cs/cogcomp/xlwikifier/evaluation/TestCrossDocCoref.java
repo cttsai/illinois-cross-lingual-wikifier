@@ -72,7 +72,7 @@ public class TestCrossDocCoref {
 
             starttime = System.currentTimeMillis();
 
-            SurfaceClustering.NILClustering(docs);
+            SurfaceClustering.NILClustering(docs, 1);
             totaltime = (System.currentTimeMillis() - starttime) / 1000.0;
             System.out.println("Time " + totaltime + " secs");
 

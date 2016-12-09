@@ -58,14 +58,22 @@ public class ConfigParameters {
         for (Language lang : Language.values()) {
             String l = lang.getCode();
             String key = l + "_ner_config";
-            if (rm.containsKey(key))
+            if (rm.containsKey(key)){
                 ner_models.put(l, rm.getString(key).trim());
+			} else {
+				String default_model = "config/ner/transfer/en-misc.config";
+				ner_models.put(l, default_model);
+			}
 
             key = l + "_ranking_model";
             if (rm.containsKey(key)) {
                 ranker_models.put(l, rm.getString(key).trim());
                 ranker_ner.put(l, rm.getString(key).trim());
-            }
+            } else {
+				String default_model = "xlwikifier-data/models/ranker/default/"+l+"/ranker.model";
+                ranker_models.put(l, default_model);
+                ranker_ner.put(l, default_model);
+			}
 
 //            key = l+"_ner_ranker";
 //            if(rm.containsKey(key))

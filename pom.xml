@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.illinois.cs.cogcomp</groupId>
     <artifactId>xlwikifier</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>wikipediaAPI-multilingual</artifactId>
-            <version>1.1.5-SNAPSHOT</version>
+            <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
