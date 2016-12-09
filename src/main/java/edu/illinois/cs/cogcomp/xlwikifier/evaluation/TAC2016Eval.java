@@ -138,14 +138,13 @@ public class TAC2016Eval {
 
             // cluster mentions based on surface forms
             doc.mentions = SurfaceClustering.cluster(doc.mentions);
-            doc.mentions = doc.mentions.stream()
-                   .sorted(Comparator.comparingInt(ELMention::getStartOffset))
-                   .collect(Collectors.toList());
+            //doc.mentions = doc.mentions.stream()
+            //       .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+            //       .collect(Collectors.toList());
 
         }
 
-		//SurfaceClustering.NILClustering(docs);
-		
+		SurfaceClustering.NILClustering(docs);
 		printEvalFormat(docs, "tac."+args[0]+".results");
 
 		for(QueryDocument doc: docs)
@@ -162,10 +161,12 @@ public class TAC2016Eval {
         System.out.print("Mention Span + Entity Type: ");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
 
+/*
         rec = link_cnt/gold_total;
         pre = link_cnt/pred_total;
         f1 = 2*rec*pre/(rec+pre);
         System.out.print("Mention Span + Entity Type + FreeBase ID: ");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
+*/
     }
 }
