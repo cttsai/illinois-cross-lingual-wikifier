@@ -1,6 +1,5 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
-import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;

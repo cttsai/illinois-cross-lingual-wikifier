@@ -105,6 +105,9 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = spanish_answers.get(key).getEnWikiTitle();
+            System.out.println( "mention: " + c.getSurfaceForm() + "; Gold title: " + gold_entitle + "; mention Titles:");
+            for ( String title : c.getLabelsToScores().keySet() )
+                System.out.println( title + ":" + c.getLabelsToScores().get(title));
             assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
                     c.getLabel().equals(gold_entitle));
         }

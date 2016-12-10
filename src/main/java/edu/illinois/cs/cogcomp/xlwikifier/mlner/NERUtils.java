@@ -197,6 +197,11 @@ public class NERUtils {
 
     }
 
+    public String translateToEn(String str)
+    {
+        return ll.translateToEn(str, lang);
+    }
+
     public void setMidByWikiTitle(ELMention m) {
         if (m.getWikiTitle().startsWith("NIL") && m.getEnWikiTitle().startsWith("NIL")) {
             m.setMid("NIL");
