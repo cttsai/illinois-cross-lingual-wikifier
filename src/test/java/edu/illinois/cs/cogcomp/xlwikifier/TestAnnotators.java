@@ -60,7 +60,7 @@ public class TestAnnotators {
         chinese_answers.put(new Pair<>(24, 26), new ELMention("美国", 24, 26, "GPE", "美国", "united_states"));
         chinese_answers.put(new Pair<>(29, 32), new ELMention("欧巴马", 29, 32, "PER", "贝拉克·奥巴马", "barack_obama"));
         chinese_answers.put(new Pair<>(38, 40), new ELMention("美国", 38, 40, "GPE", "美国", "united_states"));
-        chinese_answers.put(new Pair<>(52, 61), new ELMention("美国夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL0001"));
+        chinese_answers.put(new Pair<>(52, 61), new ELMention("美国夏威夷州檀香山", 52, 61, "GPE", "NIL", "NIL00001"));
         chinese_answers.put(new Pair<>(75, 80), new ELMention("哈佛法学院", 75, 80, "ORG", "哈佛法学院", "harvard_law_school"));
         chinese_answers.put(new Pair<>(102, 106), new ELMention("伊利诺州", 102, 106, "GPE", "伊利诺伊州", "illinois"));
     }
@@ -105,8 +105,7 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = spanish_answers.get(key).getEnWikiTitle();
-            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
-                    c.getLabel().equals(gold_entitle));
+            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,                   c.getLabel().equals(gold_entitle));
         }
 
     }
@@ -134,8 +133,7 @@ public class TestAnnotators {
             assertTrue("No entity mention \"" + c.getSurfaceForm() + "\"", chinese_answers.containsKey(key));
 
             String gold_type = chinese_answers.get(key).getType();
-            assertTrue("Entity " + c.getSurfaceForm() + " has type " + c.getLabel() + " instead of " + gold_type
-                    , c.getLabel().equals(gold_type));
+            assertTrue("Entity " + c.getSurfaceForm() + " has type " + c.getLabel() + " instead of " + gold_type, c.getLabel().equals(gold_type));
         }
 
         CrossLingualWikifier xlwikifier = null;
@@ -151,8 +149,7 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = chinese_answers.get(key).getEnWikiTitle();
-            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
-                    c.getLabel().equals(gold_entitle));
+            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,                  c.getLabel().equals(gold_entitle));
         }
     }
 

@@ -24,9 +24,13 @@ public class XLWikifierDemo {
     private static Logger logger = LoggerFactory.getLogger(XLWikifierDemo.class);
 
     public XLWikifierDemo(String text, String language) {
-        Language lang = Language.getLanguageByCode(language);
+        Language lang = null; 
+		for(Language l: Language.values()){ 
+			if(l.name().equals(language)) 
+				lang = l;
+		} 
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(language);
+        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
         TextAnnotation ta = tokenizer.getTextAnnotation(text);
 
         long startTime = System.currentTimeMillis();
@@ -41,7 +45,7 @@ public class XLWikifierDemo {
         totaltime = (System.currentTimeMillis() - startTime) / 1000.0;
         logger.info("Time " + totaltime + " secs");
 
-        output = formatOutput(xlwikifier.result, language);
+        output = formatOutput(xlwikifier.result);
         logger.info("Done");
     }
 
@@ -52,7 +56,7 @@ public class XLWikifierDemo {
      * @param lang
      * @return
      */
-    private String formatOutput(QueryDocument doc, String lang) {
+    private String formatOutput(QueryDocument doc) {
         String out = "";
 
         int pend = 0;
@@ -63,9 +67,6 @@ public class XLWikifierDemo {
             String en_title = formatTitle(m.getEnWikiTitle());
             if (!m.getEnWikiTitle().startsWith("NIL"))
                 ref = "http://en.wikipedia.org/wiki/" + en_title;
-            //else if(!m.getWikiTitle().startsWith("NIL"))
-            //    ref = "http://"+lang+".wikipedia.org/wiki/"+m.getWikiTitle();
-            //String tip = "English Wiki: "+m.en_wiki_title+" <br> "+lang+": "+m.getWikiTitle()+" <br> "+m.getType();
             String tip = "English Wiki: " + en_title + " <br> Entity Type: " + m.getType();
             out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\">" + m.getSurface() + "</a>";
             pend = m.getEndOffset();

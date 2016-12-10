@@ -5,6 +5,7 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.*;
+import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ import java.io.IOException;
 public class DemoController {
     private static Logger logger = LoggerFactory.getLogger(DemoController.class);
 
-    private String default_config = "config/xlwikifier-demo.config";
+    private static String default_config = "config/xlwikifier-demo.config";
 
     @PostConstruct
     public void initAnnotators(){
@@ -34,13 +35,14 @@ public class DemoController {
             if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
 
                 Language language = Language.getLanguageByCode(lang);
+                String sample = readExample(language);
+				if(sample == null) continue;
+
                 logger.info("Initializing " + lang + " NER and Wikifier");
                 MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
                 CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
 
                 Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-                String sample = readExample(language);
-
                 TextAnnotation ta = tokenizer.getTextAnnotation(sample);
                 ner.addView(ta);
                 wikifier.addView(ta);
@@ -54,7 +56,7 @@ public class DemoController {
         try {
             exp = FileUtils.readFileToString(new File(dir, lang.toString()), "UTF-8");
         } catch (IOException e) {
-            e.printStackTrace();
+			return null;
         }
         return exp;
     }
@@ -70,9 +72,9 @@ public class DemoController {
 
         logger.info("Request from: " + request.getRemoteAddr() + " " + request.getRemoteUser());
         logger.info("Text: " + text);
-        logger.info("Lang: " + lang);
-//        logger.info("Transfer: "+transfer);
+        logger.info("Language: " + lang);
 
         return new XLWikifierDemo(text, lang);
     }
+
 }
