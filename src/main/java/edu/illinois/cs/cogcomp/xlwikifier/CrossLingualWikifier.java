@@ -131,16 +131,19 @@ public class CrossLingualWikifier extends Annotator {
                 List<WikiCand> elmCandidates = m.getCandidates();
                 Map<String, Double> titleScores = new HashMap<>();
 
-//                System.err.println("mention Title: " + title + "; candidates:");
+                if ( elmCandidates.isEmpty() )
+                    titleScores.put(title, 1.0 ); // NIL mention
+
+                logger.debug("mention Title: {}; {} candidates:", title, elmCandidates.size());
+
                 for ( WikiCand cand : elmCandidates ) {
-//                    String target = nerutils.getMidByWikiTitle(cand.getTitle(), cand.lang);
-//                    System.err.println("Candidate: " + cand.toString());
+                    logger.debug("Candidate: {}", cand.toString());
                     if ( null != cand.getOrigTitle()) {
                         String candTitle = nerutils.translateToEn(cand.getOrigTitle());
                         titleScores.put(candTitle, cand.getScore());
                     }
                 }
-//                Constituent c = new Constituent(title, getViewName(), textAnnotation, start, end);
+                logger.debug("mention Title: {}; candidates:");
 
                 Constituent c = new Constituent(titleScores, getViewName(), textAnnotation, start, end);
                 cons.add(c);
