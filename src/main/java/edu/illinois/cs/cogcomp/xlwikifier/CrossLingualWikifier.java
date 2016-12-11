@@ -137,6 +137,9 @@ public class CrossLingualWikifier extends Annotator {
                 logger.debug("mention Title: {}; {} candidates:", title, elmCandidates.size());
 
                 for ( WikiCand cand : elmCandidates ) {
+                    if (null == cand )
+                        continue;
+                    
                     logger.debug("Candidate: {}", cand.toString());
                     if ( null != cand.getOrigTitle()) {
                         String candTitle = nerutils.translateToEn(cand.getOrigTitle());
