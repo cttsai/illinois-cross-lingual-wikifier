@@ -280,7 +280,12 @@ public class Ranker {
         int n_docs = Integer.parseInt(args[1]);
         String config = args[2];
 
-        ConfigParameters.setPropValues(config);
+        try {
+            ConfigParameters.setPropValues(config);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         if(!new File(ConfigParameters.dump_path).isDirectory()) {
             logger.error("Wikipedia dump is required to train a ranker");

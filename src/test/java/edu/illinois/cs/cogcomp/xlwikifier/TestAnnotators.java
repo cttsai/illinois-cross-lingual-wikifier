@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
@@ -70,8 +71,8 @@ public class TestAnnotators {
 
         Language lang = Language.Spanish;
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
-        TextAnnotation ta = tokenizer.getTextAnnotation(spanish_input);
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
+        TextAnnotation ta = tokenizer.createTextAnnotation(spanish_input);
 
         String config = "config/xlwikifier-demo.config";
 
@@ -105,7 +106,11 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = spanish_answers.get(key).getEnWikiTitle();
-            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,                   c.getLabel().equals(gold_entitle));
+            System.out.println( "mention: " + c.getSurfaceForm() + "; Gold title: " + gold_entitle + "; mention Titles:");
+            for ( String title : c.getLabelsToScores().keySet() )
+                System.out.println( title + ":" + c.getLabelsToScores().get(title));
+            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
+                    c.getLabel().equals(gold_entitle));
         }
 
     }
@@ -114,8 +119,8 @@ public class TestAnnotators {
     public void testChineseResults() {
 
         Language lang = Language.Chinese;
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
-        TextAnnotation ta = tokenizer.getTextAnnotation(chinese_input);
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
+        TextAnnotation ta = tokenizer.createTextAnnotation(chinese_input);
 
         String config = "config/xlwikifier-demo.config";
 
@@ -133,7 +138,8 @@ public class TestAnnotators {
             assertTrue("No entity mention \"" + c.getSurfaceForm() + "\"", chinese_answers.containsKey(key));
 
             String gold_type = chinese_answers.get(key).getType();
-            assertTrue("Entity " + c.getSurfaceForm() + " has type " + c.getLabel() + " instead of " + gold_type, c.getLabel().equals(gold_type));
+            assertTrue("Entity " + c.getSurfaceForm() + " has type " + c.getLabel() + " instead of " + gold_type
+                    , c.getLabel().equals(gold_type));
         }
 
         CrossLingualWikifier xlwikifier = null;
@@ -149,7 +155,8 @@ public class TestAnnotators {
         for (Constituent c : corefview.getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
             String gold_entitle = chinese_answers.get(key).getEnWikiTitle();
-            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,                  c.getLabel().equals(gold_entitle));
+            assertTrue("Entity " + c.getSurfaceForm() + " has English title " + c.getLabel() + " instead of " + gold_entitle,
+                    c.getLabel().equals(gold_entitle));
         }
     }
 

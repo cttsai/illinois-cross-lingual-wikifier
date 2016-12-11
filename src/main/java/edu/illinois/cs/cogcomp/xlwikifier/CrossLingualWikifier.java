@@ -9,6 +9,7 @@ import edu.illinois.cs.cogcomp.core.utilities.configuration.ResourceManager;
 import edu.illinois.cs.cogcomp.xlwikifier.core.Ranker;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
+import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.xlwikifier.mlner.NERUtils;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.PostProcessing;
 import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
@@ -18,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -87,7 +85,7 @@ public class CrossLingualWikifier extends Annotator {
             logger.error(ner_view + " is required");
         }
 
-        QueryDocument doc = ta2QueryDoc(textAnnotation);
+        QueryDocument doc = ta2QueryDoc(textAnnotation, ner_view);
 
         PostProcessing.cleanSurface(doc);
 
@@ -130,7 +128,21 @@ public class CrossLingualWikifier extends Annotator {
             for (ELMention m : len_sort) {
                 int start = textAnnotation.getTokenIdFromCharacterOffset(m.getStartOffset());
                 int end = textAnnotation.getTokenIdFromCharacterOffset(m.getEndOffset() - 1) + 1;
-                Constituent c = new Constituent(title, getViewName(), textAnnotation, start, end);
+                List<WikiCand> elmCandidates = m.getCandidates();
+                Map<String, Double> titleScores = new HashMap<>();
+
+//                System.err.println("mention Title: " + title + "; candidates:");
+                for ( WikiCand cand : elmCandidates ) {
+//                    String target = nerutils.getMidByWikiTitle(cand.getTitle(), cand.lang);
+//                    System.err.println("Candidate: " + cand.toString());
+                    if ( null != cand.getOrigTitle()) {
+                        String candTitle = nerutils.translateToEn(cand.getOrigTitle());
+                        titleScores.put(candTitle, cand.getScore());
+                    }
+                }
+//                Constituent c = new Constituent(title, getViewName(), textAnnotation, start, end);
+
+                Constituent c = new Constituent(titleScores, getViewName(), textAnnotation, start, end);
                 cons.add(c);
             }
 
@@ -146,11 +158,11 @@ public class CrossLingualWikifier extends Annotator {
      * @param textAnnotation
      * @return
      */
-    private QueryDocument ta2QueryDoc(TextAnnotation textAnnotation){
+    public static QueryDocument ta2QueryDoc(TextAnnotation textAnnotation, String nerViewName){
         QueryDocument doc = new QueryDocument(textAnnotation.getId());
         doc.setTextAnnotation(textAnnotation);
         doc.text = textAnnotation.getText();
-        for (Constituent c : textAnnotation.getView(ner_view)) {
+        for (Constituent c : textAnnotation.getView(nerViewName)) {
             ELMention m = new ELMention("", c.getStartCharOffset(), c.getEndCharOffset());
             m.setSurface(c.getSurfaceForm());
             m.setType(c.getLabel());

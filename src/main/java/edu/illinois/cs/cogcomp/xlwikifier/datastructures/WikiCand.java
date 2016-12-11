@@ -17,6 +17,7 @@ public class WikiCand {
     public Map<String, Double> ranker_feats;
     public String query_surface;
     public String orig_title;
+    private String wikiTitle;
 
     public WikiCand(String title, double s) {
         this.title = title;
@@ -25,6 +26,10 @@ public class WikiCand {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getOrigTitle() {
+        return orig_title;
     }
 
     public double getScore() {
@@ -37,5 +42,9 @@ public class WikiCand {
 
     public String toString() {
         return title + "\t" + orig_title + "\t" + score+" "+ptgivens;
+    }
+
+    public String getWikiTitle() {
+        return wikiTitle;
     }
 }

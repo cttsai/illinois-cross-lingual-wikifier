@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
 import java.io.IOException;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,7 +91,12 @@ public class TAC2016Eval {
         }
 
         String config = args[1];
-        ConfigParameters.setPropValues(config);
+        try {
+            ConfigParameters.setPropValues(config);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         List<QueryDocument> docs = null;
         Language lang = null;
