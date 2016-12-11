@@ -1,5 +1,6 @@
 package edu.illinois.cs.cogcomp.xlwikifier;
 
+import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
 import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
@@ -7,7 +8,6 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.CoreferenceView;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import org.junit.Test;
 
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * This class runs MultiLigualNER and CrossLingualWikifier on the Spansih and Chinese sample text,
@@ -83,7 +84,12 @@ public class TestAnnotators {
             e.printStackTrace();
         }
 
-        ner_annotator.addView(ta);
+        try {
+            ner_annotator.getView(ta);
+        } catch (AnnotatorException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         for (Constituent c : ta.getView(ner_annotator.getViewName()).getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
@@ -96,11 +102,11 @@ public class TestAnnotators {
         CrossLingualWikifier xlwikifier = null;
         try {
             xlwikifier = new CrossLingualWikifier(lang, config);
-        } catch (IOException e) {
+            xlwikifier.getView(ta);
+        } catch (AnnotatorException | IOException e) {
             e.printStackTrace();
+            fail(e.getMessage());
         }
-
-        xlwikifier.addView(ta);
 
         CoreferenceView corefview = (CoreferenceView) ta.getView(xlwikifier.getViewName());
         for (Constituent c : corefview.getConstituents()) {
@@ -127,11 +133,12 @@ public class TestAnnotators {
         MultiLingualNER annotator = null;
         try {
             annotator = new MultiLingualNER(lang, config);
-        } catch (IOException e) {
+            annotator.getView(ta);
+        } catch (IOException | AnnotatorException e) {
             e.printStackTrace();
+            fail(e.getMessage());
         }
 
-        annotator.addView(ta);
 
         for (Constituent c : ta.getView(annotator.getViewName()).getConstituents()) {
             Pair<Integer, Integer> key = new Pair<>(c.getStartCharOffset(), c.getEndCharOffset());
@@ -147,6 +154,7 @@ public class TestAnnotators {
             xlwikifier = new CrossLingualWikifier(lang, config);
         } catch (IOException e) {
             e.printStackTrace();
+            fail(e.getMessage());
         }
 
         xlwikifier.addView(ta);
