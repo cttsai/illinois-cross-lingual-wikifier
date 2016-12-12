@@ -12,14 +12,12 @@
 # Using configuration file config/xlwikifier-tac.config with all TAC2016 test documents, you will get the following performance:
 #
 # Spanish (es):
-# Mention Span: Precision:0.8787 Recall:0.8004 F1:0.8377
-# Mention Span + Entity Type: Precision:0.8528 Recall:0.7768 F1:0.8130
-# Mention Span + Entity Type + FreeBase ID: Precision:0.7688 Recall:0.7003 F1:0.7329
+# Mention Span: Precision:0.8793 Recall:0.8007 F1:0.8382
+# Mention Span + Entity Type: Precision:0.8538 Recall:0.7775 F1:0.8139
 #
 # Chinese (zh):
-# Mention Span: Precision:0.8682 Recall:0.7235 F1:0.7893
-# Mention Span + Entity Type: Precision:0.8346 Recall:0.6955 F1:0.7587
-# Mention Span + Entity Type + FreeBase ID: Precision:0.7501 Recall:0.6250 F1:0.6819
+# Mention Span: Precision:0.8683 Recall:0.7236 F1:0.7894
+# Mention Span + Entity Type: Precision:0.8350 Recall:0.6959 F1:0.7591
 
 LANG=$1
 CONFIG=$2
