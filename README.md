@@ -3,7 +3,7 @@ Given a piece of text in any language, a cross-lingual wikifier identifies menti
 * <a href="http://cogcomp.cs.illinois.edu/papers/TsaiRo16b.pdf" target="_blank">Cross-Lingual Wikification Using Multilingual Embeddings (Tsai and Roth, NAACL 2016)</a> 
 * <a href="http://cogcomp.cs.illinois.edu/papers/TsaiMaRo16.pdf" target="_blank">Cross-Lingual Named Entity Recognition via Wikification (Tsai et al., CoNLL 2016)</a> 
 
-This <a href="http://bilbo.cs.illinois.edu/~ctsai12/xlwikifier/" target="_blank">demo</a> will give you some intuition about this project.
+This <a href="http://bilbo.cs.illinois.edu/~ctsai12/xlwikifier/" target="_blank">demo</a> will give you some intuition about this project. The demo is presented in COLING 2016 (the [paper](http://cogcomp.cs.illinois.edu/page/publication_view/809) and [poster](http://cogcomp.cs.illinois.edu/files/posters/poster.pdf))
 
 ### Setup
 
