@@ -119,6 +119,10 @@ public class CrossLingualWikifier extends Annotator {
 
         for (String title : title2mentions.keySet()) {
 
+            if ( null == title || "".equals(title) ) {
+                logger.warn("skipping empty title -- presumably, nothing in freebase for some mention in doc {}'", doc.getDocID() );
+                continue;
+            }
             // sort mentions in a cluster by the length of surface forms
             List<ELMention> len_sort = title2mentions.get(title).stream()
                     .sorted((x1, x2) -> Integer.compare(x2.getSurface().length(), x1.getSurface().length()))
@@ -131,8 +135,6 @@ public class CrossLingualWikifier extends Annotator {
                 List<WikiCand> elmCandidates = m.getCandidates();
                 Map<String, Double> titleScores = new HashMap<>();
 
-                if ( elmCandidates.isEmpty() )
-                    titleScores.put(title, 1.0 ); // NIL mention
 
                 logger.debug("mention Title: {}; {} candidates:", title, elmCandidates.size());
 
@@ -146,7 +148,9 @@ public class CrossLingualWikifier extends Annotator {
                         titleScores.put(candTitle, cand.getScore());
                     }
                 }
-                logger.debug("mention Title: {}; candidates:");
+
+                if ( titleScores.isEmpty() ) // could happen if there are only null candidates
+                    titleScores.put(title, 1.0 ); // NIL mention
 
                 Constituent c = new Constituent(titleScores, getViewName(), textAnnotation, start, end);
                 cons.add(c);
