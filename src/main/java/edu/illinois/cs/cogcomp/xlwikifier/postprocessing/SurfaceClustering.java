@@ -4,6 +4,8 @@ package edu.illinois.cs.cogcomp.xlwikifier.postprocessing;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -14,6 +16,7 @@ import static java.util.stream.Collectors.*;
  */
 public class SurfaceClustering {
 
+    private static final Logger logger = LoggerFactory.getLogger(SurfaceClustering.class);
     private static int nil_cnt = 1;
 
 	public static double jaccard_th = 0.5;
@@ -26,6 +29,9 @@ public class SurfaceClustering {
 		List<ELMention> nils = new ArrayList();
 		for(QueryDocument doc: docs){
 			List<ELMention> non_nils = new ArrayList();
+
+            logger.debug( "doc {} mentions before clustering: ", doc.getDocID() );
+            logger.debug(printDocMentions(doc.mentions));
 			for(ELMention m: doc.mentions){
 
 				m.setDocID(doc.getDocID());
@@ -59,8 +65,21 @@ public class SurfaceClustering {
                 doc.mentions = doc.mentions.stream()
                         .sorted(Comparator.comparingInt(ELMention::getStartOffset))
                         .collect(toList());
+                logger.debug("doc {} after clustering:", doc.getDocID());
+                logger.debug(printDocMentions(doc.mentions));
             }
         }
+    }
+
+    private static String printDocMentions(List<ELMention> mentions) {
+        StringBuilder bldr = new StringBuilder();
+        for ( ELMention m : mentions ) {
+            bldr.append( m.getSurface() ).append( " (" ).append( m.getStartOffset() ).append( "-" ).append( m.getEndOffset() );
+            bldr.append( "): " ).append( m.getMid() ).append( "/" ).append( m.getWikiTitle() ).append( "/" );
+            bldr.append( m.getEnWikiTitle() ).append( "\n" );
+        }
+
+        return bldr.toString();
     }
 
     public static List<ELMention> cluster(List<ELMention> mentions){
