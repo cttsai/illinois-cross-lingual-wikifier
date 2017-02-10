@@ -161,8 +161,12 @@ public class Ranker {
     }
 
     public void setWikiTitleByTopCand(ELMention m) {
-        if (m.getCandidates().size() > 0)
+        if (m.getCandidates().size() > 0){
+            System.out.println(m.getSurface());
+            for(WikiCand cand: m.getCandidates())
+                System.out.println("\t"+cand.getTitle()+" "+cand.ptgivens);
             m.setWikiTitle(m.getCandidates().get(0).getTitle());
+        }
         else
             m.setWikiTitle("NIL");
     }
