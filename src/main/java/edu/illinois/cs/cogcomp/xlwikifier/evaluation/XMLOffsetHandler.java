@@ -1,9 +1,9 @@
 package edu.illinois.cs.cogcomp.xlwikifier.evaluation;
 
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.datastructures.IntPair;
 import edu.illinois.cs.cogcomp.core.datastructures.Pair;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class XMLOffsetHandler {
     private Map<Integer, Integer> plain2xml_start = new HashMap<>();
     private Map<Integer, Integer> plain2xml_end = new HashMap<>();
 
-    public XMLOffsetHandler(String xml, Tokenizer tokenizer){
+    public XMLOffsetHandler(String xml, TextAnnotationBuilder tokenizer){
         xml_text = xml;
 
         xml_text = xml_text.replaceAll("\n", " ");
@@ -37,7 +37,7 @@ public class XMLOffsetHandler {
                 .collect(joining(" "));
         plain_text = plain_text.replaceAll("\\s+"," ");
 
-        ta = tokenizer.getTextAnnotation(plain_text);
+        ta = tokenizer.createTextAnnotation(plain_text);
 
         populateOffsetMapping();
     }

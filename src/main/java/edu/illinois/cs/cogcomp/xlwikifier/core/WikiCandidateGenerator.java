@@ -1,9 +1,8 @@
 package edu.illinois.cs.cogcomp.xlwikifier.core;
 
-import com.github.stuxuhai.jpinyin.ChineseHelper;
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
@@ -41,7 +40,7 @@ public class WikiCandidateGenerator {
     private int top = 10;
     public boolean en_search = true;
     public boolean word_search = false;
-    private Tokenizer tokenizer;
+    private TextAnnotationBuilder tokenizer;
     public WikiCandidateGenerator en_generator;
     private static Logger logger = LoggerFactory.getLogger(WikiCandidateGenerator.class);
 
@@ -209,7 +208,7 @@ public class WikiCandidateGenerator {
         if (lang.equals("zh"))
             tokens = surface.split("·");
         else
-            tokens = tokenizer.getTextAnnotation(surface).getTokens();
+            tokens = tokenizer.createTextAnnotation(surface).getTokens();
 //            tokens = surface.split("\\s+");
         int each_word_top = max_cand / tokens.length;
         for (String t : tokens) {
@@ -298,7 +297,7 @@ public class WikiCandidateGenerator {
 //                    t = ChineseHelper.convertToSimplifiedChinese(t);
                 }
                 else
-                    tokens = tokenizer.getTextAnnotation(s).getTokens();
+                    tokens = tokenizer.createTextAnnotation(s).getTokens();
 
                 for (String ss : tokens) {
                     if (!s2t.containsKey(ss))
@@ -527,7 +526,12 @@ public class WikiCandidateGenerator {
     }
 
     public static void main(String[] args) {
-        ConfigParameters.setPropValues();
+        try {
+            ConfigParameters.setPropValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
         System.out.println(g.getCandsBySurface("臺灣"));
         System.exit(-1);

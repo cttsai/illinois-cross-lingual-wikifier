@@ -3,6 +3,7 @@ package edu.illinois.cs.cogcomp.xlwikifier.postprocessing;
 import edu.illinois.cs.cogcomp.core.algorithms.LevensteinDistance;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
+import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.MediaWikiSearch;
 
@@ -41,17 +42,44 @@ public class PostProcessing {
 
                 if(longer.getSurface().toLowerCase().contains(current.getSurface().toLowerCase())
                         && longer.getSurface().length() > current.getSurface().length()){
-                    if(!longer.getMid().startsWith("NIL"))
+                    if(!longer.getMid().startsWith("NIL")){
+//                        System.err.println("in postprocessing, setting mId from " + current.getMid() + " to " +
+//                                longer.getMid());
                         current.setMid(longer.getMid());
-                    if(!longer.getEnWikiTitle().startsWith("NIL"))
+                    }
+                    if(!longer.getEnWikiTitle().startsWith("NIL")) {
+//                        System.err.println("in postprocessing, setting enWikiTitle from " + current.getEnWikiTitle() + " to " +
+//                                longer.getEnWikiTitle());
                         current.setEnWikiTitle(longer.getEnWikiTitle());
-                    if(!longer.getWikiTitle().startsWith("NIL"))
+                    }
+                    if(!longer.getWikiTitle().startsWith("NIL")) {
+//                        System.err.println("in postprocessing, setting wikiTitle from " + current.getWikiTitle() + " to "  +
+//                            longer.getWikiTitle());
                         current.setWikiTitle(longer.getWikiTitle());
+                        current.getCandidates().add( getMaxScoringCandidate(longer.getCandidates()));
+                    }
                     break;
                 }
 
             }
         }
+    }
+
+    /**
+     * todo: this is slow. Might be better to just store sorted list of candidates in mention.
+     * @param wikiCands
+     * @return
+     */
+    private static WikiCand getMaxScoringCandidate(List<WikiCand> wikiCands) {
+        WikiCand maxScoreCand = null;
+        double maxScore = -100;
+        for ( WikiCand wc : wikiCands ) {
+            if ( wc.getScore() > maxScore ) {
+                maxScore = wc.getScore();
+                maxScoreCand = wc;
+            }
+        }
+        return maxScoreCand;
     }
 
     public static void wikiSearchSolver(QueryDocument doc, String lang){

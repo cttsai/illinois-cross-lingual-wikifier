@@ -9,8 +9,11 @@ import edu.illinois.cs.cogcomp.xlwikifier.postprocessing.SurfaceClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +30,8 @@ import java.io.File;
  * Created by ctsai12 on 10/27/16.
  */
 public class TAC2016Eval {
+
+    private static final String NAME = TAC2016Eval.class.getCanonicalName();
 
     private static Logger logger = LoggerFactory.getLogger(TAC2016Eval.class);
     private static List<ELMention> golds;
@@ -86,27 +91,41 @@ public class TAC2016Eval {
     public static void main(String[] args) {
 
         if(args.length < 2){
-            logger.error("Require two arguments: language and config file");
+            logger.error("Usage: " + NAME + " <language code=es|zh> configFile [<failOnReadError=true|false");
         }
 
         String config = args[1];
-        ConfigParameters.setPropValues(config);
+        try {
+            ConfigParameters.setPropValues(config);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        boolean failOnReadError = false;
 
-        List<QueryDocument> docs = null;
+        if (args.length == 3)
+            failOnReadError = Boolean.parseBoolean(args[2]);
+
+        TACDataReader reader = new TACDataReader(failOnReadError);
         Language lang = null;
-        if(args[0].equals("zh")){
-            lang = Language.Chinese;
-            docs = TACDataReader.readChineseEvalDocs();
-            golds = TACDataReader.readChineseGoldNAM();
-        }
-        else if(args[0].equals("es")){
-            lang = Language.Spanish;
-            docs = TACDataReader.readSpanishEvalDocs(10000);
-            golds = TACDataReader.readSpanishGoldNAM();
-        }
-        else
-            logger.error("Unknown language: "+args[0]);
+        List<QueryDocument> docs = null;
 
+        try {
+            if (args[0].equals("zh")) {
+                lang = Language.Chinese;
+                docs = reader.readChineseEvalDocs();
+                golds = reader.readChineseGoldNAM();
+            } else if (args[0].equals("es")) {
+                lang = Language.Spanish;
+                docs = reader.readSpanishEvalDocs(10000);
+                golds = reader.readSpanishGoldNAM();
+            } else
+                logger.error("Unknown language: " + args[0]);
+        }
+        catch ( FileNotFoundException e ) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, config);
 
         CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);

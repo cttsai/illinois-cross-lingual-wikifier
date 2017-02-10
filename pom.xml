@@ -3,8 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.illinois.cs.cogcomp</groupId>
     <artifactId>xlwikifier</artifactId>
-    <version>1.0</version>
+    <version>1.0.4-SNAPSHOT</version>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <cogcompNlpVersion>3.0.87</cogcompNlpVersion>
+    </properties>
     <repositories>
         <repository>
             <id>CogcompSoftware</id>
@@ -36,7 +41,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-tokenizer</artifactId>
-            <version>3.0.86</version>
+            <version>${cogcompNlpVersion}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -52,7 +57,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>wikipediaAPI-multilingual</artifactId>
-            <version>1.1.3</version>
+            <version>1.1.6</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
@@ -78,7 +83,7 @@
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-ner</artifactId>
-            <version>3.0.86</version>
+            <version>${cogcompNlpVersion}</version>
         </dependency>
     </dependencies>
 
@@ -92,7 +97,21 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>
+            </plugin>            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.1.2</version>
+            <executions>
+                <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -111,5 +130,24 @@
             </plugin>
 
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.4</version>
+            </extension>
+        </extensions>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>CogcompSoftware</id>
+            <name>CogcompSoftware</name>
+            <url>scp://bilbo.cs.illinois.edu:/mounts/bilbo/disks/0/www/cogcomp/html/m2repo</url>
+        </repository>
+        <site>
+            <id>CogcompSoftwareDoc</id>
+            <url>scp://bilbo.cs.illinois.edu:/mounts/bilbo/disks/0/www/cogcomp/html/software/doc/cross-lingual-wikifier</url>
+        </site>
+    </distributionManagement>
+
 </project>

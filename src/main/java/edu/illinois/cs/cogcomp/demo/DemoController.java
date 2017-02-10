@@ -1,11 +1,10 @@
 package edu.illinois.cs.cogcomp.demo;
 
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.*;
-import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.LangLinker;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,12 @@ public class DemoController {
     @PostConstruct
     public void initAnnotators(){
 
-        ConfigParameters.setPropValues(default_config);
+        try {
+            ConfigParameters.setPropValues(default_config);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         logger.info("Initializing demo");
         for(String lang: ConfigParameters.ranker_models.keySet()) {
             if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
@@ -42,8 +46,9 @@ public class DemoController {
                 MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
                 CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
 
-                Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-                TextAnnotation ta = tokenizer.getTextAnnotation(sample);
+                TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+
+                TextAnnotation ta = tokenizer.createTextAnnotation(sample);
                 ner.addView(ta);
                 wikifier.addView(ta);
             }
@@ -56,7 +61,7 @@ public class DemoController {
         try {
             exp = FileUtils.readFileToString(new File(dir, lang.toString()), "UTF-8");
         } catch (IOException e) {
-			return null;
+            e.printStackTrace();
         }
         return exp;
     }
@@ -72,9 +77,9 @@ public class DemoController {
 
         logger.info("Request from: " + request.getRemoteAddr() + " " + request.getRemoteUser());
         logger.info("Text: " + text);
-        logger.info("Language: " + lang);
+        logger.info("Lang: " + lang);
+//        logger.info("Transfer: "+transfer);
 
         return new XLWikifierDemo(text, lang);
     }
-
 }

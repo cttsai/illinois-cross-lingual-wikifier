@@ -183,6 +183,7 @@ public class ELMention {
         return this.cands;
     }
 
+
     public void prepareFeatures(QueryDocument doc, RankerFeatureManager fm, List<ELMention> pms) {
         context30 = fm.getWeightedContextVector(this, doc, 5);
         context100 = fm.getWeightedContextVector(this, doc, 10);
