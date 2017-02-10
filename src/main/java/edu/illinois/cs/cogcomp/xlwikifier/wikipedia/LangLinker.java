@@ -181,7 +181,12 @@ public class LangLinker {
 
     public static void main(String[] args) {
 
-        ConfigParameters.setPropValues();
+        try {
+            ConfigParameters.setPropValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         LangLinker ll = new LangLinker();
 //        ll.loadDB("zh", true);
 

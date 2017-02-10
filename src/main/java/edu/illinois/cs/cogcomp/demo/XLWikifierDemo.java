@@ -1,9 +1,10 @@
 package edu.illinois.cs.cogcomp.demo;
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.constants.Language;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifier;
 import edu.illinois.cs.cogcomp.xlwikifier.CrossLingualWikifierManager;
 import edu.illinois.cs.cogcomp.xlwikifier.MultiLingualNER;
@@ -24,14 +25,12 @@ public class XLWikifierDemo {
     private static Logger logger = LoggerFactory.getLogger(XLWikifierDemo.class);
 
     public XLWikifierDemo(String text, String language) {
-        Language lang = null; 
-		for(Language l: Language.values()){ 
-			if(l.name().equals(language)) 
-				lang = l;
-		} 
+        Language lang = Language.getLanguageByCode(language);
 
-        Tokenizer tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
-        TextAnnotation ta = tokenizer.getTextAnnotation(text);
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(language);
+        if(language.equals("zh"))
+            text = ChineseHelper.convertToSimplifiedChinese(text);
+        TextAnnotation ta = tokenizer.createTextAnnotation(text);
 
         long startTime = System.currentTimeMillis();
         MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, default_config);
@@ -45,7 +44,7 @@ public class XLWikifierDemo {
         totaltime = (System.currentTimeMillis() - startTime) / 1000.0;
         logger.info("Time " + totaltime + " secs");
 
-        output = formatOutput(xlwikifier.result);
+        output = formatOutput(xlwikifier.result, language);
         logger.info("Done");
     }
 
@@ -56,7 +55,7 @@ public class XLWikifierDemo {
      * @param lang
      * @return
      */
-    private String formatOutput(QueryDocument doc) {
+    private String formatOutput(QueryDocument doc, String lang) {
         String out = "";
 
         int pend = 0;

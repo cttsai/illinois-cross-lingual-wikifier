@@ -252,7 +252,12 @@ public class FreeBaseQuery {
 //        System.exit(-1);
 
         ConfigParameters params = new ConfigParameters();
-        params.setPropValues();
+        try {
+            params.setPropValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         FreeBaseQuery.loadDB(true);
 //        try {
 ////            FreeBaseQuery.importDump();

@@ -240,7 +240,12 @@ public class Importer {
 
 
     public static void main(String[] args) {
-        ConfigParameters.setPropValues(args[2]);
+        try {
+            ConfigParameters.setPropValues(args[2]);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
 //        Importer importer = new Importer(args[0], args[1]);
 

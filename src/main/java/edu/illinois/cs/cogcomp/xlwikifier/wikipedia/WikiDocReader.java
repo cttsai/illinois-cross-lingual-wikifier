@@ -1,9 +1,9 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
+import edu.illinois.cs.cogcomp.annotation.TextAnnotationBuilder;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.io.LineIO;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
-import edu.illinois.cs.cogcomp.tokenizers.Tokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.*;
 import org.apache.commons.io.FileUtils;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class WikiDocReader {
 
     public Map<String, String> title_map;
-    public Tokenizer tokenizer;
+    public TextAnnotationBuilder tokenizer;
     private static Logger logger = LoggerFactory.getLogger(WikiDocReader.class);
 
     public WikiDocReader() {
@@ -70,7 +70,7 @@ public class WikiDocReader {
         try {
             lines = LineIO.read(dir + "annotation/" + filename);
             String plain = FileUtils.readFileToString(new File(dir + "plain/" + filename), "UTF-8");
-            ta = tokenizer.getTextAnnotation(plain);
+            ta = tokenizer.createTextAnnotation(plain);
             if (ta == null)
                 return null;
         } catch (Exception e) {

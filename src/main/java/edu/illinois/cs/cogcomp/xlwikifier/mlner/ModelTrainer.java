@@ -189,7 +189,12 @@ public class ModelTrainer {
             String test_dir = args[2];
             String lang = args[3];
             String config = args[4];
-            ConfigParameters.setPropValues(config);
+            try {
+                ConfigParameters.setPropValues(config);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
             trainModel(train_dir, test_dir, lang);
         }
         else if(args[0].equals("test")){
@@ -197,7 +202,12 @@ public class ModelTrainer {
             String train_lang = args[2];
             String test_lang = args[3];
             String config = args[4];
-            ConfigParameters.setPropValues(config);
+            try {
+                ConfigParameters.setPropValues(config);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
             testModel(test_dir, train_lang, test_lang);
         }
 
