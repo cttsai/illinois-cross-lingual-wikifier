@@ -197,8 +197,7 @@ public class NERUtils {
 
     }
 
-    public String translateToEn(String str)
-    {
+    public String translateToEn(String str) {
         return ll.translateToEn(str, lang);
     }
 
