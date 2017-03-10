@@ -48,6 +48,10 @@ public class QueryDocument {
         return xmlhandler;
     }
 
+    public String getXMLText(){
+        return xmlhandler.xml_text;
+    }
+
     public void prepareFeatures(RankerFeatureManager fm) {
 
         // compute vectors to represent mentions

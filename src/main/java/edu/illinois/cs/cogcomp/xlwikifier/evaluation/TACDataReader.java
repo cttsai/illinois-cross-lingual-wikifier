@@ -32,26 +32,49 @@ public class TACDataReader {
         this.dieOnReadFailure = dieOnReadFailure;
     }
 
-    public List<QueryDocument> readEnglishEvalDocs() {
-
-//        Set<String> docids = readEnglishGoldNAM().stream()
-//                .map(x -> x.getDocID()).collect(Collectors.toSet());
-//
-//        String dir = "/shared/corpora/corporaWeb/tac/LDC2016E63_TAC_KBP_2016_Evaluation_Source_Corpus_V1.1/data/eng/";
-//        for(String id: docids){
-//            String f = null;
-//            if(id.contains("_NW_"))
-//                f = dir+"nw/";
-//            else
-//                f = dir+"df/";
-//            try {
-//                Files.copy(new File(f, id+".xml"), new File("/shared/preprocessed/ctsai12/multilingual/deft/xlwikifier-data/test/tac-en/", id+".xml"));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
+    public List<QueryDocument> readEnglishEvalDocs() throws FileNotFoundException {
+        return readEnglishEvalDocs(ConfigParameters.tac_en_samples);
+    }
+    public List<QueryDocument> readEnglishEvalDocs(String corpusDir) throws FileNotFoundException {
         List<QueryDocument> docs = new ArrayList<>();
-        logger.error("NOT IMPLEMENTED");
+
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer("en");
+        List<String> filenames = null;
+        try {
+            filenames = LineIO.read(corpusDir);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            if ( dieOnReadFailure )
+                throw e;
+            else {
+                logger.error("Failed to read file from {}: {}", corpusDir, e.getMessage() );
+                logger.error("configured to continue in spite of failure.");
+            }
+        }
+
+        for (String filename: filenames) {
+            int idx = filename.lastIndexOf(".");
+            int idx1 = filename.lastIndexOf("/");
+            String docid = filename.substring(idx1+1, idx);
+
+            String xml_text = null;
+            InputStream res = ResourceUtilities.loadResource(filename);
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+                xml_text = in.lines().collect(joining("\n"));
+                in.close();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+
+            QueryDocument doc = new QueryDocument(docid);
+            XMLOffsetHandler xmlhandler = new XMLOffsetHandler(xml_text, tokenizer);
+            doc.setText(xmlhandler.plain_text);
+            doc.setTextAnnotation(xmlhandler.ta);
+            doc.setXmlHandler(xmlhandler);
+            docs.add(doc);
+        }
+
         return docs;
     }
 
@@ -225,6 +248,5 @@ public class TACDataReader {
     public static void main(String[] args) {
         boolean dieOnReadFailure = true;
         TACDataReader reader = new TACDataReader(dieOnReadFailure);
-        reader.readEnglishEvalDocs();
     }
 }

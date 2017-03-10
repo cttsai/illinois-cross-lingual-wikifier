@@ -25,10 +25,13 @@ public class XLWikifierDemo {
     private static Logger logger = LoggerFactory.getLogger(XLWikifierDemo.class);
 
     public XLWikifierDemo(String text, String language) {
-        Language lang = Language.getLanguageByCode(language);
 
-        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(language);
-        if(language.equals("zh"))
+        logger.info("Language: "+language);
+//        Language lang = Language.getLanguageByCode(language);
+        Language lang = Language.valueOf(language);
+
+        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang.getCode());
+        if(language.equals("Chinese"))
             text = ChineseHelper.convertToSimplifiedChinese(text);
         TextAnnotation ta = tokenizer.createTextAnnotation(text);
 

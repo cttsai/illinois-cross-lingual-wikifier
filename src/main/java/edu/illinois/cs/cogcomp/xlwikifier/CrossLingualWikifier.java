@@ -142,7 +142,7 @@ public class CrossLingualWikifier extends Annotator {
                     if (null == cand )
                         continue;
                     
-                    logger.debug("Candidate: {}", cand.toString());
+//                    logger.debug("Candidate: {}", cand.toString());
                     if ( null != cand.getOrigTitle()) {
                         String candTitle = nerutils.translateToEn(cand.getOrigTitle());
                         titleScores.put(candTitle, cand.getScore());

@@ -22,7 +22,7 @@ public class TACUtils {
      * Find text regions that are inside <quote> and </quote> (in xml offsets)
      * @return
      */
-    private static List<Pair<Integer, Integer>> getBadIntervals(String xml_text){
+    public static List<Pair<Integer, Integer>> getBadIntervals(String xml_text){
 
         List<Pair<Integer, Integer>> ret = new ArrayList<>();
         int start = -1;
