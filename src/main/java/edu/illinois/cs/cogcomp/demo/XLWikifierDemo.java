@@ -70,7 +70,7 @@ public class XLWikifierDemo {
             if (!m.getEnWikiTitle().startsWith("NIL"))
                 ref = "http://en.wikipedia.org/wiki/" + en_title;
             String tip = "English Wiki: " + en_title + " <br> Entity Type: " + m.getType();
-            out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\">" + m.getSurface() + "</a>";
+            out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\">" + m.getSurface() + " </a>";
             pend = m.getEndOffset();
         }
         out += doc.text.substring(pend, doc.text.length());
