@@ -77,45 +77,41 @@ public class XMLOffsetHandler {
         for(int i = 0; i < ta.getTokens().length; i++){
             IntPair thisoff = ta.getTokenCharacterOffset(i);
             int idx = xml_text.indexOf(ta.getToken(i), search_start);
-
+            boolean form_change = false;
+            IntPair prevoff = null;
             if (i > 0) {
-                IntPair prevoff = ta.getTokenCharacterOffset(i - 1);
-                if(thisoff.getFirst() < prevoff.getSecond())
+                prevoff = ta.getTokenCharacterOffset(i - 1);
+                if(thisoff.getFirst() == prevoff.getSecond() && (idx == -1 || idx > search_start)){
+                    form_change = true;
                     idx = last_idx;
-                else if((thisoff.getFirst() - prevoff.getFirst() < idx - last_idx)){ // the form has changed and the gap is large
-                    idx = getNextNonXmlChar(xml_text, search_start);
                 }
             }
 
-
-            if(idx == -1 || i == 0){
-                if(i < ta.getTokens().length-1){
-                    IntPair nextoff = ta.getTokenCharacterOffset(i + 1);
-
-                    if(nextoff.getFirst() < thisoff.getSecond()) {
-                        int next_start = getNextNonXmlChar(xml_text, search_start);
-                        idx = next_start;
-                    }
+            if(idx == -1) {
+                if(ta.getToken(i).contains(" ")){
+                    continue;
                 }
-
-                if(idx == -1) {
-                    if(ta.getToken(i).contains(" ")){
-                        continue;
-                    }
-                    System.out.println(ta.getToken(i)+" "+ta.getTokenCharacterOffset(i)+" "+idx+" "+ta.getToken(i).length()+" "+search_start+" "+xml_text.substring(search_start, search_start+1));
-                    System.out.println(ta.getToken(i + 1) + " " + ta.getTokenCharacterOffset(i + 1));
-                    System.exit(-1);
-                }
+                System.out.println(ta.getToken(i)+" "+ta.getTokenCharacterOffset(i)+" "+idx+" "+ta.getToken(i).length()+" "+search_start+" "+xml_text.substring(search_start, search_start+1));
+                System.out.println(ta.getToken(i + 1) + " " + ta.getTokenCharacterOffset(i + 1));
+                System.exit(-1);
             }
 
             int xml_start = idx;
-            int xml_end = idx + thisoff.getSecond() - thisoff.getFirst();
-
             plain2xml_start.put(thisoff.getFirst(), xml_start);
-            plain2xml_end.put(thisoff.getSecond(), xml_end);
+            int xml_end;
+
+            if(!form_change) {
+                xml_end = xml_start + thisoff.getSecond() - thisoff.getFirst();
+                plain2xml_end.put(thisoff.getSecond(), xml_end);
+            }
+            else {
+                xml_end = xml_start + thisoff.getSecond() - prevoff.getFirst();
+                plain2xml_end.put(thisoff.getSecond(), xml_end);
+                plain2xml_end.put(prevoff.getSecond(), xml_end);
+            }
 
             last_idx = xml_start;
-            search_start = xml_end;
+            search_start = getNextNonXmlChar(xml_text, xml_end);
         }
     }
 }

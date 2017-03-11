@@ -30,8 +30,6 @@ public class SurfaceClustering {
 		for(QueryDocument doc: docs){
 			List<ELMention> non_nils = new ArrayList();
 
-            logger.debug( "doc {} mentions before clustering: ", doc.getDocID() );
-            logger.debug(printDocMentions(doc.mentions));
 			for(ELMention m: doc.mentions){
 
 				m.setDocID(doc.getDocID());
@@ -65,8 +63,6 @@ public class SurfaceClustering {
                 doc.mentions = doc.mentions.stream()
                         .sorted(Comparator.comparingInt(ELMention::getStartOffset))
                         .collect(toList());
-                logger.debug("doc {} after clustering:", doc.getDocID());
-                logger.debug(printDocMentions(doc.mentions));
             }
         }
     }
