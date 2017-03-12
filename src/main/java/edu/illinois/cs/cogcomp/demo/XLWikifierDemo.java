@@ -59,7 +59,7 @@ public class XLWikifierDemo {
      * @return
      */
     private String formatOutput(QueryDocument doc, String lang) {
-        String out = "";
+        String out = "<span> ";
 
         int pend = 0;
         for (ELMention m : doc.mentions) {
@@ -67,13 +67,18 @@ public class XLWikifierDemo {
             out += doc.text.substring(pend, start);
             String ref = "#";
             String en_title = formatTitle(m.getEnWikiTitle());
-            if (!m.getEnWikiTitle().startsWith("NIL"))
-                ref = "http://en.wikipedia.org/wiki/" + en_title;
             String tip = "English Wiki: " + en_title + " <br> Entity Type: " + m.getType();
-            out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\">" + m.getSurface() + " </a>";
+            if (!m.getEnWikiTitle().startsWith("NIL")) {
+                ref = "http://en.wikipedia.org/wiki/" + m.getEnWikiTitle();
+                out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\">" + m.getSurface() + "</a>";
+            }
+            else{
+                out += "<a class=\"top\" target=\"_blank\" title=\"\" data-html=true data-placement=\"top\" data-toggle=\"tooltip\" href=\"" + ref + "\" data-original-title=\"" + tip + "\" onclick=\"return false;\">" + m.getSurface() + "</a>";
+            }
             pend = m.getEndOffset();
         }
         out += doc.text.substring(pend, doc.text.length());
+        out += " </span>";
         return out;
     }
 
@@ -99,4 +104,10 @@ public class XLWikifierDemo {
         return this.output;
     }
 
+    public static void main(String[] args) {
+        String text = "Barack Obama Zum Anhören bitte klicken! ist ein US-amerikanischer Politiker und seit dem 20. Januar 2009 der 44. Präsident der Vereinigten Staaten. Obama ist ein auf US-Verfassungsrecht spezialisierter Rechtsanwalt. Im Jahr 1992 schloss er sich der Demokratischen Partei an, für die er 1997 Mitglied im Senat von Illinois wurde. Im Anschluss gehörte er von 2005 bis 2008 als Junior Senator für diesen US-Bundesstaat dem Senat der Vereinigten Staaten an. Bei der Präsidentschaftswahl des Jahres 2008 errang er die Kandidatur seiner Partei und setzte sich dann gegen den Republikaner John McCain durch." ;
+        text = "ברק חוסיין אובמה השני (באנגלית: Barack Hussein Obama II (מידע · עזרה); נולד ב-4 באוגוסט 1961) הוא נשיאה הארבעים וארבעה של ארצות הברית (מאז שנת 2009), וצפוי לסיים את כהונתו, בתום שתי קדנציות, ב-20 בינואר 2017. אובמה הוא האפרו-אמריקאי הראשון המכהן בתפקיד זה. לפני בחירתו לנשיא כיהן בסנאט של ארצות הברית מטעם מדינת אילינוי, מינואר 2005";
+        XLWikifierDemo result = new XLWikifierDemo(text, "Hebrew");
+        System.out.println(result.output);
+    }
 }
