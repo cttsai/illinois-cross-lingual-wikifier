@@ -36,7 +36,7 @@ public class DemoController {
         }
         logger.info("Initializing demo");
         for(String lang: ConfigParameters.ranker_models.keySet()) {
-            if(lang.equals("en") && new File(ConfigParameters.ranker_models.get(lang)).exists()) {
+            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
 
                 Language language = Language.getLanguageByCode(lang);
                 String sample = readExample(language);
