@@ -23,9 +23,10 @@ This script evaluates Spanish and Chinese performnace on TAC-KBP 2016 EDL shared
 
 ```
 Spanish 
-strong mention match:       Precision:0.880 Recall:0.801 F1:0.838
-strong typed mention match: Precision:0.854 Recall:0.778 F1:0.814
-mention ceaf:               Precision:0.814 Recall:0.740 F1:0.775
+strong mention match:       Precision:0.885 Recall:0.806 F1:0.844
+strong typed mention match: Precision:0.858 Recall:0.782 F1:0.818
+string typed all match:     Precision:0.754 Recall:0.687 F1:0.719
+mention ceaf:               Precision:0.822 Recall:0.749 F1:0.784
 
 Chinese
 strong mention match:       Precision:0.868 Recall:0.724 F1:0.789
