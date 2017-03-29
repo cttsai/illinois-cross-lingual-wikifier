@@ -22,6 +22,12 @@ mvn compile
 This script evaluates Spanish and Chinese performnace on TAC-KBP 2016 EDL shared task. You need to specify the paths to the test documents and the gold annotations in the config file. Check [config/xlwikifier-tac.config](https://github.com/cttsai/illinois-cross-lingual-wikifier/blob/master/config/xlwikifier-tac.config) for example. These documents are in the original format provided by LDC. You will get the following performance on named entities:
 
 ```
+English
+strong mention match:       Precision:0.935 Recall:0.801 F1:0.863
+strong typed mention match: Precision:0.900 Recall:0.771 F1:0.831
+string typed all match:     Precision:0.764 Recall:0.655 F1:0.705
+mention ceaf:               Precision:0.854 Recall:0.732 F1:0.788
+
 Spanish 
 strong mention match:       Precision:0.885 Recall:0.806 F1:0.844
 strong typed mention match: Precision:0.858 Recall:0.782 F1:0.818
