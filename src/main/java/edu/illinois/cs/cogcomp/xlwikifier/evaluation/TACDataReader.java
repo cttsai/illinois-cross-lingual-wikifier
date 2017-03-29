@@ -22,7 +22,12 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.joining;
 
 /**
- * This class reads TAC 2016 data
+ * This class reads TAC 2015/2016 Tri-Lingual EDL data,
+ * including training and test data of 2015 and the test data of 2016.
+ *
+ * The main function converts the data into CoNLL column format,
+ * which is used for training NER models.
+ *
  * Created by ctsai12 on 10/27/16.
  */
 public class TACDataReader {
@@ -176,19 +181,18 @@ public class TACDataReader {
     public List<QueryDocument> read2015ChineseTrainDocs() throws IOException {
         return readDocs(ConfigParameters.tac2015_zh_train, "zh");
     }
-    public List<QueryDocument> readEnglishEvalDocs() throws FileNotFoundException {
-        return readEnglishEvalDocs(ConfigParameters.tac_en_samples);
-    }
+
     public List<QueryDocument> readDocs(String corpusDir, String lang) throws IOException {
         List<QueryDocument> docs = new ArrayList<>();
 
         TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-        for(File file: new File(corpusDir).listFiles()){
+        List<File> files = Arrays.stream(new File(corpusDir).listFiles()).sorted().collect(Collectors.toList());
+        for(File file: files){
 
-            if(file == null) continue;
+//            if(file == null) continue;
 
-//        for (String filename: filenames) {
             String filename = file.getAbsolutePath();
+            System.out.println(filename);
             int idx = filename.lastIndexOf(".");
             int idx1 = filename.lastIndexOf("/");
             String docid = filename.substring(idx1+1, idx);
@@ -212,157 +216,17 @@ public class TACDataReader {
 
         return docs;
     }
-    public List<QueryDocument> readEnglishEvalDocs(String corpusDir) throws FileNotFoundException {
-        List<QueryDocument> docs = new ArrayList<>();
-
-        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer("en");
-        List<String> filenames = null;
-        try {
-            filenames = LineIO.read(corpusDir);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            if ( dieOnReadFailure )
-                throw e;
-            else {
-                logger.error("Failed to read file from {}: {}", corpusDir, e.getMessage() );
-                logger.error("configured to continue in spite of failure.");
-            }
-        }
-
-        for (String filename: filenames) {
-            int idx = filename.lastIndexOf(".");
-            int idx1 = filename.lastIndexOf("/");
-            String docid = filename.substring(idx1+1, idx);
-
-            String xml_text = null;
-            InputStream res = ResourceUtilities.loadResource(filename);
-            try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
-                xml_text = in.lines().collect(joining("\n"));
-                in.close();
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-
-            QueryDocument doc = new QueryDocument(docid);
-            XMLOffsetHandler xmlhandler = new XMLOffsetHandler(xml_text, tokenizer);
-            doc.setText(xmlhandler.plain_text);
-            doc.setTextAnnotation(xmlhandler.ta);
-            doc.setXmlHandler(xmlhandler);
-            docs.add(doc);
-        }
-
-        return docs;
-    }
-
-    public List<QueryDocument> readChineseEvalDocs() throws FileNotFoundException {
-        return readChineseEvalDocs(ConfigParameters.tac_zh_samples);
-    }
-
-    public List<QueryDocument> readChineseEvalDocs(String corpusDir) throws FileNotFoundException {
-
-        List<QueryDocument> docs = new ArrayList<>();
-
-        List<String> filenames = null;
-        try {
-            filenames = LineIO.read(corpusDir);
-        } catch (FileNotFoundException e) {
-            if (dieOnReadFailure)
-                throw e;
-            else {
-                e.printStackTrace();
-                logger.error("failed to read document from directory {}: {}", corpusDir, e.getMessage());
-                logger.error("configured to keep on anyway.");
-            }
-        }
-        
-        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer("zh");
-        for (String filename: filenames) {
-            int idx = filename.lastIndexOf(".");
-            int idx1 = filename.lastIndexOf("/");
-            String docid = filename.substring(idx1+1, idx);
-
-            String xml_text = null;
-            InputStream res = ResourceUtilities.loadResource(filename);
-            try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
-                xml_text = in.lines().collect(joining("\n"))+"\n";
-                String tmp = ChineseHelper.convertToSimplifiedChinese(xml_text);
-                if(xml_text.length() != tmp.length()){
-                    System.out.println(docid+" "+xml_text.length()+" "+tmp.length());
-                    System.exit(-1);
-                }
-                xml_text = ChineseHelper.convertToSimplifiedChinese(xml_text);
-                in.close();
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-
-            QueryDocument doc = new QueryDocument(docid);
-            XMLOffsetHandler xmlhandler = new XMLOffsetHandler(xml_text, tokenizer);
-            doc.setText(xmlhandler.plain_text);
-            doc.setTextAnnotation(xmlhandler.ta);
-            doc.setXmlHandler(xmlhandler);
-            docs.add(doc);
-        }
-
-        return docs;
-    }
-
-    public List<QueryDocument> readSpanishEvalDocs(int ndocs) throws FileNotFoundException {
-        return readSpanishEvalDocs(ndocs, ConfigParameters.tac_es_samples);
-    }
-
-    public List<QueryDocument> readSpanishEvalDocs(int ndocs, String corpusDir) throws FileNotFoundException {
-        List<QueryDocument> docs = new ArrayList<>();
-
-        TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer("es");
-        List<String> filenames = null;
-        try {
-            filenames = LineIO.read(corpusDir);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            if ( dieOnReadFailure )
-                throw e;
-            else {
-                logger.error("Failed to read file from {}: {}", corpusDir, e.getMessage() );
-                logger.error("configured to continue in spite of failure.");
-            }
-        }
-
-        for (String filename: filenames) {
-            if(docs.size() == ndocs) break;
-            int idx = filename.lastIndexOf(".");
-            int idx1 = filename.lastIndexOf("/");
-            String docid = filename.substring(idx1+1, idx);
-
-            String xml_text = null;
-            InputStream res = ResourceUtilities.loadResource(filename);
-            try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
-                xml_text = in.lines().collect(joining("\n"));
-                in.close();
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-
-
-            QueryDocument doc = new QueryDocument(docid);
-            XMLOffsetHandler xmlhandler = new XMLOffsetHandler(xml_text, tokenizer);
-            doc.setText(xmlhandler.plain_text);
-            doc.setTextAnnotation(xmlhandler.ta);
-            doc.setXmlHandler(xmlhandler);
-            docs.add(doc);
-        }
-
-        return docs;
-    }
 
     public List<ELMention> read2016EnglishEvalGoldNAM(){
-        return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
+        List<ELMention> mentions = readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
                 .filter(x -> x.getLanguage().equals("ENG"))
                 .filter(x -> x.noun_type.equals("NAM"))
                 .collect(Collectors.toList());
+
+        System.out.println("#golds: "+mentions.size());
+        System.out.println("#NILs: "+mentions.stream().filter(x -> x.gold_mid.startsWith("NIL")).count());
+
+        return mentions;
     }
     public List<ELMention> read2016SpanishEvalGoldNAM(){
         return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
@@ -410,26 +274,6 @@ public class TACDataReader {
     public List<ELMention> read2015ChineseTrainGoldNAM(){
         return readGoldMentions(ConfigParameters.tac2015_train_golds).stream()
                 .filter(x -> x.getLanguage().equals("CMN"))
-                .filter(x -> x.noun_type.equals("NAM"))
-                .collect(Collectors.toList());
-    }
-    public List<ELMention> readEnglishGoldNAM(){
-        return readGoldMentions().stream()
-                .filter(x -> x.getLanguage().equals("ENG"))
-                .filter(x -> x.noun_type.equals("NAM"))
-                .collect(Collectors.toList());
-    }
-
-    public List<ELMention> readChineseGoldNAM(){
-        return readGoldMentions().stream()
-                .filter(x -> x.getLanguage().equals("CMN"))
-                .filter(x -> x.noun_type.equals("NAM"))
-                .collect(Collectors.toList());
-    }
-
-    public List<ELMention> readSpanishGoldNAM(){
-        return readGoldMentions().stream()
-                .filter(x -> x.getLanguage().equals("SPA"))
                 .filter(x -> x.noun_type.equals("NAM"))
                 .collect(Collectors.toList());
     }

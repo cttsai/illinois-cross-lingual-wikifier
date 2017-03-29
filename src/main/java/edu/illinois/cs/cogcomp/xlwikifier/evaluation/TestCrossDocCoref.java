@@ -35,7 +35,7 @@ public class TestCrossDocCoref {
         try {
             for (int ndoc : nds) {
                 Language lang = Language.Spanish;
-                List<QueryDocument> docs = reader.readSpanishEvalDocs(ndoc);
+                List<QueryDocument> docs = reader.read2016SpanishEvalDocs();
 
                 MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, config);
 
@@ -88,6 +88,8 @@ public class TestCrossDocCoref {
         catch ( FileNotFoundException e ) {
             e.printStackTrace();
             System.exit(-1);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

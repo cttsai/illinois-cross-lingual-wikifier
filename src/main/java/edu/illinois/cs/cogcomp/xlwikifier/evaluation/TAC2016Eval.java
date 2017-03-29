@@ -40,6 +40,8 @@ public class TAC2016Eval {
     private static double pred_total = 0;
     private static double gold_total = 0;
 
+    private static int match_nil = 0, has_cand = 0, has_cand1 = 0;
+
     public static void evaluate(QueryDocument doc){
 
         List<ELMention> doc_golds = golds.stream().filter(x -> x.getDocID().equals(doc.getDocID()))
@@ -62,6 +64,16 @@ public class TAC2016Eval {
                             if(m.getMid().equals(gm.gold_mid))
                                 link_cnt++;
                         }
+
+                        if(gm.gold_mid.startsWith("NIL")){
+                            match_nil++;
+                            if(m.getCandidates().size()>0)
+                                has_cand++;
+
+                            if(!m.getMid().startsWith("NIL"))
+                                has_cand1++;
+
+                        }
                     }
                     break;
                 }
@@ -73,15 +85,18 @@ public class TAC2016Eval {
 	public static void printEvalFormat(List<QueryDocument> docs, String outfile){
 
 		String out = "";
+		String out1 = "";
 		int cnt = 0;
 		for(QueryDocument doc: docs){
 			for(ELMention m: doc.mentions){
 				out += doc.getDocID()+"\t"+m.getStartOffset()+"\t"+(m.getEndOffset()-1)+"\t"+m.getMid()+"\t0\t"+m.getType()+"\n";
+                out1 += doc.getDocID()+"\t"+m.getStartOffset()+"\t"+(m.getEndOffset()-1)+"\t"+m.getSurface()+"\t"+m.getWikiTitle()+"\t"+m.getMid()+"\t0\t"+m.getType()+"\n";
 			}
 		}
 
 		try {
 			FileUtils.writeStringToFile(new File(outfile), out, "UTF-8");
+            FileUtils.writeStringToFile(new File(outfile+".more"), out1, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -113,10 +128,8 @@ public class TAC2016Eval {
         try {
             if (args[0].equals("zh")) {
                 lang = Language.Chinese;
-//                docs = reader.read2016ChineseEvalDocs();
-                docs = reader.readChineseEvalDocs();
-//                golds = reader.read2016ChineseEvalGoldNAM();
-                golds = reader.readChineseGoldNAM();
+                docs = reader.read2016ChineseEvalDocs();
+                golds = reader.read2016ChineseEvalGoldNAM();
             } else if (args[0].equals("es")) {
                 lang = Language.Spanish;
                 docs = reader.read2016SpanishEvalDocs();
@@ -172,6 +185,8 @@ public class TAC2016Eval {
 
 		for(QueryDocument doc: docs)
             evaluate(doc);
+        System.out.println("#golds: "+gold_total);
+        System.out.println("#preds: "+pred_total);
         double rec = span_cnt/gold_total;
         double pre = span_cnt/pred_total;
         double f1 = 2*rec*pre/(rec+pre);
@@ -189,5 +204,7 @@ public class TAC2016Eval {
         f1 = 2*rec*pre/(rec+pre);
         System.out.print("Mention Span + Entity Type + FreeBase ID: ");
         System.out.printf("Precision:%.4f Recall:%.4f F1:%.4f\n", pre, rec, f1);
+
+        System.out.println("#matched nil "+match_nil+" has cand "+has_cand+" non-NIL mid "+has_cand1);
     }
 }
