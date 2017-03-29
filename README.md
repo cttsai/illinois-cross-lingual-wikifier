@@ -30,14 +30,14 @@ mention ceaf:               Precision:0.854 Recall:0.732 F1:0.788
 
 Spanish 
 strong mention match:       Precision:0.885 Recall:0.806 F1:0.844
-strong typed mention match: Precision:0.858 Recall:0.782 F1:0.818
-string typed all match:     Precision:0.754 Recall:0.687 F1:0.719
+strong typed mention match: Precision:0.859 Recall:0.782 F1:0.819
+string typed all match:     Precision:0.755 Recall:0.688 F1:0.720
 mention ceaf:               Precision:0.822 Recall:0.749 F1:0.784
 
 Chinese
-strong mention match:       Precision:0.869 Recall:0.724 F1:0.790
+strong mention match:       Precision:0.868 Recall:0.724 F1:0.789
 strong typed mention match: Precision:0.835 Recall:0.696 F1:0.759
-string typed all match:     Precision:0.746 Recall:0.622 F1:0.678
+string typed all match:     Precision:0.746 Recall:0.622 F1:0.679
 mention ceaf:               Precision:0.807 Recall:0.673 F1:0.734
 ```
 ### Train NER Model
