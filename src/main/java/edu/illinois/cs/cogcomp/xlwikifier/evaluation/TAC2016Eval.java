@@ -113,23 +113,26 @@ public class TAC2016Eval {
         try {
             if (args[0].equals("zh")) {
                 lang = Language.Chinese;
+//                docs = reader.read2016ChineseEvalDocs();
                 docs = reader.readChineseEvalDocs();
+//                golds = reader.read2016ChineseEvalGoldNAM();
                 golds = reader.readChineseGoldNAM();
             } else if (args[0].equals("es")) {
                 lang = Language.Spanish;
-                docs = reader.readSpanishEvalDocs(10000);
-                golds = reader.readSpanishGoldNAM();
+                docs = reader.read2016SpanishEvalDocs();
+                golds = reader.read2016SpanishEvalGoldNAM();
             } else if (args[0].equals("en")) {
                 lang = Language.English;
-                docs = reader.readEnglishEvalDocs();
-                golds = reader.readEnglishGoldNAM();
+                docs = reader.read2016EnglishEvalDocs();
+                golds = reader.read2016EnglishEvalGoldNAM();
             } else
                 logger.error("Unknown language: " + args[0]);
         }
-        catch ( FileNotFoundException e ) {
+        catch ( IOException e ) {
             e.printStackTrace();
             System.exit(-1);
         }
+
         MultiLingualNER mlner = MultiLingualNERManager.buildNerAnnotator(lang, config);
 
         CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);

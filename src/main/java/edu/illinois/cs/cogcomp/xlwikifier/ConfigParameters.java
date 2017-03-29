@@ -30,6 +30,9 @@ public class ConfigParameters {
     public static String target_kb;
     private static String config_name;
     public static String liblinear_path = "liblinear-ranksvm-1.95";
+    public static String tac2016_es_eval, tac2016_zh_eval, tac2016_en_eval, tac2016_eval_golds;
+    public static String tac2015_es_eval, tac2015_zh_eval, tac2015_en_eval, tac2015_eval_golds;
+    public static String tac2015_es_train, tac2015_zh_train, tac2015_en_train, tac2015_train_golds;
 
 
     public static void setPropValues() throws IOException {
@@ -109,6 +112,31 @@ public class ConfigParameters {
             target_kb = rm.getString("target_kb").trim();
         if (rm.containsKey("liblinear_path"))
             liblinear_path = rm.getString("liblinear_path").trim();
+
+        if (rm.containsKey("tac2016_es_eval"))
+            tac2016_es_eval = rm.getString("tac2016_es_eval").trim();
+        if (rm.containsKey("tac2016_zh_eval"))
+            tac2016_zh_eval = rm.getString("tac2016_zh_eval").trim();
+        if (rm.containsKey("tac2016_en_eval"))
+            tac2016_en_eval = rm.getString("tac2016_en_eval").trim();
+        if (rm.containsKey("tac2016_eval_golds"))
+            tac2016_eval_golds = rm.getString("tac2016_eval_golds").trim();
+        if (rm.containsKey("tac2015_es_eval"))
+            tac2015_es_eval = rm.getString("tac2015_es_eval").trim();
+        if (rm.containsKey("tac2015_zh_eval"))
+            tac2015_zh_eval = rm.getString("tac2015_zh_eval").trim();
+        if (rm.containsKey("tac2015_en_eval"))
+            tac2015_en_eval = rm.getString("tac2015_en_eval").trim();
+        if (rm.containsKey("tac2015_eval_golds"))
+            tac2015_eval_golds = rm.getString("tac2015_eval_golds").trim();
+        if (rm.containsKey("tac2015_es_train"))
+            tac2015_es_train = rm.getString("tac2015_es_train").trim();
+        if (rm.containsKey("tac2015_zh_train"))
+            tac2015_zh_train = rm.getString("tac2015_zh_train").trim();
+        if (rm.containsKey("tac2015_en_train"))
+            tac2015_en_train = rm.getString("tac2015_en_train").trim();
+        if (rm.containsKey("tac2015_train_golds"))
+            tac2015_train_golds = rm.getString("tac2015_train_golds").trim();
     }
 
     public static void main(String[] args) {
