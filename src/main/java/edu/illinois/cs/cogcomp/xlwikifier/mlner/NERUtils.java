@@ -147,7 +147,7 @@ public class NERUtils {
             mentions.add(m);
         }
 
-        mentions = mentions.stream().sorted((x1, x2) -> Integer.compare(x1.getStartOffset(), x2.getStartOffset()))
+        mentions = mentions.stream().sorted(Comparator.comparingInt(ELMention::getStartOffset))
                 .collect(toList());
         mentions.forEach(x -> x.setLanguage(lang));
         return mentions;

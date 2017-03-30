@@ -15,7 +15,6 @@ import edu.illinois.cs.cogcomp.ner.config.NerBaseConfigurator;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +88,6 @@ public class ModelTrainer {
                 System.out.println(qdoc.mentions.size()+" "+nt);
                 System.exit(-1);
             }
-
         }
     }
 
