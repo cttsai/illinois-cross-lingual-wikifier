@@ -36,7 +36,6 @@ public class CrossLingualWikifier extends Annotator {
     private Language language;
     private WikiCandidateGenerator wcg;
     private Ranker ranker;
-    private LangLinker ll;
     private NERUtils nerutils;
     private String ner_view;
 
@@ -71,7 +70,6 @@ public class CrossLingualWikifier extends Annotator {
         wcg = new WikiCandidateGenerator(lang, true);
         ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_models.get(lang));
         ranker.setNERMode(false);
-        ll = new LangLinker();
 
         nerutils = new NERUtils(lang);
 

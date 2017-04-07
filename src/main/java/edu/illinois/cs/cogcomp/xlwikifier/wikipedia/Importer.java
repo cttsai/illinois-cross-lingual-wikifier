@@ -64,16 +64,20 @@ public class Importer {
         try {
             logger.info("Downloading " + lang + " wikipedia dump...");
             URL url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-pages-articles.xml.bz2");
-            FileUtils.copyURLToFile(url, new File(dumpfile));
+            System.out.println(url);
+//            FileUtils.copyURLToFile(url, new File(dumpfile));
             logger.info("Downloading page sql file...");
             url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-page.sql.gz");
-            FileUtils.copyURLToFile(url, new File(pagefile));
+            System.out.println(url);
+//            FileUtils.copyURLToFile(url, new File(pagefile));
             logger.info("Downloading lang link file...");
             url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-langlinks.sql.gz");
-            FileUtils.copyURLToFile(url, new File(langfile));
+            System.out.println(url);
+//            FileUtils.copyURLToFile(url, new File(langfile));
             logger.info("Downloading redirect file...");
             url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-redirect.sql.gz");
-            FileUtils.copyURLToFile(url, new File(redirectfile));
+            System.out.println(url);
+//            FileUtils.copyURLToFile(url, new File(redirectfile));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -188,7 +192,7 @@ public class Importer {
 
     public void importLangLinks() {
         logger.info("Importing language links...");
-        LangLinker ll = new LangLinker();
+        LangLinker ll = new LangLinker(lang, false);
         ll.populateDBNew(lang, langfile, pagefile);
     }
 
@@ -249,13 +253,15 @@ public class Importer {
 
 //        Importer importer = new Importer(args[0], args[1]);
 
-        List<String> langs = null;
+        List<String> langs = new ArrayList<>();
         try {
             langs = LineIO.read("import-langs");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+//        String date = "20160801";
         String date = "20161101";
+//        String date = "20170320";
         for (String lang : langs) {
             lang = lang.trim();
 //            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
@@ -263,8 +269,8 @@ public class Importer {
             try {
 //                importer.downloadDump();
 //                importer.parseWikiDump();
-//                importer.importLangLinks();
-                importer.importCandidates();
+                importer.importLangLinks();
+//                importer.importCandidates();
 //                importer.importTFIDF();
 //                importer.getMostFreqWords();
             } catch (Exception e) {

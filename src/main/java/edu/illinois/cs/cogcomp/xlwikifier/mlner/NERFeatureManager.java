@@ -23,7 +23,7 @@ public class NERFeatureManager implements Serializable {
 
     public NERFeatureManager(String lang) {
         lex = new LexManager();
-        ll = new LangLinker();
+        ll = LangLinker.getLangLinker(lang);
         en_stops = StopWord.getStopWords("en");
         fo_stops = StopWord.getStopWords(lang);
     }

@@ -22,7 +22,7 @@ public class RankerFeatureManager implements Serializable {
     public LexManager lex;
     public WordEmbedding we;
     private String lang;
-    private LangLinker ll = new LangLinker();
+    private LangLinker ll;
     public TFIDFManager tfidf = new TFIDFManager();
     public String context_lang;
     public TextAnnotationBuilder tokenizer;
@@ -32,6 +32,7 @@ public class RankerFeatureManager implements Serializable {
     public RankerFeatureManager(String lang) {
         this.lang = lang;
         this.context_lang = lang;
+        ll = LangLinker.getLangLinker(lang);
         we = new WordEmbedding();
         lex = new LexManager();
 

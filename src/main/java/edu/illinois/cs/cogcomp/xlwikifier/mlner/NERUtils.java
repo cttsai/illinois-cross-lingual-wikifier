@@ -29,17 +29,15 @@ public class NERUtils {
     private final Logger logger = LoggerFactory.getLogger(NERUtils.class);
     public Set<String> stops;
     public String lang;
-    private LangLinker ll = new LangLinker();
+    private LangLinker ll;
     private WikiCandidateGenerator wcg;
     private NERFeatureManager fm;
     private Ranker ranker;
     private Map<String, Map<String, Double>> fcache = new HashMap<>();
 
-    public NERUtils() {
-    }
-
     public NERUtils(String lang) {
         setLang(lang);
+        ll = LangLinker.getLangLinker(lang);
         wcg = new WikiCandidateGenerator(lang, true);
         ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_ner.get(lang));
         ranker.setNERMode(true);

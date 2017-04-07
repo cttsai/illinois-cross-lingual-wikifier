@@ -1,6 +1,5 @@
 package edu.illinois.cs.cogcomp.xlwikifier.wikipedia;
 
-import com.github.stuxuhai.jpinyin.ChineseHelper;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -28,12 +27,9 @@ public class LangLinker {
     private Map<String, String> to_cache = new HashMap<>();
     private Map<String, String> from_cache = new HashMap<>();
     private static Logger logger = LoggerFactory.getLogger(LangLinker.class);
+    private static Map<String, LangLinker> lang_linker_map;
 
-    public LangLinker() {
-
-    }
-
-    public void loadDB(String lang, boolean read_only) {
+    public LangLinker(String lang, boolean read_only) {
         if (lang.equals("en")) {
             logger.error("no English DB for lang links");
             System.exit(-1);
@@ -75,6 +71,28 @@ public class LangLinker {
 
 
         this.lang = lang;
+
+    }
+
+    public LangLinker() {
+
+    }
+
+    public static LangLinker getLangLinker(String lang){
+        if(lang_linker_map == null)
+            lang_linker_map = new HashMap<>();
+
+        if(!lang_linker_map.containsKey(lang)){
+            logger.info("Initializing LangLinker "+lang);
+            LangLinker ll;
+            if(lang.equals("en"))
+                ll = new LangLinker();
+            else
+                ll = new LangLinker(lang, true);
+            lang_linker_map.put(lang, ll);
+        }
+
+        return lang_linker_map.get(lang);
     }
 
     public void closeDB() {
@@ -84,15 +102,18 @@ public class LangLinker {
         }
     }
 
+    public Set<String> getForeignTitles(){
+        return to_en.keySet();
+    }
+
 
     public void populateDBNew(String lang, String lang_file, String page_file) {
-//        ChineseTokenizer ct = null;
-//        if (lang.equals("zh"))
-//            ct = new ChineseTokenizer();
-        loadDB(lang, false);
+
         DumpReader dr = new DumpReader();
         dr.readTitle2ID(page_file, lang);
         dr.readId2En(lang_file, "en");
+
+
         List<String> aligns = new ArrayList<>();
         for (String id : dr.id2title.keySet()) {
             if (dr.id2en.containsKey(id)) {
@@ -129,11 +150,6 @@ public class LangLinker {
             return title;
         }
 
-        if (db == null || this.lang == null || !this.lang.equals(lang)) {
-            loadDB(lang, true);
-            this.lang = lang;
-        }
-
         title = title.toLowerCase().replaceAll(" ", "_");
 
         String cache_key = title + "_" + lang;
@@ -156,10 +172,6 @@ public class LangLinker {
         if (lang.equals("en")) {
             logger.error("Translate English Title to English");
             System.exit(-1);
-        }
-        if (db == null || !this.lang.equals(lang)) {
-            loadDB(lang, true);
-            this.lang = lang;
         }
         title = title.toLowerCase().replaceAll(" ", "_");
 
@@ -187,9 +199,5 @@ public class LangLinker {
             e.printStackTrace();
             System.exit(-1);
         }
-        LangLinker ll = new LangLinker();
-//        ll.loadDB("zh", true);
-
-        System.out.println(ll.translateToEn(ChineseHelper.convertToSimplifiedChinese("希拉蕊·柯林頓"), "zh"));
     }
 }

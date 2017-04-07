@@ -8,6 +8,7 @@ import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.WikiCand;
 import edu.illinois.cs.cogcomp.core.algorithms.LevensteinDistance;
+import edu.illinois.cs.cogcomp.xlwikifier.freebase.FreeBaseQuery;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.DumpReader;
 import org.mapdb.*;
 import org.mapdb.serializer.SerializerArray;
@@ -532,8 +533,9 @@ public class WikiCandidateGenerator {
             e.printStackTrace();
             System.exit(-1);
         }
-        WikiCandidateGenerator g = new WikiCandidateGenerator("zh", true);
-        System.out.println(g.getCandsBySurface("臺灣"));
+        WikiCandidateGenerator g = new WikiCandidateGenerator("ta", true);
+        System.out.println(g.getCandsBySurface("டிரம்ப் "));
+        System.out.println(g.getCandidateByWord("டிரம்ப் ", 10));
         System.exit(-1);
 
         g.closeDB();

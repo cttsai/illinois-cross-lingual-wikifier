@@ -35,24 +35,24 @@ public class DemoController {
             System.exit(-1);
         }
         logger.info("Initializing demo");
-        for(String lang: ConfigParameters.ranker_models.keySet()) {
-            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
-
-                Language language = Language.getLanguageByCode(lang);
-                String sample = readExample(language);
-				if(sample == null) continue;
-
-                logger.info("Initializing " + lang + " NER and Wikifier");
-                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
-                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
-
-                TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-
-                TextAnnotation ta = tokenizer.createTextAnnotation(sample);
-                ner.addView(ta);
-                wikifier.addView(ta);
-            }
-        }
+//        for(String lang: ConfigParameters.ranker_models.keySet()) {
+//            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
+//
+//                Language language = Language.getLanguageByCode(lang);
+//                String sample = readExample(language);
+//				if(sample == null) continue;
+//
+//                logger.info("Initializing " + lang + " NER and Wikifier");
+//                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
+//                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
+//
+//                TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+//
+//                TextAnnotation ta = tokenizer.createTextAnnotation(sample);
+//                ner.addView(ta);
+//                wikifier.addView(ta);
+//            }
+//        }
     }
 
     private String readExample(Language lang) {
@@ -81,5 +81,18 @@ public class DemoController {
 //        logger.info("Transfer: "+transfer);
 
         return new XLWikifierDemo(text, lang);
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/transtitle", method = RequestMethod.POST)
+    public TitleTranslator translateTitle(@RequestParam(value = "query", defaultValue = "") String query,
+                                          @RequestParam(value = "lang", defaultValue = "") String lang,
+                                          HttpServletRequest request) {
+
+        logger.info("Request from: " + request.getRemoteAddr() + " " + request.getRemoteUser());
+        logger.info("Query: " + query);
+        logger.info("Lang: " + lang);
+
+        return new TitleTranslator(query, lang);
     }
 }
