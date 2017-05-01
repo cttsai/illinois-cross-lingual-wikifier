@@ -24,6 +24,8 @@ public class XMLOffsetHandler {
     public TextAnnotation ta;
     private Map<Integer, Integer> plain2xml_start = new HashMap<>();
     private Map<Integer, Integer> plain2xml_end = new HashMap<>();
+    private Map<Integer, Integer> xml2plain_start = new HashMap<>();
+    private Map<Integer, Integer> xml2plain_end = new HashMap<>();
 
     public XMLOffsetHandler(String xml, TextAnnotationBuilder tokenizer){
         xml_text = xml;
@@ -66,6 +68,14 @@ public class XMLOffsetHandler {
         return new Pair<>(plain2xml_start.get(start), plain2xml_end.get(end));
     }
 
+    public Pair<Integer, Integer> getPlainOffsets(int start, int end){
+
+        if(xml2plain_start.containsKey(start) && xml2plain_end.containsKey(end))
+            return new Pair<>(xml2plain_start.get(start), xml2plain_end.get(end));
+        else
+            return null;
+    }
+
     /**
      * Find the character offsets mapping between xml and plain text
      * This is complicated because Stanford Spanish tokenizer handles morphology thus changes the text
@@ -98,16 +108,20 @@ public class XMLOffsetHandler {
 
             int xml_start = idx;
             plain2xml_start.put(thisoff.getFirst(), xml_start);
+            xml2plain_start.put(xml_start, thisoff.getFirst());
             int xml_end;
 
             if(!form_change) {
                 xml_end = xml_start + thisoff.getSecond() - thisoff.getFirst();
                 plain2xml_end.put(thisoff.getSecond(), xml_end);
+                xml2plain_end.put(xml_end, thisoff.getSecond());
             }
             else {
                 xml_end = xml_start + thisoff.getSecond() - prevoff.getFirst();
                 plain2xml_end.put(thisoff.getSecond(), xml_end);
                 plain2xml_end.put(prevoff.getSecond(), xml_end);
+                xml2plain_end.put(xml_end, thisoff.getSecond());
+                xml2plain_end.put(xml_end, prevoff.getSecond());
             }
 
             last_idx = xml_start;

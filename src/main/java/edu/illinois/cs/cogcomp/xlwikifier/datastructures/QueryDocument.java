@@ -24,6 +24,10 @@ public class QueryDocument {
         return id;
     }
 
+    public void setDocID(String id){
+        this.id = id;
+    }
+
     public void setText(String t){
         this.text = t;
     }

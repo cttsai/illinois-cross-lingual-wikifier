@@ -35,24 +35,24 @@ public class DemoController {
             System.exit(-1);
         }
         logger.info("Initializing demo");
-//        for(String lang: ConfigParameters.ranker_models.keySet()) {
-//            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
-//
-//                Language language = Language.getLanguageByCode(lang);
-//                String sample = readExample(language);
-//				if(sample == null) continue;
-//
-//                logger.info("Initializing " + lang + " NER and Wikifier");
-//                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
-//                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
-//
-//                TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
-//
-//                TextAnnotation ta = tokenizer.createTextAnnotation(sample);
-//                ner.addView(ta);
-//                wikifier.addView(ta);
-//            }
-//        }
+        for(String lang: ConfigParameters.ranker_models.keySet()) {
+            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
+
+                Language language = Language.getLanguageByCode(lang);
+                String sample = readExample(language);
+				if(sample == null) continue;
+
+                logger.info("Initializing " + lang + " NER and Wikifier");
+                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
+                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
+
+                TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
+
+                TextAnnotation ta = tokenizer.createTextAnnotation(sample);
+                ner.addView(ta);
+                wikifier.addView(ta);
+            }
+        }
     }
 
     private String readExample(Language lang) {

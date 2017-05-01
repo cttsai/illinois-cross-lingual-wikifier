@@ -72,15 +72,6 @@ public class FreeBaseQuery {
         String file = "/shared/preprocessed/ctsai12/freebase/fb.plain.new";
         FreeBaseQuery.loadDB(false);
 
-//        DB.TreeMapSink<String,String[]> m2tsink = db
-//                .treeMap("mid2types", Serializer.STRING, new SerializerArray<>(Serializer.STRING))
-//                .createFromSink();
-//        DB.TreeMapSink<String,String> tl2msink = db
-//                .treeMap("mid2types", Serializer.STRING, Serializer.STRING)
-//                .createFromSink();
-//        DB.TreeMapSink<String,String[]> ml2tsink = db
-//                .treeMap("mid2types", Serializer.STRING, new SerializerArray<>(Serializer.STRING))
-//                .createFromSink();
 
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
@@ -264,8 +255,10 @@ public class FreeBaseQuery {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        String mid = FreeBaseQuery.getMidFromTitle("中国", "en");
-        System.out.println(mid);
+        System.out.println(FreeBaseQuery.getTypesFromTitle("學名", "zh-cn"));
+        System.out.println(FreeBaseQuery.getTypesFromTitle("spanish_language", "en"));
+//        String mid = FreeBaseQuery.getMidFromTitle("中国", "en");
+//        System.out.println(mid);
 
     }
 

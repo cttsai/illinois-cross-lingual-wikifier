@@ -56,17 +56,15 @@ public class NERUtils {
      * @param doc
      */
     public void wikifyNgrams(QueryDocument doc) {
-//        logger.info("Wikifying n-grams...");
-
         List<ELMention> prevm = new ArrayList<>();
+
+        // up to 4-grams.
         for (int n = 4; n > 0; n--) {
             doc.mentions = getNgramMentions(doc, n);
             propFeatures(doc, prevm);
-//            wikifyMentions(doc, n);
             extractNERFeatures(doc, n);
             prevm = doc.mentions;
         }
-//        logger.info("Done");
     }
 
     public void extractNERFeatures(QueryDocument doc, int n) {
@@ -75,7 +73,7 @@ public class NERUtils {
 
             String surface = m.getSurface().toLowerCase();
 
-            if(fcache.containsKey(surface)) {
+            if (fcache.containsKey(surface)) {
                 m.ner_features = fcache.get(surface);
                 continue;
             }
@@ -83,14 +81,22 @@ public class NERUtils {
             if (m.ner_features.size() > 0) continue;
             if (NumberUtils.isNumber(surface.trim())) continue;
 
-            wikifyMention(m, n);
+            generateTitleCandidates(m, n);
+        }
 
+        if(ConfigParameters.no_ranking_in_ner)
+            ranker.setWikiTitleByTopCand(doc);
+        else
+            ranker.setWikiTitleByModel(doc);
+
+        for(int j = 0; j < doc.mentions.size(); j++){
+            ELMention m = doc.mentions.get(j);
+            setMidByWikiTitle(m);
             Map<String, Double> map = getFeatureMap(doc.mentions, j, true);
             for (String key : map.keySet()) {
                 m.ner_features.put(key, map.get(key));
             }
-
-            fcache.put(surface, m.ner_features);
+//            fcache.put(m.getSurface().toLowerCase(), m.ner_features);
         }
     }
 
@@ -151,7 +157,13 @@ public class NERUtils {
         return mentions;
     }
 
-    public void wikifyMention(ELMention m, int n) {
+    /**
+     * Generate title candidates for n-grams
+     * This is different from the algorithm in WikiCandGenerator, since not all n-grams are entities
+     * @param m
+     * @param n
+     */
+    public void generateTitleCandidates(ELMention m, int n) {
         if (!m.getWikiTitle().startsWith("NIL")) return;
         if (m.ner_features.size() > 0) return;
 
@@ -178,9 +190,6 @@ public class NERUtils {
 
         m.setCandidates(cands);
 
-        ranker.setWikiTitleByTopCand(m);
-
-        setMidByWikiTitle(m);
     }
 
     public void setEnWikiTitle(QueryDocument doc){
@@ -207,14 +216,15 @@ public class NERUtils {
         for (WikiCand c : m.getCandidates()) {
             String mid = getMidByWikiTitle(c.getTitle(), c.lang);
             c.orig_title = c.title;
-            if (mid != null)
+            if (mid != null) {
+//                List<String> types = FreeBaseQuery.getTypesFromMid(mid);
                 c.title = mid;
+                if(m.getMid().startsWith("NIL")) {
+                    m.setMid(mid);
+                }
+            }
             else
                 c.title = "NIL";
-        }
-
-        if (m.getCandidates().size() > 0) {
-            m.setMid(m.getCandidates().get(0).title);
         }
     }
 

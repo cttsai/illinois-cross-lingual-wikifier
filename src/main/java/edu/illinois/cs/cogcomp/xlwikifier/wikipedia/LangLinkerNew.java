@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -149,10 +150,16 @@ public class LangLinkerNew {
         String langfile = dumpdir+lang+"wiki-"+date+"-langlinks.sql.gz";
         String redirectfile = dumpdir+lang+"wiki-"+date+"-redirect.sql.gz";
 
-        LangLinkerNew ll = new LangLinkerNew(lang, false);
-        ll.populateDBNew(lang, langfile, pagefile, redirectfile);
+//        LangLinkerNew ll = new LangLinkerNew(lang, false);
+//        ll.populateDBNew(lang, langfile, pagefile, redirectfile);
 
-//        LangLinkerNew ll = LangLinkerNew.getLangLinker("en");
+        LangLinkerNew ll = LangLinkerNew.getLangLinker("es");
+        int cnt = 0;
+        for(Object src: ll.src2lang2tgt.keySet()){
+            if(((Object[])src)[1].equals("en"))
+                cnt++;
+        }
+        System.out.println(cnt);
 //        System.out.println(ll.translate("barack obama"));
 //        System.out.println(ll.getRedirect("birding"));
     }

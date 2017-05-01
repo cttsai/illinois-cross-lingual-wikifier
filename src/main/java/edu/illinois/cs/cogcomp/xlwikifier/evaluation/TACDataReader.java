@@ -40,15 +40,14 @@ public class TACDataReader {
     }
 
 
-    public void writeCoNLLFormat(List<QueryDocument> docs, List<ELMention> golds, String out_dir){
+    public static void writeCoNLLFormat(List<QueryDocument> docs, List<ELMention> golds, String out_dir){
 
-        for(QueryDocument doc: docs)
-            doc.mentions = golds.stream().filter(x -> doc.getDocID().startsWith(x.getDocID())).collect(Collectors.toList());
 
         resolveNested(docs);
 
         int ent_cnt = 0;
         for(QueryDocument doc: docs){
+            System.out.println(doc.mentions.size());
 
             List<Pair<Integer, Integer>> badintervals = TACUtils.getBadIntervals(doc.getXMLText());
 
@@ -165,7 +164,10 @@ public class TACDataReader {
         return readDocs(ConfigParameters.tac2015_en_eval, "en");
     }
     public List<QueryDocument> read2015SpanishEvalDocs() throws IOException {
-        return readDocs(ConfigParameters.tac2015_es_eval, "es");
+        List<QueryDocument> docs = readDocs(ConfigParameters.tac2015_es_eval, "es");
+        for(QueryDocument doc: docs)
+            doc.setDocID(doc.getDocID().split("\\.")[0]);
+        return docs;
     }
     public List<QueryDocument> read2015ChineseEvalDocs() throws IOException {
         return readDocs(ConfigParameters.tac2015_zh_eval, "zh");
@@ -348,6 +350,8 @@ public class TACDataReader {
         List<ELMention> golds = reader.read2016EnglishEvalGoldNAM();
 
         String outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/en/tac2016.eval/";
+        for(QueryDocument doc: docs)
+            doc.mentions = golds.stream().filter(x -> doc.getDocID().startsWith(x.getDocID())).collect(Collectors.toList());
 
         reader.writeCoNLLFormat(docs, golds, outdir);
     }

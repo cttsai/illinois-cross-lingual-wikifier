@@ -33,6 +33,7 @@ public class ConfigParameters {
     public static String tac2016_es_eval, tac2016_zh_eval, tac2016_en_eval, tac2016_eval_golds;
     public static String tac2015_es_eval, tac2015_zh_eval, tac2015_en_eval, tac2015_eval_golds;
     public static String tac2015_es_train, tac2015_zh_train, tac2015_en_train, tac2015_train_golds;
+    public static boolean no_ranking_in_ner = true;
 
 
     public static void setPropValues() throws IOException {
@@ -137,6 +138,8 @@ public class ConfigParameters {
             tac2015_en_train = rm.getString("tac2015_en_train").trim();
         if (rm.containsKey("tac2015_train_golds"))
             tac2015_train_golds = rm.getString("tac2015_train_golds").trim();
+        if (rm.containsKey("no_ranking_in_ner"))
+            no_ranking_in_ner = rm.getBoolean("no_ranking_in_ner");
     }
 
     public static void main(String[] args) {

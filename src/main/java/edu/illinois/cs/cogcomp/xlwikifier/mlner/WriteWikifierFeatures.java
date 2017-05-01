@@ -45,7 +45,7 @@ public class WriteWikifierFeatures {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        NERUtils nerutils = new NERUtils("en");
+        NERUtils nerutils = new NERUtils(lang);
         List<QueryDocument> docs = ModelTrainer.data2QueryDocs(data);
         logger.info("Wikifying training documents");
         int cnt = 0;
@@ -70,7 +70,7 @@ public class WriteWikifierFeatures {
                     NEWord word = (NEWord) sent.get(i);
                     out += word.neLabel+"\tx\tx\tx\tx\t"+word.form+"\tx\tx\tx\tx";
                     for(String feat: word.wikifierFeatures) {
-                        System.out.println(feat);
+//                        System.out.println(feat);
                         out += "\t" + feat;
                     }
                     out += "\n";
@@ -95,8 +95,12 @@ public class WriteWikifierFeatures {
             System.exit(-1);
         }
         String indir = "/shared/corpora/ner/human/ta/conll";
+//        indir = "/shared/corpora/ner/conll2003/eng/eng.all.nomisc";
+//        indir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/nw.xinhua-char";
         String lang = "ta";
-        String outdir = "/shared/corpora/ner/human/ta/conll.wiki";
+        String outdir = "/shared/corpora/ner/human/ta/conll.wiki2";
+//        outdir = "/shared/corpora/ner/conll2003/eng/eng.all.nomisc.wiki";
+//        outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/nw.xinhua-char.wiki";
 
         run(indir, lang, outdir);
     }
