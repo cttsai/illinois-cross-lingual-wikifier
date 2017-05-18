@@ -184,6 +184,23 @@ public class Ranker {
         }
     }
 
+    public void setWikiTitleByCoherenceModel(QueryDocument doc) {
+        doc.prepareFeatures(fm);
+        // get scores for all candidate titles for all
+        // mentions in the document.
+        for (int i = 0; i < doc.mentions.size(); i++) {
+            ELMention m = doc.mentions.get(i);
+            m.prepareFeatures(doc, fm, doc.mentions.subList(0, i));
+            List<WikiCand> cands = m.getCandidates();
+            for (WikiCand cand : cands) {
+                double score = getScoreByModel(m, cand, doc);
+                cand.setScore(score);
+            }
+        }
+
+        CoherenceSolver solver = new CoherenceSolver(doc,fm);
+        solver.solve();
+    }
 
     /**
      * Use wikipedia titles stored in mentions as candidates
@@ -202,16 +219,15 @@ public class Ranker {
             }
 
             if (cands.size() > 0) {
-                cands = cands.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(toList());
+                cands = cands.stream().sorted((x1, x2) -> 
+                    Double.compare(x2.getScore(), x1.getScore())).collect(toList());
                 m.setCandidates(cands);
-
                 m.setWikiTitle(cands.get(0).getTitle());
                 m.setMidVec(fm.we.getTitleVector(m.getWikiTitle(), cands.get(0).lang));
             } else {
                 m.setWikiTitle("NIL");
                 m.setMidVec(null);
             }
-
         }
     }
 
