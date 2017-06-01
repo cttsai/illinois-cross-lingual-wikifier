@@ -61,6 +61,10 @@ public class TACDataReader {
                 String token = ta.getToken(i);
                 IntPair plain_offsets = ta.getTokenCharacterOffset(i);
                 Pair<Integer, Integer> xml_offsets = doc.getXmlhandler().getXmlOffsets(plain_offsets.getFirst(), plain_offsets.getSecond());
+                if(xml_offsets.getFirst() == null || xml_offsets.getSecond() == null){
+                    out += "\n";
+                    continue;
+                }
 
                 boolean bad = false;
                 for(Pair<Integer, Integer> inte: badintervals){
@@ -198,6 +202,9 @@ public class TACDataReader {
             int idx1 = filename.lastIndexOf("/");
             String docid = filename.substring(idx1+1, idx);
 
+//            if(!docid.equals("SPA_DF_001502_20090127_G00A0I0HW"))
+//                continue;
+
             String xml_text = null;
             InputStream res = ResourceUtilities.loadResource(filename);
             BufferedReader in = new BufferedReader(new InputStreamReader(res, "UTF-8"));
@@ -229,10 +236,21 @@ public class TACDataReader {
 
         return mentions;
     }
+    public List<ELMention> read2016SpanishEvalGoldNAMNOM(){
+        return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
+                .filter(x -> x.getLanguage().equals("SPA"))
+                .collect(Collectors.toList());
+    }
     public List<ELMention> read2016SpanishEvalGoldNAM(){
         return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
                 .filter(x -> x.getLanguage().equals("SPA"))
                 .filter(x -> x.noun_type.equals("NAM"))
+                .collect(Collectors.toList());
+    }
+    public List<ELMention> read2016SpanishEvalGoldNOM(){
+        return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
+                .filter(x -> x.getLanguage().equals("SPA"))
+                .filter(x -> x.noun_type.equals("NOM"))
                 .collect(Collectors.toList());
     }
     public List<ELMention> read2016ChineseEvalGoldNAM(){
@@ -343,13 +361,18 @@ public class TACDataReader {
 
         List<QueryDocument> docs = null;
         try {
-            docs = reader.read2016EnglishEvalDocs();
+//            docs = reader.read2016EnglishEvalDocs();
+//            docs = reader.read2016ChineseEvalDocs();
+            docs = reader.read2016SpanishEvalDocs();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        List<ELMention> golds = reader.read2016EnglishEvalGoldNAM();
+//        List<ELMention> golds = reader.read2016ChineseEvalGoldNAM();
+        List<ELMention> golds = reader.read2016SpanishEvalGoldNAM();
+//        List<ELMention> golds = reader.read2016SpanishEvalGoldNOM();
 
-        String outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/en/tac2016.eval/";
+        String outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/tac2016.eval/";
+        outdir = "/shared/corpora/ner/nominal_exp/es.tac.NAM";
         for(QueryDocument doc: docs)
             doc.mentions = golds.stream().filter(x -> doc.getDocID().startsWith(x.getDocID())).collect(Collectors.toList());
 

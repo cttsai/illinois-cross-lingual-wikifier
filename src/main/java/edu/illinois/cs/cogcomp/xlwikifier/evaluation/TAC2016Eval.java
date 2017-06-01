@@ -26,11 +26,10 @@ import java.io.File;
 
 /**
  * This class runs MultiLingualNER and CrossLingualWikifier on TAC-KBP 2016 EDL dataset.
- * It only evaluates on Spanish and Chinese named entity annotations
  *
  * The paths to the data are specified in config/xlwikifier-tac.config
  *
- * It can be run by executing "scripts/run-benchmark.sh es" or "scripts/run-benchmark.sh zh"
+ * It can be run by "scripts/run-benchmark.sh"
  *
  * Created by ctsai12 on 10/27/16.
  */
@@ -101,21 +100,40 @@ public class TAC2016Eval {
         pred_total += doc.mentions.size();
     }
 
+    public static void printSubmissionFormat(List<QueryDocument> docs, String outfile){
+
+        String out = "";
+        int cnt = 100000;
+        for(QueryDocument doc: docs){
+            for(ELMention m: doc.mentions){
+                out += "UI_CCG\t"+cnt+"\t"+m.getSurface()+"\t"+doc.getDocID()+":"+m.getStartOffset()+"-"+(m.getEndOffset()-1)+"\t"+m.getMid()+"\t"+m.getType()+"\tNAM\t1.0\n";
+                cnt++;
+            }
+        }
+
+        try {
+            FileUtils.writeStringToFile(new File(outfile), out, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 	public static void printEvalFormat(List<QueryDocument> docs, String outfile){
 
 		String out = "";
-		String out1 = "";
+//		String out1 = "";
 		int cnt = 0;
 		for(QueryDocument doc: docs){
 			for(ELMention m: doc.mentions){
 				out += doc.getDocID()+"\t"+m.getStartOffset()+"\t"+(m.getEndOffset()-1)+"\t"+m.getMid()+"\t0\t"+m.getType()+"\n";
-                out1 += doc.getDocID()+"\t"+m.getStartOffset()+"\t"+(m.getEndOffset()-1)+"\t"+m.getSurface()+"\t"+m.getWikiTitle()+"\t"+m.getMid()+"\t0\t"+m.getType()+"\n";
+//                out1 += doc.getDocID()+"\t"+m.getStartOffset()+"\t"+(m.getEndOffset()-1)+"\t"+m.getSurface()+"\t"+m.getWikiTitle()+"\t"+m.getMid()+"\t0\t"+m.getType()+"\n";
 			}
 		}
 
 		try {
 			FileUtils.writeStringToFile(new File(outfile), out, "UTF-8");
-            FileUtils.writeStringToFile(new File(outfile+".more"), out1, "UTF-8");
+//            FileUtils.writeStringToFile(new File(outfile+".more"), out1, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -176,16 +194,18 @@ public class TAC2016Eval {
         try {
             if (args[0].equals("zh")) {
                 lang = Language.Chinese;
-                docs = reader.read2016ChineseEvalDocs();
-                golds = reader.read2016ChineseEvalGoldNAM();
+                docs = reader.read2015ChineseEvalDocs();
+                golds = reader.read2015ChineseEvalGoldNAM();
             } else if (args[0].equals("es")) {
                 lang = Language.Spanish;
-                docs = reader.read2016SpanishEvalDocs();
-                golds = reader.read2016SpanishEvalGoldNAM();
+                docs = reader.readDocs("/shared/corpora/corporaWeb/tac/LDC2016E63_TAC_KBP_2016_Evaluation_Source_Corpus_V1.1/data/spa/df1/", "es");
+//                docs = reader.read2015SpanishEvalDocs();
+//                golds = reader.read2015SpanishEvalGoldNAM();
             } else if (args[0].equals("en")) {
                 lang = Language.English;
-                docs = reader.read2016EnglishEvalDocs();
-                golds = reader.read2016EnglishEvalGoldNAM();
+//                docs = reader.read2015EnglishEvalDocs();
+                docs = reader.readDocs("/shared/corpora/corporaWeb/tac/LDC2016E63_TAC_KBP_2016_Evaluation_Source_Corpus_V1.1/data/eng/nw/", "en");
+//                golds = reader.read2015EnglishEvalGoldNAM();
             } else
                 logger.error("Unknown language: " + args[0]);
         }
@@ -201,9 +221,10 @@ public class TAC2016Eval {
 
         CrossLingualWikifier xlwikifier = CrossLingualWikifierManager.buildWikifierAnnotator(lang, config);
 
+        int cnt = 1;
         for(QueryDocument doc: docs){
 
-            logger.info("Working on document: "+doc.getDocID());
+            logger.info((cnt++)+" Working on document: "+doc.getDocID());
 
             // ner
             mlner.annotate(doc);
@@ -227,15 +248,16 @@ public class TAC2016Eval {
             PostProcessing.fixPerAnnotation(doc);
 
             // cluster mentions based on surface forms
-//            doc.mentions = SurfaceClustering.cluster(doc.mentions);
-
+            doc.mentions = SurfaceClustering.cluster(doc.mentions);
         }
 
 //		SurfaceClustering.NILClustering(docs, 3);
-		printEvalFormat(docs, "tac."+args[0]+".results");
+//		printEvalFormat(docs, "tac."+args[0]+".results");
+        printSubmissionFormat(docs, "TAC2016.eval.df1.spanish.wiki");
+        TACDataReader.writeCoNLLFormat(docs, null, "TAC2016.df1.spanish.predictions");
 
-		for(QueryDocument doc: docs)
-            evaluate(doc);
+//		for(QueryDocument doc: docs)
+//            evaluate(doc);
         System.out.println("#golds: "+gold_total);
         System.out.println("#preds: "+pred_total);
         double rec = span_cnt/gold_total;

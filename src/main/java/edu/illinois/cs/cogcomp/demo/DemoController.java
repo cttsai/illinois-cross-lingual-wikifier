@@ -23,28 +23,29 @@ import java.io.IOException;
 public class DemoController {
     private static Logger logger = LoggerFactory.getLogger(DemoController.class);
 
-    private static String default_config = "config/xlwikifier-demo.config";
+    public static String config = "";
 
     @PostConstruct
     public void initAnnotators(){
 
         try {
-            ConfigParameters.setPropValues(default_config);
+            ConfigParameters.setPropValues(config);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
         }
         logger.info("Initializing demo");
         for(String lang: ConfigParameters.ranker_models.keySet()) {
-            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
+            if(lang.equals("en") || lang.equals("es") || lang.equals("zh")){
+//            if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
 
                 Language language = Language.getLanguageByCode(lang);
                 String sample = readExample(language);
 				if(sample == null) continue;
 
                 logger.info("Initializing " + lang + " NER and Wikifier");
-                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, default_config);
-                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, default_config);
+                MultiLingualNER ner = MultiLingualNERManager.buildNerAnnotator(language, config);
+                CrossLingualWikifier wikifier = CrossLingualWikifierManager.buildWikifierAnnotator(language, config);
 
                 TextAnnotationBuilder tokenizer = MultiLingualTokenizer.getTokenizer(lang);
 
@@ -58,7 +59,7 @@ public class DemoController {
     private String readExample(Language lang) {
         String dir = "/home/ctsai12/public_html/xlwikifier/examples/";
         String exp = null;
-        try {
+       try {
             exp = FileUtils.readFileToString(new File(dir, lang.toString()), "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();

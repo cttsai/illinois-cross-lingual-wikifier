@@ -40,6 +40,8 @@ public class EREReader {
             for (int i = 0; i < nodes.getLength(); i++) {
                 Element entity = (Element) nodes.item(i);
                 String ent_type = entity.getAttribute("type");
+                String specificity = entity.getAttribute("specificity");
+                if(!specificity.equals("specific")) continue;
                 NodeList mentions = entity.getElementsByTagName("entity_mention");
                 for (int j = 0; j < mentions.getLength(); j++) {
                     Element mention = (Element) mentions.item(j);
@@ -112,7 +114,7 @@ public class EREReader {
                     .filter(x -> !x.equals("txt") && !x.equals("cmp") && !x.equals("mp") && !x.equals("xml") && !x.equals("mpdf"))
                     .collect(joining("."));
             List<ELMention> docms = golds.stream().filter(x -> x.getDocID().equals(docid))
-                    .filter(x -> x.noun_type.equals("NAM"))
+                    .filter(x -> x.noun_type.equals("NOM"))
                     .collect(Collectors.toList());
 
 //            List<ELMention> mentions = new ArrayList<>();
@@ -138,11 +140,13 @@ public class EREReader {
         ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E68_DEFT_Rich_ERE_English_Training_Annotation_R2_V2/data/ere";
         src_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E29_DEFT_Rich_ERE_English_Training_Annotation_V2/data/source/cmptxt";
         ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E29_DEFT_Rich_ERE_English_Training_Annotation_V2/data/ere/cmptxt";
-        String lang = "en";
+        ere_dir = "/shared/corpora/corporaWeb/tac/2016/ere-all/es-test/ere";
+        src_dir = "/shared/corpora/corporaWeb/tac/2016/ere-all/es-test/source";
+        String lang = "es";
 
         List<QueryDocument> docs = EREReader.read(src_dir, ere_dir, lang);
 
-        String out_dir = "/shared/corpora/ner/ere/en/NAMV2-new";
+        String out_dir = "/shared/corpora/ner/nominal_exp/es.ere.NOM.spe";
 
         TACDataReader.writeCoNLLFormat(docs, docs.stream().flatMap(x -> x.mentions.stream()).collect(Collectors.toList()), out_dir);
 

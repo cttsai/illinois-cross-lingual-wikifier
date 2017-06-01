@@ -255,8 +255,9 @@ public class FreeBaseQuery {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        System.out.println(FreeBaseQuery.getTypesFromTitle("學名", "zh-cn"));
-        System.out.println(FreeBaseQuery.getTypesFromTitle("spanish_language", "en"));
+//        System.out.println(FreeBaseQuery.getTypesFromTitle("學名", "zh-cn"));
+        System.out.println(FreeBaseQuery.getTypesFromTitle("thursday_(band)", "en"));
+        System.out.println(FreeBaseQuery.getTypesFromTitle("united_states", "en").size());
 //        String mid = FreeBaseQuery.getMidFromTitle("中国", "en");
 //        System.out.println(mid);
 

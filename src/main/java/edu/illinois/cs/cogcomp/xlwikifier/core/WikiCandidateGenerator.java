@@ -146,13 +146,29 @@ public class WikiCandidateGenerator {
                             .filter(x -> !x.getTitle().contains("_cuisine"))
                             .filter(x -> !x.getTitle().contains("_dollar"))
                             .filter(x -> !x.getTitle().contains("_studies"))
+                            .filter(x -> !x.getTitle().contains("_americans"))
                             .filter(x -> !x.getTitle().contains("disambiguation)")).collect(toList());
+                    if(m.getSurface().toLowerCase().equals("washington")){
+                        cands = cands.stream().filter(x -> x.getTitle().equals("washington,_d.c.")).collect(toList());
+                    }
+                    if(m.getSurface().toLowerCase().equals("new york")){
+                        cands = cands.stream().filter(x -> x.getTitle().equals("new_york_city")).collect(toList());
+                    }
+                    if(m.getSurface().toLowerCase().equals("european")){
+                        cands = cands.stream().filter(x -> x.getTitle().equals("europe")).collect(toList());
+                    }
+                    if(m.getSurface().toLowerCase().equals("german")){
+                        cands = cands.stream().filter(x -> x.getTitle().equals("germany")).collect(toList());
+                    }
                 }
                 else if(lang.equals("es")) {
                     cands = cands.stream().filter(x -> !x.getTitle().startsWith("idioma_"))
                             .filter(x -> !x.getTitle().startsWith("pueblo_"))
                             .filter(x -> !x.getTitle().endsWith("(desambiguación)"))
                             .collect(toList());
+                    if(m.getSurface().toLowerCase().equals("washington")){
+                        cands = cands.stream().filter(x -> x.getTitle().equals("washington_d._c.")).collect(toList());
+                    }
                 }
                 else if(lang.equals("zh")){
                     if(m.getSurface().equals("台湾")){
@@ -160,6 +176,9 @@ public class WikiCandidateGenerator {
 					}
 					else if(m.getSurface().equals("中国")){
                         cands = cands.stream().filter(x -> x.getTitle().equals("中国")).collect(toList());
+					}
+					else if(m.getSurface().equals("共产党")){
+                        cands = cands.stream().filter(x -> x.getTitle().equals("中国共产党")).collect(toList());
 					}
                 }
                 m.getCandidates().addAll(cands);
