@@ -23,13 +23,13 @@ This script runs and evaluates on the TAC-KBP 2016 EDL shared task (en: English,
 
 ```
 English
-strong mention match:       Precision:93.6 Recall:83.3 F1:88.2
-strong typed mention match: Precision:90.5 Recall:80.6 F1:85.3
-strong typed all match:     Precision:80.7 Recall:71.9 F1:76.1
+strong mention match:       Precision:93.4 Recall:83.7 F1:88.3
+strong typed mention match: Precision:90.3 Recall:80.9 F1:85.4
+strong typed all match:     Precision:80.9 Recall:72.6 F1:76.5
 
 Spanish 
-strong mention match:       Precision:88.5 Recall:81.9 F1:85.1
-strong typed mention match: Precision:85.7 Recall:79.3 F1:82.4
+strong mention match:       Precision:88.4 Recall:81.8 F1:85.0
+strong typed mention match: Precision:85.7 Recall:79.3 F1:82.3
 strong typed all match:     Precision:78.1 Recall:72.3 F1:75.1
 
 Chinese
