@@ -19,7 +19,7 @@ mvn dependency:copy-dependencies
 mvn compile
 ./scripts/run-benchmark.sh es config/xlwikifier-tac.config
 ```
-This script evaluates Spanish and Chinese performnace on TAC-KBP 2016 EDL shared task. You need to specify the paths to the test documents and the gold annotations in the config file. Check [config/xlwikifier-tac.config](https://github.com/cttsai/illinois-cross-lingual-wikifier/blob/master/config/xlwikifier-tac.config) for example. These documents are in the original format provided by LDC. You will get the following performance on named entities:
+This script runs and evaluates on the TAC-KBP 2016 EDL shared task (en: English, es: Spanish, zh: Chinese). You need to specify the paths to the evaluation documents and the gold annotations in the config file. Please check [config/xlwikifier-tac.config](https://github.com/cttsai/illinois-cross-lingual-wikifier/blob/master/config/xlwikifier-tac.config) for example. These documents are in the original format provided by LDC. Using the [official evaluation script](https://github.com/wikilinks/neleval), this package gets the following performance on named entities:
 
 ```
 English
