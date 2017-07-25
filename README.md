@@ -23,19 +23,19 @@ This script evaluates Spanish and Chinese performnace on TAC-KBP 2016 EDL shared
 
 ```
 English
-strong mention match:       Precision:0.936 Recall:0.833 F1:0.882
-strong typed mention match: Precision:0.905 Recall:0.806 F1:0.853
-strong typed all match:     Precision:0.807 Recall:0.719 F1:0.761
+strong mention match:       Precision:93.6 Recall:83.3 F1:88.2
+strong typed mention match: Precision:90.5 Recall:80.6 F1:85.3
+strong typed all match:     Precision:80.7 Recall:71.9 F1:76.1
 
 Spanish 
-strong mention match:       Precision:0.885 Recall:0.807 F1:0.844
-strong typed mention match: Precision:0.857 Recall:0.781 F1:0.817
-strong typed all match:     Precision:0.781 Recall:0.712 F1:0.745
+strong mention match:       Precision:88.5 Recall:81.9 F1:85.1
+strong typed mention match: Precision:85.7 Recall:79.3 F1:82.4
+strong typed all match:     Precision:78.1 Recall:72.3 F1:75.1
 
 Chinese
-strong mention match:       Precision:0.870 Recall:0.728 F1:0.793
-strong typed mention match: Precision:0.832 Recall:0.696 F1:0.758
-strong typed all match:     Precision:0.775 Recall:0.649 F1:0.706
+strong mention match:       Precision:87.0 Recall:72.8 F1:79.3
+strong typed mention match: Precision:83.2 Recall:69.6 F1:75.8
+strong typed all match:     Precision:77.5 Recall:64.9 F1:70.6
 ```
 ### Train NER Model
 
