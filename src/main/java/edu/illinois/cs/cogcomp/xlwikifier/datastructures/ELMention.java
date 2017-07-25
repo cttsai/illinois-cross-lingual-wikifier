@@ -32,6 +32,7 @@ public class ELMention {
     public int ngram;
     public boolean is_stop;
     public Map<String, Double> ner_features = new HashMap<>();
+    public double confidence = 1.0;
 
     // for ranker features
     private transient float[] mid_vec;

@@ -256,8 +256,11 @@ public class FreeBaseQuery {
 //            e.printStackTrace();
 //        }
 //        System.out.println(FreeBaseQuery.getTypesFromTitle("學名", "zh-cn"));
-        System.out.println(FreeBaseQuery.getTypesFromTitle("thursday_(band)", "en"));
-        System.out.println(FreeBaseQuery.getTypesFromTitle("united_states", "en").size());
+        List<String> types = FreeBaseQuery.getTypesFromTitle("Donald Trump", "en");
+        for(String type: types){
+            if(type.contains("people") || type.contains("gender") || type.contains("male") || type.contains("man"))
+                System.out.println(type);
+        }
 //        String mid = FreeBaseQuery.getMidFromTitle("中国", "en");
 //        System.out.println(mid);
 

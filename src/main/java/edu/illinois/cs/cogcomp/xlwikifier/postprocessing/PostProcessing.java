@@ -58,6 +58,7 @@ public class PostProcessing {
                         current.setWikiTitle(longer.getWikiTitle());
                         current.getCandidates().add( getMaxScoringCandidate(longer.getCandidates()));
                     }
+                    current.confidence = longer.confidence;
                     break;
                 }
 
@@ -93,6 +94,7 @@ public class PostProcessing {
 
             if(titles.size()>0) {
                 m.setWikiTitle(titles.get(0));
+                m.confidence = 0.8;
                 String mid = FreeBaseQuery.getMidFromTitle(titles.get(0), fb_lang);
                 if(mid != null)
                     m.setMid(mid);
@@ -101,6 +103,7 @@ public class PostProcessing {
                 titles = MediaWikiSearch.search(m.getSurface(), "en", "fuzzy");
                 if (titles.size() > 0) {
                     m.setEnWikiTitle(titles.get(0));
+                    m.confidence = 0.8;
                     String mid = FreeBaseQuery.getMidFromTitle(titles.get(0), "en");
                     if (mid != null)
                         m.setMid(mid);

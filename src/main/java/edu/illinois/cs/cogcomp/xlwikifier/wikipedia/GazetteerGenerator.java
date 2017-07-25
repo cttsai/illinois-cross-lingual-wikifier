@@ -136,6 +136,6 @@ public class GazetteerGenerator {
             e.printStackTrace();
         }
         GazetteerGenerator gg = new GazetteerGenerator();
-        gg.run("so");
+        gg.run("am");
     }
 }

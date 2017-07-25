@@ -551,7 +551,7 @@ public class WikiCandidateGenerator {
                 if(lang.equals("zh"))
                     query_lang = "zh-cn";
                 List<String> types = FreeBaseQuery.getTypesFromTitle(m.gold_wiki_title, query_lang);
-                if(types.contains("person.person") || types.contains("organization.organization") || types.contains("location.location"))
+                if(types.contains("people.person") || types.contains("organization.organization") || types.contains("location.location"))
                     ms.add(m);
             }
             doc.mentions = ms;

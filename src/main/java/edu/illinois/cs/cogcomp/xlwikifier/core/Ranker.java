@@ -204,9 +204,14 @@ public class Ranker {
             if (cands.size() > 0) {
                 cands = cands.stream().sorted((x1, x2) -> Double.compare(x2.getScore(), x1.getScore())).collect(toList());
                 m.setCandidates(cands);
-
                 m.setWikiTitle(cands.get(0).getTitle());
                 m.setMidVec(fm.we.getTitleVector(m.getWikiTitle(), cands.get(0).lang));
+
+                double conf = 1;
+                if(cands.size()>1)
+                    conf = Math.exp(cands.get(0).getScore())/(Math.exp(cands.get(0).getScore())+Math.exp(cands.get(1).getScore()));
+                m.confidence = conf;
+
             } else {
                 m.setWikiTitle("NIL");
                 m.setMidVec(null);

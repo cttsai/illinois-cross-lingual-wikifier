@@ -33,7 +33,11 @@ public class WriteWikifierFeatures {
     public static void run(String in_dir, String lang, String out_dir){
         try {
             NerBaseConfigurator baseConfigurator = new NerBaseConfigurator();
-            ResourceManager ner_rm = new ResourceManager(ConfigParameters.ner_models.get(lang));
+            ResourceManager ner_rm;
+            if(lang.equals("am"))
+                ner_rm = new ResourceManager(ConfigParameters.ner_models.get("en"));
+            else
+                ner_rm = new ResourceManager(ConfigParameters.ner_models.get(lang));
             ParametersForLbjCode.currentParameters = readAndLoadConfig(baseConfigurator.getConfig(ner_rm), true);
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,10 +99,15 @@ public class WriteWikifierFeatures {
             System.exit(-1);
         }
         String indir = "/shared/corpora/ner/human/ta/conll";
+        indir = "/shared/corpora/corporaWeb/lorelei/data/LDC2016E86_LORELEI_Amharic_Representative_Language_Pack_Monolingual_Text_V1.1/data/monolingual_text/zipped/final-test2-stem";
+        indir = "/shared/corpora/ner/lorelei/am/All-nosn-stem";
 //        indir = "/shared/corpora/ner/conll2003/eng/eng.all.nomisc";
 //        indir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/nw.xinhua-char";
-        String lang = "ta";
+        String lang = "am";
         String outdir = "/shared/corpora/ner/human/ta/conll.wiki2";
+        outdir = "/shared/corpora/corporaWeb/lorelei/data/LDC2016E86_LORELEI_Amharic_Representative_Language_Pack_Monolingual_Text_V1.1/data/monolingual_text/zipped/final-test2-stem-wiki";
+        outdir = "/shared/corpora/ner/lorelei/am/All-nosn-wiki";
+        outdir = "/shared/corpora/corporaWeb/lorelei/data/LDC2016E86_LORELEI_Amharic_Representative_Language_Pack_Monolingual_Text_V1.1/data/monolingual_text/zipped/All-nosn-stem-wiki";
 //        outdir = "/shared/corpora/ner/conll2003/eng/eng.all.nomisc.wiki";
 //        outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/nw.xinhua-char.wiki";
 

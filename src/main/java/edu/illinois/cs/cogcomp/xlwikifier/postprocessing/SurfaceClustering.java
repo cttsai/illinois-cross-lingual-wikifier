@@ -78,6 +78,18 @@ public class SurfaceClustering {
         return bldr.toString();
     }
 
+    public static List<ELMention> clusterAuthors(List<ELMention> authors){
+
+        Map<ELMention, List<ELMention>> clusters = authors.stream().collect(groupingBy(x -> x));
+
+        for(ELMention key: clusters.keySet()){
+            for(ELMention m: clusters.get(key))
+                m.setMid("NIL" + String.format("%05d", nil_cnt++));
+        }
+
+        return clusters.entrySet().stream().flatMap(x -> x.getValue().stream()).collect(toList());
+    }
+
     public static List<ELMention> cluster(List<ELMention> mentions){
 
         //nil_cnt = 1;
@@ -166,7 +178,7 @@ public class SurfaceClustering {
 
     private static boolean compareMentionCluster(String m, Set<String> c){
         OptionalDouble max = c.stream().mapToDouble(x -> jaccard(x, m)).max();
-        if(max.isPresent() && max.getAsDouble() >= jaccard_th)
+        if(max.isPresent() && max.getAsDouble() > jaccard_th)
             return true;
         return false;
     }

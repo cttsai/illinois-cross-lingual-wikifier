@@ -39,7 +39,10 @@ public class NERUtils {
         setLang(lang);
         ll = LangLinker.getLangLinker(lang);
         wcg = new WikiCandidateGenerator(lang, true);
-        ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_ner.get(lang));
+        if(lang.equals("am"))
+            ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_ner.get("en"));
+        else
+            ranker = Ranker.loadPreTrainedRanker(lang, ConfigParameters.ranker_ner.get(lang));
         ranker.setNERMode(true);
     }
 

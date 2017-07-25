@@ -69,7 +69,36 @@ public class TACUtils {
         }
     }
 
-    public static void addPostAuthors(QueryDocument doc){
+    public static List<ELMention> getNWAuthors(QueryDocument doc){
+        List<ELMention> ret = new ArrayList<>();
+        Pattern pattern = Pattern.compile("<AUTHOR>(.*?)</AUTHOR>");
+
+        Matcher matcher = pattern.matcher(doc.getXmlhandler().xml_text);
+        while(matcher.find()){
+            String mention = matcher.group(1);
+            int start = matcher.start(1);
+            int end = matcher.end(1);
+            while(mention.startsWith(" ")) {
+                start++;
+                mention = mention.substring(1);
+            }
+            while(mention.endsWith(" ")) {
+                end--;
+                mention = mention.substring(0, mention.length()-1);
+            }
+
+            ELMention m = new ELMention(doc.getDocID(), start, end);
+            m.setSurface(mention);
+            m.setType("PER");
+            m.setMid("NIL");
+            m.confidence = 1.0;
+            ret.add(m);
+        }
+
+        return ret;
+    }
+
+    public static List<ELMention> getDFAuthors(QueryDocument doc){
         List<ELMention> ret = new ArrayList<>();
         Pattern pattern = Pattern.compile(" author=\"(.*?)\"");
 
@@ -91,10 +120,10 @@ public class TACUtils {
             m.setSurface(mention);
             m.setType("PER");
             m.setMid("NIL");
+            m.confidence = 1.0;
             ret.add(m);
         }
-//        logger.info("Extracted "+ret.size()+" authors in xml tags");
 
-        doc.mentions.addAll(ret);
+        return ret;
     }
 }

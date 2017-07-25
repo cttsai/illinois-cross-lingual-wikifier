@@ -59,7 +59,7 @@ public class TestCrossDocCoref {
                     TACUtils.setXmlOffsets(doc);
 
                     // add author mentions inside xml tags
-                    TACUtils.addPostAuthors(doc);
+//                    TACUtils.addPostAuthors(doc);
 
                     // remove mentions between <quote> and </quote>
                     TACUtils.removeQuoteMentions(doc);

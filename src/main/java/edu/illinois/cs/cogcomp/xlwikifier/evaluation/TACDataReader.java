@@ -202,8 +202,8 @@ public class TACDataReader {
             int idx1 = filename.lastIndexOf("/");
             String docid = filename.substring(idx1+1, idx);
 
-//            if(!docid.equals("SPA_DF_001502_20090127_G00A0I0HW"))
-//                continue;
+            //if(!docid.equals("SPA_DF_001502_20091013_G00A0I1CI"))
+            //    continue;
 
             String xml_text = null;
             InputStream res = ResourceUtilities.loadResource(filename);
@@ -250,6 +250,12 @@ public class TACDataReader {
     public List<ELMention> read2016SpanishEvalGoldNOM(){
         return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
                 .filter(x -> x.getLanguage().equals("SPA"))
+                .filter(x -> x.noun_type.equals("NOM"))
+                .collect(Collectors.toList());
+    }
+    public List<ELMention> read2016EnglishEvalGoldNOM(){
+        return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
+                .filter(x -> x.getLanguage().equals("ENG"))
                 .filter(x -> x.noun_type.equals("NOM"))
                 .collect(Collectors.toList());
     }
@@ -361,18 +367,18 @@ public class TACDataReader {
 
         List<QueryDocument> docs = null;
         try {
-//            docs = reader.read2016EnglishEvalDocs();
+            docs = reader.read2016EnglishEvalDocs();
 //            docs = reader.read2016ChineseEvalDocs();
-            docs = reader.read2016SpanishEvalDocs();
+//            docs = reader.read2016SpanishEvalDocs();
         } catch (IOException e) {
             e.printStackTrace();
         }
 //        List<ELMention> golds = reader.read2016ChineseEvalGoldNAM();
-        List<ELMention> golds = reader.read2016SpanishEvalGoldNAM();
-//        List<ELMention> golds = reader.read2016SpanishEvalGoldNOM();
+        List<ELMention> golds = reader.read2016EnglishEvalGoldNAM();
+//        List<ELMention> golds = reader.read2016EnglishEvalGoldNOM();
 
         String outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/tac2016.eval/";
-        outdir = "/shared/corpora/ner/nominal_exp/es.tac.NAM";
+        outdir = "/shared/corpora/ner/tac/en/2016.nam";
         for(QueryDocument doc: docs)
             doc.mentions = golds.stream().filter(x -> doc.getDocID().startsWith(x.getDocID())).collect(Collectors.toList());
 

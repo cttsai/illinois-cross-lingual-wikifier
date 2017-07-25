@@ -49,7 +49,10 @@ public class RankerFeatureManager implements Serializable {
 //            we.setMonoVecsNew("en");
             we.loadDB("es", true);
         } else {
-            we.loadDB(lang, true);
+            if(lang.equals("am"))
+                we.loadDB("es", true);
+            else
+                we.loadDB(lang, true);
         }
     }
 
