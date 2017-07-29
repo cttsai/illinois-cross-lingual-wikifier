@@ -1,6 +1,7 @@
 **This only works for CogComp members**
 
-Following are the steps to add a new language:
+Following are the steps to add a new language: 
+(The example language is Amharic, Wikipedia language code: am)
 
 1. Process the Wikipedia dump
 
@@ -8,7 +9,7 @@ Following are the steps to add a new language:
     
     Example:
     ```
-    ./scripts/import-wiki.sh om 20170701 config/xlwikifier-demo.config
+    ./scripts/import-wiki.sh am 20170701 config/xlwikifier-demo.config
     ```
 
 
@@ -35,7 +36,20 @@ Following are the steps to add a new language:
     
     Example:
     ```
-    ./scripts/import-embedding.sh om
+    ./scripts/import-embedding.sh am
     ```
 
 4. Train the ranking model
+
+    Set the path of ranking model in the configuration file. For example, add the following line in config/xlwikifier-demo.config:
+    ```
+    am_ranking_model = xlwikifier-data/models/ranker/default/am/ranker.model
+    ```
+    Run [scripts/train-ranker.sh](https://github.com/cttsai/illinois-cross-lingual-wikifier/blob/master/scripts/train-ranker.sh).
+   
+    Example:
+    ```
+    ./scripts/train-ranker.sh am 3000 config/xlwikifier-demo.config
+    ```
+    
+    
