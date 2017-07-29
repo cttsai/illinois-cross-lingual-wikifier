@@ -19,6 +19,9 @@ import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,24 +62,22 @@ public class Importer {
 //        }
     }
 
-
     public void downloadDump() {
         try {
             logger.info("Downloading " + lang + " wikipedia dump...");
             URL url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-pages-articles.xml.bz2");
-            System.out.println(url);
             FileUtils.copyURLToFile(url, new File(dumpfile));
+
             logger.info("Downloading page sql file...");
             url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-page.sql.gz");
-            System.out.println(url);
             FileUtils.copyURLToFile(url, new File(pagefile));
+
             logger.info("Downloading lang link file...");
             url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-langlinks.sql.gz");
-            System.out.println(url);
             FileUtils.copyURLToFile(url, new File(langfile));
+
             logger.info("Downloading redirect file...");
             url = new URL("https://dumps.wikimedia.org/" + lang + "wiki/" + date + "/" + lang + "wiki-" + date + "-redirect.sql.gz");
-            System.out.println(url);
             FileUtils.copyURLToFile(url, new File(redirectfile));
         } catch (Exception e) {
             e.printStackTrace();
@@ -237,6 +238,9 @@ public class Importer {
             String out = sorted.subList(0, 50).stream().collect(joining("\n"));
             FileUtils.writeStringToFile(new File(ConfigParameters.dump_path+"/"+lang, "stopwords."+lang), out, "UTF-8");
 
+            if(new File(ConfigParameters.stopword_path).isDirectory())
+                FileUtils.writeStringToFile(new File(ConfigParameters.stopword_path, "stopwords."+lang), out, "UTF-8");
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -244,6 +248,10 @@ public class Importer {
 
 
     public static void main(String[] args) {
+
+        if(args.length < 3)
+            logger.error("Require 3 arguments");
+
         try {
             ConfigParameters.setPropValues(args[2]);
         } catch (IOException e) {
@@ -251,32 +259,18 @@ public class Importer {
             System.exit(-1);
         }
 
-//        Importer importer = new Importer(args[0], args[1]);
-
-        List<String> langs = new ArrayList<>();
-        langs.add("am");
-//        try {
-//            langs = LineIO.read("import-langs");
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        String date = "20160801";
-        String date = "20170601";
-//        String date = "20170320";
-        for (String lang : langs) {
-            lang = lang.trim();
-//            if(lang.equals("ceb") || lang.equals("war") || lang.equals("pl")) continue;
-            Importer importer = new Importer(lang, date);
-            try {
-//                importer.downloadDump();
-                importer.parseWikiDump();
-                importer.importLangLinks();
-                importer.importCandidates();
-                importer.importTFIDF();
-                importer.getMostFreqWords();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        String lang = args[0];
+        String date = args[1];
+        Importer importer = new Importer(lang, date);
+        try {
+            importer.downloadDump();
+            importer.parseWikiDump();
+            importer.importLangLinks();
+            importer.importCandidates();
+            importer.importTFIDF();
+            importer.getMostFreqWords();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -76,6 +76,12 @@ public class WordEmbedding {
                     .keySerializer(Serializer.STRING)
                     .valueSerializer(Serializer.FLOAT_ARRAY)
                     .open();
+            multi_vecs.put("en", multi_vec_en);
+            multi_vecs.put(lang, multi_vec_lang);
+            if (multi_vec_en.containsKey("obama"))
+                dim = multi_vec_en.get("obama").length;
+
+            stopwords.put(lang, StopWord.getStopWords(lang));
         } else {
             db = DBMaker.fileDB(f)
                     .closeOnJvmShutdown()
@@ -92,12 +98,6 @@ public class WordEmbedding {
                     .create();
         }
 
-        multi_vecs.put("en", multi_vec_en);
-        multi_vecs.put(lang, multi_vec_lang);
-        if (multi_vec_en.containsKey("obama"))
-            dim = multi_vec_en.get("obama").length;
-
-        stopwords.put(lang, StopWord.getStopWords(lang));
     }
 
     public float[] getVectorFromWords(List<String> words, String lang) {
@@ -259,29 +259,12 @@ public class WordEmbedding {
 
         WordEmbedding we = new WordEmbedding();
         String dir = "/shared/preprocessed/ctsai12/multilingual/cca/";
-//        String lang = args[0];
+        String lang = args[0];
 
-        ArrayList<String> langs = null;
-        try {
-            langs = LineIO.read("import-langs");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        boolean start = false;
-        for (String lang : langs) {
-            lang = lang.trim();
-            if(lang.equals("da") && !start) start = true;
-            if(start) {
-//        String name = "es";
-                we.createMultiVec(lang);
-                we.loadEmbeddingToDB(dir + "en" + lang + "_orig1_projected.txt", we.multi_vec_en);
-                we.loadEmbeddingToDB(dir + "en" + lang + "_orig2_projected.txt", we.multi_vec_lang);
-//        we.loadEmbeddingToDB("/shared/preprocessed/ctsai12/multilingual/vectors/vectors.olden", we.multi_vec_en);
-//            we.loadEmbeddingToDB(dir + lang + "/en.txt", we.multi_vec_en);
-//            we.loadEmbeddingToDB(dir + lang + "/" + lang + ".txt", we.multi_vec_lang);
+        we.createMultiVec(lang);
+        we.loadEmbeddingToDB(dir + "en" + lang + "_orig1_projected.txt", we.multi_vec_en);
+        we.loadEmbeddingToDB(dir + "en" + lang + "_orig2_projected.txt", we.multi_vec_lang);
 
-                we.closeDB();
-            }
-        }
+        we.closeDB();
     }
 }

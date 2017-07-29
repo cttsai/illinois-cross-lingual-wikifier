@@ -302,7 +302,8 @@ public class Ranker {
             System.exit(-1);
         }
 
-        if(new File(ConfigParameters.ranker_models.get(lang)).exists()) {
+        if(ConfigParameters.ranker_models.containsKey(lang) &&
+                new File(ConfigParameters.ranker_models.get(lang)).exists()) {
             logger.error("Ranking model already exists");
             System.exit(-1);
         }

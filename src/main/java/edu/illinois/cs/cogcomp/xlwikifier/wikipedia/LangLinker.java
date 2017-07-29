@@ -56,6 +56,11 @@ public class LangLinker {
                     .open();
 
         } else {
+
+            if(new File(dbfile).exists()){
+                logger.error("DB exists! "+dbfile);
+                System.exit(-1);
+            }
             db = DBMaker.fileDB(dbfile)
                     .closeOnJvmShutdown()
                     .make();

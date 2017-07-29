@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,31 +59,44 @@ public class ConfigParameters {
 
     private static void setPropValues(ResourceManager rm) throws IOException {
 
-        // load models configs
+        Enumeration<Object> keys = rm.getKeys();
+        while(keys.hasMoreElements()){
+            String key = (String)keys.nextElement();
+            if(key.endsWith("_ner_config")){
+                String lang = key.substring(0, key.length()-"_ner_config".length());
+                ner_models.put(lang, rm.getString(key).trim());
+            }
+
+            if(key.endsWith("_ranking_model")){
+                String lang = key.substring(0, key.length()-"_ranking_model".length());
+                ranker_models.put(lang, rm.getString(key).trim());
+                if(rm.containsKey(lang+"_ner_ranker"))
+                    ranker_ner.put(lang, rm.getString(lang+"_ner_ranker").trim());
+                else
+                    ranker_ner.put(lang, rm.getString(key).trim());
+            }
+        }
+
+
+        // set default models if not specified
         for (Language lang : Language.values()) {
             String l = lang.getCode();
-            String key = l + "_ner_config";
-            if (rm.containsKey(key)){
-                ner_models.put(l, rm.getString(key).trim());
-			} else {
-				String default_model = "config/ner/transfer/en-misc.config";
-				ner_models.put(l, default_model);
-			}
+            if(!ner_models.containsKey(l)) {
+                String default_model = "config/ner/transfer/en-misc.config";
+                ner_models.put(l, default_model);
+            }
 
-            key = l + "_ranking_model";
-            if (rm.containsKey(key)) {
-                ranker_models.put(l, rm.getString(key).trim());
-                ranker_ner.put(l, rm.getString(key).trim());
-            } else {
-				String default_model = "xlwikifier-data/models/ranker/default/"+l+"/ranker.model";
+            if(!ranker_models.containsKey(l)) {
+                String default_model = "xlwikifier-data/models/ranker/default/" + l + "/ranker.model";
                 ranker_models.put(l, default_model);
-                ranker_ner.put(l, default_model);
-			}
+            }
 
-//            key = l+"_ner_ranker";
-//            if(rm.containsKey(key))
-//                ranker_ner.put(l, rm.getString(key).trim());
+            if(!ranker_ner.containsKey(l)) {
+                String default_model = "xlwikifier-data/models/ranker/default/" + l + "/ranker.model";
+                ranker_ner.put(l, default_model);
+            }
         }
+
 
         if (rm.containsKey("db_path")) {
             db_path = rm.getString("db_path").trim();

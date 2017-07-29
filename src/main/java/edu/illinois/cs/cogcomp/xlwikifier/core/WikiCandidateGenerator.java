@@ -83,6 +83,10 @@ public class WikiCandidateGenerator {
                 t2w2prob = db.treeMap("t2w", new SerializerArray(Serializer.STRING), Serializer.FLOAT)
                         .open();
             } else {
+                if(new File(dbfile).exists()){
+                    logger.error("DB exists! "+dbfile);
+                    System.exit(-1);
+                }
                 db = DBMaker.fileDB(new File(dbfile))
                         .closeOnJvmShutdown()
                         .make();
@@ -554,7 +558,8 @@ public class WikiCandidateGenerator {
                 if(types.contains("people.person") || types.contains("organization.organization") || types.contains("location.location"))
                     ms.add(m);
             }
-            doc.mentions = ms;
+            if(ms.size() > 0)
+                doc.mentions = ms;
         }
         System.out.println("# named entity mentions" + docs.stream().flatMap(x -> x.mentions.stream()).count());
 

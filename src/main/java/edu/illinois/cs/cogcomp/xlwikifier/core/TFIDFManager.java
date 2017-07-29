@@ -5,6 +5,8 @@ import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 import org.mapdb.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,14 +24,17 @@ public class TFIDFManager {
     private DB db;
     public HTreeMap<String, Integer> word2df;
     private String lang;
+    private static Logger logger = LoggerFactory.getLogger(TFIDFManager.class);
 
     public TFIDFManager() {
 
     }
 
     public void loadDB(String lang, boolean read_only) {
+
+        String dbfile = ConfigParameters.db_path + "/tfidf/"+lang;
         if (read_only) {
-            db = DBMaker.fileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
+            db = DBMaker.fileDB(new File(dbfile))
                     .closeOnJvmShutdown()
                     .readOnly()
                     .make();
@@ -38,7 +43,11 @@ public class TFIDFManager {
                     .valueSerializer(Serializer.INTEGER)
                     .open();
         } else {
-            db = DBMaker.fileDB(new File(ConfigParameters.db_path + "/tfidf", lang))
+            if(new File(dbfile).exists()){
+                logger.error("DB exists! "+dbfile);
+                System.exit(-1);
+            }
+            db = DBMaker.fileDB(new File(dbfile))
                     .closeOnJvmShutdown()
                     .make();
             word2df = db.hashMap("df")
