@@ -7,11 +7,13 @@ This <a href="http://cogcomp.cs.illinois.edu/page/demo_view/xl_wikifier" target=
 
 ### Setup
 
-Download [this file](http://cogcomp.cs.illinois.edu/Data/ccgPapersData/ctsai12/xlwikifier-mapdb.tar.gz) which contains MapDB indices of FreeBase dump and English, Spanish, and Chinese Wikipedia. Follow the README inside to extract the files and set the corresponding paths in the config file.
+For CogComp members, resources for more than 40 languages are on our servers. The paths are specified in config/xlwikifier-demo.config. You only need to do the following soft link under the root of this project:
+```
+ln -s /shared/preprocessed/ctsai12/multilingual/xlwikifier-data xlwikifier-data
+```
 
-Note that we currently only release the resources for these three languages.
 
-For CogComp members, if you want to know where are the resources for other languages, please contact me.
+If you **cannot** access CogComp servers, we currently only release the resources for these three languages. Download [this file](http://cogcomp.cs.illinois.edu/Data/ccgPapersData/ctsai12/xlwikifier-mapdb.tar.gz) which contains MapDB indices of FreeBase dump and English, Spanish, and Chinese Wikipedia. Follow the README inside to extract the files and set the corresponding paths in the config file.
 
 ### Run Benchmark
 ```
@@ -37,6 +39,8 @@ strong mention match:       Precision:87.0 Recall:72.8 F1:79.3
 strong typed mention match: Precision:83.2 Recall:69.6 F1:75.8
 strong typed all match:     Precision:77.5 Recall:64.9 F1:70.6
 ```
+
+<!---
 ### Train NER Model
 
 Use ./scripts/train-ner.sh to train Illinois NER models with wikifier features. Note that the training and test files should be in the column format. 
@@ -49,6 +53,7 @@ Requirements:
 ./scripts/train-ranker.sh es config/xlwikifier-tac.config
 ```
 This script trains ranking models using Wikipedia articles. The resulting model is saved at the location specified in the config file.  
+--->
 
 ### Contact
 Chen-Tse Tsai (ctsai12@illinois.edu)
