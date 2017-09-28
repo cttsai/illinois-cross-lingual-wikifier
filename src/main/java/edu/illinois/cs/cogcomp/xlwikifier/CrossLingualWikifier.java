@@ -49,7 +49,7 @@ public class CrossLingualWikifier extends Annotator {
      */
     public CrossLingualWikifier(Language lang, String configFile) throws IOException {
 
-        super(lang.name()+"_WIKIFIERVIEW", new String[]{}, true, new ResourceManager(configFile));
+        super(lang.name()+"_WIKIFIERVIEW", new String[]{lang.name()+"_NERVIEW"}, true, new ResourceManager(configFile));
 
         this.language = lang;
 
